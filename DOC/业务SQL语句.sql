@@ -157,7 +157,6 @@ CREATE TABLE `end_card_number`  (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
-
 /*
  Navicat Premium Data Transfer
 
@@ -171,7 +170,7 @@ SET FOREIGN_KEY_CHECKS = 1;
  Target Server Version : 50645
  File Encoding         : 65001
 
- Date: 24/02/2020 15:07:57
+ Date: 24/02/2020 17:50:24
 */
 
 SET NAMES utf8mb4;
@@ -185,6 +184,7 @@ CREATE TABLE `maximum_balance`  (
   `id` varchar(36) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'id',
   `date` date NULL DEFAULT NULL COMMENT '日期',
   `card_id` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '卡号',
+  `max_money` double(10, 2) NULL DEFAULT NULL COMMENT '最大金额',
   `max_balance` double(10, 2) NULL DEFAULT NULL COMMENT '最大余额',
   `case_id` varchar(36) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '案件id',
   `Reserve1` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'Reserve1',
