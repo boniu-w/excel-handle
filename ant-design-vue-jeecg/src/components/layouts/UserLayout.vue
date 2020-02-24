@@ -4,18 +4,18 @@
       <div class="top">
         <div class="header">
           <a href="/">
-            <img src="~@/assets/logo.svg" class="logo" alt="logo">
-            <span class="title">Jeecg Boot</span>
+            <!-- <img src="~@/assets/logo.svg" class="logo" alt="logo"> -->
+            <span class="title">资金查控平台</span>
           </a>
         </div>
-        <div class="desc">
+<!--        <div class="desc">
           Jeecg Boot 是中国最具影响力的 企业级 快速开发平台
-        </div>
+        </div> -->
       </div>
 
       <route-view></route-view>
 
-      <div class="footer">
+<!--      <div class="footer">
         <div class="links">
           <a href="http://jeecg-boot.mydoc.io" target="_blank">帮助</a>
           <a href="https://github.com/zhangdaiscott/jeecg-boot" target="_blank">隐私</a>
@@ -24,7 +24,7 @@
         <div class="copyright">
           Copyright &copy; 2019 <a href="http://www.jeecg.org" target="_blank">JEECG开源社区</a> 出品
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
