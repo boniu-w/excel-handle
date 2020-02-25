@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-@Api(tags="新建module--jm")
+@Api(tags="新建module--hhhjm")
 @RestController
 @RequestMapping("/hello")
 public class HelloController  {
