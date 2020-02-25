@@ -1,60 +1,64 @@
 <template>
-  <a-modal
-    :title="title"
-    :width="800"
-    :visible="visible"
-    :confirmLoading="confirmLoading"
-    @ok="handleOk"
-    @cancel="handleCancel"
-    cancelText="关闭">
-    
+  <a-drawer
+      :title="title"
+      :width="800"
+      placement="right"
+      :closable="false"
+      @close="close"
+      :visible="visible"
+  >
+
     <a-spin :spinning="confirmLoading">
       <a-form :form="form">
       
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="案件名称">
-          <a-input placeholder="请输入案件名称" v-decorator="['caseName', validatorRules.caseName ]" />
+          label="日期">
+          <a-date-picker v-decorator="[ 'date', {}]" />
         </a-form-item>
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="案件类型">
-          <!-- <a-input placeholder="请输入案件类型" v-decorator="['caseTypeId', validatorRules.caseTypeId ]" /> -->
-          <a-select placeholder="请输入案件名称" style="width: 100%;" @change="handleChange" v-decorator="['caseTypeId', validatorRules.caseTypeId ]">
-                <a-select-option value="非吸" >非吸</a-select-option>
-                <a-select-option value="赌博" >赌博</a-select-option>
-                <a-select-option value="传销" >传销</a-select-option>
-                <a-select-option value="涉税" >涉税</a-select-option>
-                <a-select-option value="电信诈骗" >电信诈骗</a-select-option>
-                <a-select-option value="金融犯罪" >金融犯罪</a-select-option>
-                <a-select-option value="地下钱庄" >地下钱庄</a-select-option>
-          </a-select>
-        </a-form-item>
-       <!-- <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="创建人id">
-          <a-input placeholder="请输入创建人id" v-decorator="['introductionId', validatorRules.introductionId ]" />
-        </a-form-item> -->
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="地址">
-          <a-input placeholder="请输入地址" v-decorator="['path', {}]" />
+          label="卡号">
+          <a-input placeholder="请输入卡号" v-decorator="['cardId', {}]" />
         </a-form-item>
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="备注">
-          <a-input placeholder="请输入备注" v-decorator="['remarks', {}]" />
+          label="最大金额">
+          <a-input-number v-decorator="[ 'maxMoney', {}]" />
         </a-form-item>
-        
+        <a-form-item
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+          label="最大余额">
+          <a-input-number v-decorator="[ 'maxBalance', {}]" />
+        </a-form-item>
+        <a-form-item
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+          label="案件id">
+          <a-input placeholder="请输入案件id" v-decorator="['caseId', {}]" />
+        </a-form-item>
+        <a-form-item
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+          label="Reserve1">
+          <a-input placeholder="请输入Reserve1" v-decorator="['reserve1', {}]" />
+        </a-form-item>
+        <a-form-item
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+          label="Reserve2">
+          <a-input placeholder="请输入Reserve2" v-decorator="['reserve2', {}]" />
+        </a-form-item>
 		
       </a-form>
     </a-spin>
-  </a-modal>
+    <a-button type="primary" @click="handleOk">确定</a-button>
+    <a-button type="primary" @click="handleCancel">取消</a-button>
+  </a-drawer>
 </template>
 
 <script>
@@ -63,7 +67,7 @@
   import moment from "moment"
 
   export default {
-    name: "CaseTableModal",
+    name: "MaximumBalanceModal",
     data () {
       return {
         title:"操作",
@@ -81,13 +85,10 @@
         confirmLoading: false,
         form: this.$form.createForm(this),
         validatorRules:{
-        caseName:{rules: [{ required: true, message: '请输入案件名称!' }]},
-        caseTypeId:{rules: [{ required: true, message: '请输入案件类型!' }]},
-        introductionId:{rules: [{ required: true, message: '请输入创建人id!' }]},
         },
         url: {
-          add: "/casetable/caseTable/add",
-          edit: "/casetable/caseTable/edit",
+          add: "/maximumbalance/maximumBalance/add",
+          edit: "/maximumbalance/maximumBalance/edit",
         },
       }
     },
@@ -102,8 +103,9 @@
         this.model = Object.assign({}, record);
         this.visible = true;
         this.$nextTick(() => {
-          this.form.setFieldsValue(pick(this.model,'caseName','caseTypeId','introductionId','path','remarks','timeStamp','updateCount','deleteIdentifier','reserve1','reserve2','reserve3'))
+          this.form.setFieldsValue(pick(this.model,'cardId','maxMoney','maxBalance','caseId','reserve1','reserve2'))
 		  //时间格式化
+          this.form.setFieldsValue({date:this.model.date?moment(this.model.date):null})
         });
 
       },
@@ -112,7 +114,6 @@
         this.visible = false;
       },
       handleOk () {
-        alert(1)
         const that = this;
         // 触发表单验证
         this.form.validateFields((err, values) => {
@@ -129,6 +130,7 @@
             }
             let formData = Object.assign(this.model, values);
             //时间格式化
+            formData.date = formData.date?formData.date.format():null;
             
             console.log(formData)
             httpAction(httpurl,formData,method).then((res)=>{
@@ -158,5 +160,10 @@
 </script>
 
 <style lang="less" scoped>
-
+/** Button按钮间距 */
+  .ant-btn {
+    margin-left: 30px;
+    margin-bottom: 30px;
+    float: right;
+  }
 </style>

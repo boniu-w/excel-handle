@@ -188,6 +188,9 @@ export const JeecgListMixin = {
       this.$refs.modalForm.title = "编辑";
       this.$refs.modalForm.disableSubmit = false;
     },
+    ckfx: function (id){
+      this.$router.push({name:'ckfx',params:{id:'aaa'}});
+    },
     handleAdd: function () {
       this.$refs.modalForm.add();
       this.$refs.modalForm.title = "新增";
