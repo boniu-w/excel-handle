@@ -1,51 +1,59 @@
 <template>
-  <a-card :bordered="false" title="" >
+  <page-layout>
     <!-- 查询区域 -->
-    <div class="table-page-search-wrapper">
-      <a-form layout="inline" @keyup.enter.native="searchQuery">
-        <a-row :gutter="24">
-
+    <a-card  :title="this.pp">
+      <div class="table-page-search-wrapper">
+        <a-form layout="inline" @keyup.enter.native="searchQuery">
+          <a-row :gutter="24">
+      
+            <a-col :md="6" :sm="8">
+              <a-form-item label="日期">
+                <a-input placeholder="请输入日期" v-model="queryParam.date"></a-input>
+              </a-form-item>
+            </a-col>
+            <a-col :md="6" :sm="8">
+              <a-form-item label="卡号">
+                <a-input placeholder="请输入卡号" v-model="queryParam.cardId"></a-input>
+              </a-form-item>
+            </a-col>
+          <template v-if="toggleSearchStatus">
           <a-col :md="6" :sm="8">
-            <a-form-item label="日期">
-              <a-input placeholder="请输入日期" v-model="queryParam.date"></a-input>
-            </a-form-item>
-          </a-col>
-          <a-col :md="6" :sm="8">
-            <a-form-item label="卡号">
-              <a-input placeholder="请输入卡号" v-model="queryParam.cardId"></a-input>
-            </a-form-item>
-          </a-col>
-        <template v-if="toggleSearchStatus">
-        <a-col :md="6" :sm="8">
-            <a-form-item label="最大金额">
-              <a-input placeholder="请输入最大金额" v-model="queryParam.maxMoney"></a-input>
-            </a-form-item>
-          </a-col>
-          <a-col :md="6" :sm="8">
-            <a-form-item label="最大余额">
-              <a-input placeholder="请输入最大余额" v-model="queryParam.maxBalance"></a-input>
-            </a-form-item>
-          </a-col>
-          <a-col :md="6" :sm="8">
-            <a-form-item label="案件id">
-              <a-input placeholder="请输入案件id" v-model="queryParam.caseId"></a-input>
-            </a-form-item>
-          </a-col>
-          </template>
-          <a-col :md="6" :sm="8" >
-            <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
-              <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
-              <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
-              <a @click="handleToggleSearch" style="margin-left: 8px">
-                {{ toggleSearchStatus ? '收起' : '展开' }}
-                <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
-              </a>
-            </span>
-          </a-col>
-
-        </a-row>
-      </a-form>
-    </div>
+              <a-form-item label="最大金额">
+                <a-input placeholder="请输入最大金额" v-model="queryParam.maxMoney"></a-input>
+              </a-form-item>
+            </a-col>
+            <a-col :md="6" :sm="8">
+              <a-form-item label="最大余额">
+                <a-input placeholder="请输入最大余额" v-model="queryParam.maxBalance"></a-input>
+              </a-form-item>
+            </a-col>
+            <a-col :md="6" :sm="8">
+              <a-form-item label="案件id">
+                <a-input placeholder="请输入案件id" v-model="queryParam.caseId"></a-input>
+              </a-form-item>
+            </a-col>
+            </template>
+            <a-col :md="6" :sm="8" >
+              <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
+                <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
+                <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
+                <a @click="handleToggleSearch" style="margin-left: 8px">
+                  {{ toggleSearchStatus ? '收起' : '展开' }}
+                  <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
+                </a>
+              </span>
+            </a-col>
+      
+          </a-row>
+        </a-form>
+      </div>
+    </a-card>
+    <!-- 折线图区域 -->
+    <a-card style="margin-top: 15px;">
+      <line-chart-multid :fields="visitFields" :dataSource="visitInfo"></line-chart-multid>
+    </a-card>
+  <a-card :bordered="false" style="margin-top: 15px;" >
+    
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
@@ -104,21 +112,27 @@
     <!-- 表单区域 -->
     <maximumBalance-modal ref="modalForm" @ok="modalFormOk"></maximumBalance-modal>
   </a-card>
+  </page-layout>
 </template>
 
 <script>
   import MaximumBalanceModal from './modules/MaximumBalanceModal'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+  import LineChartMultid from '@/components/chart/LineChartMultid'
 
   export default {
     name: "MaximumBalanceList",
     mixins:[JeecgListMixin],
     components: {
-      MaximumBalanceModal
+      MaximumBalanceModal,
+      LineChartMultid
     },
     data () {
       return {
         description: '最大余额表管理页面',
+        pp:this.$route.query.id,
+        visitFields:['最大余额','最大金额'],
+        visitInfo:[{"tian":"2020-02-24","最大余额":2,"最大金额":10,"type":"02-24"},{"tian":"2020-02-25","最大余额":1,"最大金额":10,"type":"02-25"},{"tian":"2020-02-26","最大余额":1,"最大金额":5,"type":"02-26"}],
         // 表头
         columns: [
           {
@@ -188,6 +202,11 @@
     }
   },
     methods: {
+      ckfx(){
+        // alert(this.$route.params.id)
+        // alert(this.$route.query.id)
+        this.ckfx = this.$route.query.id;
+      }
      
     }
   }

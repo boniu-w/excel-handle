@@ -101,7 +101,7 @@
 
     <a-row>
       <a-col :span="24">
-        <a-card :loading="loading" :bordered="false" title="最近一周访问次数统计" :style="{ marginTop: '24px' }">
+        <a-card :loading="loading" :bordered="false" title="最近一周访问次数统计" :style="{ marginTop: '24px' }" @click="pp()" >
           <a-row>
             <a-col :span="6">
               <head-info title="今日访问IP数" :content="loginfo.todayIp"></head-info>
@@ -120,7 +120,7 @@
               </a-spin>
             </a-col>
             <a-col :span="6">
-              <head-info title="访问总次数" :content="loginfo.totalVisitCount"></head-info>
+              <head-info title="访问总次数" :content="loginfo.totalVisitCount" ></head-info>
             </a-col>
             <a-col :span="2">
               <a-spin class='circle-cust'>
@@ -214,6 +214,9 @@
            }
          })
       },
+      pp(){
+        alert(JSON.stringify(this.visitInfo[2]));
+      }
     }
   }
 </script>

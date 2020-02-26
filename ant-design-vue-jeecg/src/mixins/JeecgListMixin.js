@@ -189,7 +189,7 @@ export const JeecgListMixin = {
       this.$refs.modalForm.disableSubmit = false;
     },
     ckfx: function (id){
-      this.$router.push({name:'ckfx',params:{id:'aaa'}});
+      this.$router.push({path:'/MaximumBalance/MaximumBalanceList',query:{id:'"'+id+'"         案件'}}); 
     },
     handleAdd: function () {
       this.$refs.modalForm.add();
