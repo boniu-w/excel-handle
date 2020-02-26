@@ -2,13 +2,14 @@
   <page-layout>
     <!-- 查询区域 -->
     <a-card  :title="this.pp">
+      <a-button type="primary" style="background-color: #E78C45;border-color: #E78C45; position: absolute; right: 50px;top: 10px;" @click="FanHui()" icon="enter">返回</a-button>
       <div class="table-page-search-wrapper">
         <a-form layout="inline" @keyup.enter.native="searchQuery">
           <a-row :gutter="24">
       
             <a-col :md="6" :sm="8">
               <a-form-item label="日期">
-                <a-input placeholder="请输入日期" v-model="queryParam.date"></a-input>
+                <a-range-picker @change="onChange"  v-model="queryParam.date" />
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="8">
@@ -27,11 +28,11 @@
                 <a-input placeholder="请输入最大余额" v-model="queryParam.maxBalance"></a-input>
               </a-form-item>
             </a-col>
-            <a-col :md="6" :sm="8">
+          <!--  <a-col :md="6" :sm="8">
               <a-form-item label="案件id">
                 <a-input placeholder="请输入案件id" v-model="queryParam.caseId"></a-input>
               </a-form-item>
-            </a-col>
+            </a-col> -->
             </template>
             <a-col :md="6" :sm="8" >
               <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
@@ -57,11 +58,11 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button @click="handleAdd" type="primary" icon="plus">新增</a-button>
+      <a-button @click="handleAdd" style="background-color: #006400;border-color: #006400;" type="primary" icon="search">查看全部流水</a-button>
       <a-button type="primary" icon="download" @click="handleExportXls('最大余额表')">导出</a-button>
-      <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
+      <!-- <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
         <a-button type="primary" icon="import">导入</a-button>
-      </a-upload>
+      </a-upload> -->
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="batchDel"><a-icon type="delete"/>删除</a-menu-item>
@@ -119,13 +120,15 @@
   import MaximumBalanceModal from './modules/MaximumBalanceModal'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
   import LineChartMultid from '@/components/chart/LineChartMultid'
+  import Utils from '@/views/MaximumBalance/util.js';
 
   export default {
     name: "MaximumBalanceList",
     mixins:[JeecgListMixin],
     components: {
       MaximumBalanceModal,
-      LineChartMultid
+      LineChartMultid,
+      Utils
     },
     data () {
       return {
@@ -135,16 +138,6 @@
         visitInfo:[{"tian":"2020-02-24","最大余额":2,"最大金额":10,"type":"02-24"},{"tian":"2020-02-25","最大余额":1,"最大金额":10,"type":"02-25"},{"tian":"2020-02-26","最大余额":1,"最大金额":5,"type":"02-26"}],
         // 表头
         columns: [
-          {
-            title: '#',
-            dataIndex: '',
-            key:'rowIndex',
-            width:60,
-            align:"center",
-            customRender:function (t,r,index) {
-              return parseInt(index)+1;
-            }
-           },
 		   {
             title: '日期',
             align:"center",
@@ -164,21 +157,6 @@
             title: '最大余额',
             align:"center",
             dataIndex: 'maxBalance'
-           },
-		   {
-            title: '案件id',
-            align:"center",
-            dataIndex: 'caseId'
-           },
-		   {
-            title: 'Reserve1',
-            align:"center",
-            dataIndex: 'reserve1'
-           },
-		   {
-            title: 'Reserve2',
-            align:"center",
-            dataIndex: 'reserve2'
            },
           {
             title: '操作',
@@ -201,13 +179,19 @@
       return `${window._CONFIG['domianURL']}/${this.url.importExcelUrl}`;
     }
   },
+  mounted(){
+    this.pp = this.$route.query.id;
+    this.searchQuery();
+  },
     methods: {
-      ckfx(){
-        // alert(this.$route.params.id)
-        // alert(this.$route.query.id)
-        this.ckfx = this.$route.query.id;
+      onChange(date, dateString) {
+        console.log(date, dateString);
+      },
+      FanHui(){
+        this.$router.push({path:'/casetable/CaseTableList'}); 
+        var key = "/MaximumBalance/MaximumBalanceList?id=%22%E5%95%AA%E5%95%AA%E5%95%AA%E5%95%AA%E5%95%AA%E5%95%AA%E9%93%BA%E9%93%BA%E9%93%BA%E9%93%BA%22%20%20%20%20%20%20%20%20%20%E6%A1%88%E4%BB%B6";
+        Utils.$emit('demo',key);
       }
-     
     }
   }
 </script>

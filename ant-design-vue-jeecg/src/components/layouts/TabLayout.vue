@@ -36,6 +36,7 @@
   import Contextmenu from '@/components/menu/Contextmenu'
   import { mixin, mixinDevice } from '@/utils/mixin.js'
   import { triggerWindowResizeEvent } from '@/utils/util'
+  import Utils from '@/views/MaximumBalance/util.js';
 
   const indexKey = '/dashboard/analysis'
 
@@ -43,7 +44,8 @@
     name: 'TabLayout',
     components: {
       GlobalLayout,
-      Contextmenu
+      Contextmenu,
+      Utils
     },
     mixins: [mixin, mixinDevice],
     data() {
@@ -123,6 +125,13 @@
           }
         }
       }
+    },
+    mounted(){
+        var that = this;
+        Utils.$on('demo', function (msg) {
+            console.log(msg);
+            that.remove(msg); 
+        })
     },
     methods: {
       changePage(key) {
