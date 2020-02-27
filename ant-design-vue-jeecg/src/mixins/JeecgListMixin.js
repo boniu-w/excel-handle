@@ -81,6 +81,38 @@ export const JeecgListMixin = {
         this.loading = false;
       })
     },
+    loadData1(arg,a) {
+      if(!this.url.list){
+        this.$message.error("请设置url.list属性!")
+        return
+      }
+      //加载数据 若传入参数1则加载第一页的内容
+      if (arg === 1) {
+        this.ipagination.current = 1;
+      }
+      var params = this.getQueryParams();//查询条件
+      params.caseId = this.$route.query.id.id;
+      this.loading = true;
+      getAction(this.url.list, params).then((res) => {
+        if (res.success) {
+          this.dataSource = res.result.records;
+          this.ipagination.total = res.result.total;
+        }
+        if(res.code===510){
+          this.$message.warning(res.message)
+        }
+        this.loading = false;
+        //折线图传值
+        if(a ==1){
+          var Line = [];
+          for(var i = 0;i<this.dataSource.length;i++){
+            var pp = {"最大余额":this.dataSource[i].maxBalance,"最大金额":this.dataSource[i].maxMoney,"type":this.dataSource[i].date};
+            Line[i] = pp;
+          }
+          this.visitInfo = Line;
+        }
+      })
+    },
     initDictConfig(){
       console.log("--这是一个假的方法!")
     },
@@ -187,10 +219,6 @@ export const JeecgListMixin = {
       this.$refs.modalForm.edit(record);
       this.$refs.modalForm.title = "编辑";
       this.$refs.modalForm.disableSubmit = false;
-    },
-    ckfx: function (id){
-      // console.log("---------:"+JSON.stringify(id));
-      this.$router.push({path:'/MaximumBalance/MaximumBalanceList',query:{id:'"'+id+'"         案件'}}); 
     },
     handleAdd: function () {
       this.$refs.modalForm.add();

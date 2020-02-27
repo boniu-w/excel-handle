@@ -101,7 +101,7 @@
         <span slot="action" slot-scope="text, record">
           <a @click="handleEdit(record)">编辑</a>
           
-          <a @click="ckfx(record.caseName)" style="color: #52C41A;margin-left: 10px;">查控分析</a>
+          <a @click="ckfx(record)" style="color: #52C41A;margin-left: 10px;">查控分析</a>
 
           <a-divider type="vertical" />
           <a-dropdown>
@@ -235,6 +235,10 @@
        onChange(date, dateString) {
                console.log(date, dateString);
                return dateString;
+       },
+       ckfx: function (id){
+         // console.log("---------:"+JSON.stringify(id));
+         this.$router.push({path:'/MaximumBalance/MaximumBalanceList',query:{id:id}}); 
        },
     }
   }

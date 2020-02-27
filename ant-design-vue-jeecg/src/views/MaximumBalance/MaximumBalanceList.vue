@@ -1,7 +1,7 @@
 <template>
   <page-layout>
     <!-- 查询区域 -->
-    <a-card  :title="this.pp">
+    <a-card  :title="this.caseName">
       <a-button type="primary" style="background-color: #E78C45;border-color: #E78C45; position: absolute; right: 50px;top: 10px;" @click="FanHui()" icon="enter">返回</a-button>
       <div class="table-page-search-wrapper">
         <a-form layout="inline" @keyup.enter.native="searchQuery">
@@ -10,11 +10,6 @@
             <a-col :md="6" :sm="8">
               <a-form-item label="日期">
                 <a-range-picker @change="onChange"  v-model="queryParam.date" />
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="8">
-              <a-form-item label="卡号">
-                <a-input placeholder="请输入卡号" v-model="queryParam.cardId"></a-input>
               </a-form-item>
             </a-col>
           <template v-if="toggleSearchStatus">
@@ -28,6 +23,11 @@
                 <a-input placeholder="请输入最大余额" v-model="queryParam.maxBalance"></a-input>
               </a-form-item>
             </a-col>
+            <a-col :md="6" :sm="8" style="">
+              <a-form-item label="案件id">
+                <a-input id="ajid" placeholder="请输入案件id" v-model="queryParam.caseId"/>
+              </a-form-item>
+            </a-col>
           <!--  <a-col :md="6" :sm="8">
               <a-form-item label="案件id">
                 <a-input placeholder="请输入案件id" v-model="queryParam.caseId"></a-input>
@@ -36,7 +36,7 @@
             </template>
             <a-col :md="6" :sm="8" >
               <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
-                <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
+                <a-button type="primary" @click="loadData1(1)" icon="search">查询</a-button>
                 <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
                 <a @click="handleToggleSearch" style="margin-left: 8px">
                   {{ toggleSearchStatus ? '收起' : '展开' }}
@@ -58,7 +58,7 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator">
-      <a-button @click="handleAdd" style="background-color: #006400;border-color: #006400;" type="primary" icon="search">查看全部流水</a-button>
+      <a-button @click="ckls" style="background-color: #006400;border-color: #006400;" type="primary" icon="search">查看全部流水</a-button>
       <a-button type="primary" icon="download" @click="handleExportXls('最大余额表')">导出</a-button>
       <!-- <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
         <a-button type="primary" icon="import">导入</a-button>
@@ -133,20 +133,16 @@
     data () {
       return {
         description: '最大余额表管理页面',
-        pp:this.$route.query.id,
+        caseName:this.$route.query.id.caseName+'"         案件',
+        id:this.$route.query.id.id,
         visitFields:['最大余额','最大金额'],
-        visitInfo:[{"tian":"2020-02-24","最大余额":2,"最大金额":10,"type":"02-24"},{"tian":"2020-02-25","最大余额":1,"最大金额":10,"type":"02-25"},{"tian":"2020-02-26","最大余额":1,"最大金额":5,"type":"02-26"}],
+        visitInfo:[],
         // 表头
         columns: [
 		   {
             title: '日期',
             align:"center",
             dataIndex: 'date'
-           },
-		   {
-            title: '卡号',
-            align:"center",
-            dataIndex: 'cardId'
            },
 		   {
             title: '最大金额',
@@ -174,19 +170,14 @@
        },
     }
   },
-  // watch: {
-  //   '$route': {
-  //     handler(){
-  //       if(this.name === 'MaximumBalanceList'){
-  //         this.update();
-  //       }
-  //     }
-  //   }
-  // },
   computed: {
     importExcelUrl: function(){
       return `${window._CONFIG['domianURL']}/${this.url.importExcelUrl}`;
     }
+  },
+  activated: function() {
+    this.update();
+    this.loadData1(1,1);
   },
     methods: {
       onChange(date, dateString) {
@@ -196,13 +187,15 @@
         // alert(encodeURIComponent(this.$route.query.id));
         var key = "/MaximumBalance/MaximumBalanceList?id="+encodeURIComponent(this.$route.query.id);
         Utils.$emit('demo',key);
-        this.$router.push({path:'/casetable/CaseTableList'}); 
       },
       update(){
-        alert(1)
-        if(this.pp != this.$route.query.id){
-          this.pp = this.$route.query.id;
+        if(this.caseName != this.$route.query.id.caseName+'"         案件'){
+          this.caseName = this.$route.query.id.caseName+'"         案件';
+          this.queryParam.caseId = this.$route.query.id.id
         }
+      },
+      ckls(){
+        this.$router.push({path:'/bankStatement/BankStatementList',query:{id:this.$route.query.id}}); 
       }
     }
   }

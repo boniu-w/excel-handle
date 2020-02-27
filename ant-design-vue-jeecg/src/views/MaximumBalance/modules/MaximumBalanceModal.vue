@@ -20,12 +20,6 @@
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="卡号">
-          <a-input placeholder="请输入卡号" v-decorator="['cardId', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
           label="最大金额">
           <a-input-number v-decorator="[ 'maxMoney', {}]" />
         </a-form-item>
@@ -101,7 +95,7 @@
         this.model = Object.assign({}, record);
         this.visible = true;
         this.$nextTick(() => {
-          this.form.setFieldsValue(pick(this.model,'cardId','maxMoney','maxBalance','caseId','reserve1','reserve2'))
+          this.form.setFieldsValue(pick(this.model,'maxMoney','maxBalance','caseId','reserve1','reserve2'))
 		  //时间格式化
           this.form.setFieldsValue({date:this.model.date?moment(this.model.date):null})
         });

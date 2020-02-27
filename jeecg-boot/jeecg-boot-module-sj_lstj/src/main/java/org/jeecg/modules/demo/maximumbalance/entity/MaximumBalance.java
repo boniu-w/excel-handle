@@ -38,10 +38,6 @@ public class MaximumBalance {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @ApiModelProperty(value = "日期")
 	private java.util.Date date;
-	/**卡号*/
-	@Excel(name = "卡号", width = 15)
-    @ApiModelProperty(value = "卡号")
-	private java.lang.String cardId;
 	/**最大金额*/
 	@Excel(name = "最大金额", width = 15)
     @ApiModelProperty(value = "最大金额")
@@ -62,4 +58,10 @@ public class MaximumBalance {
 	@Excel(name = "Reserve2", width = 15)
     @ApiModelProperty(value = "Reserve2")
 	private java.lang.String reserve2;
+	/**日期*/
+	@Excel(name = "日期", width = 15, format = "yyyy-MM-dd hh:mm:ss")
+	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd hh:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd hh:mm:ss")
+    @ApiModelProperty(value = "日期")
+	private java.util.Date create_time;
 }
