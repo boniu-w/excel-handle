@@ -1,5 +1,5 @@
 <template>
- <div>
+<!-- <div>
     <index-chart v-if="indexStyle==1"></index-chart>
     <index-bdc v-if="indexStyle==2"></index-bdc>
     <index-task v-if="indexStyle==3"></index-task>
@@ -11,7 +11,7 @@
         <a-radio :value="3">任务表格</a-radio>
       </a-radio-group>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script>

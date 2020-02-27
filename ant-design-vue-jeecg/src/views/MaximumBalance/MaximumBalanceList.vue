@@ -174,23 +174,35 @@
        },
     }
   },
+  // watch: {
+  //   '$route': {
+  //     handler(){
+  //       if(this.name === 'MaximumBalanceList'){
+  //         this.update();
+  //       }
+  //     }
+  //   }
+  // },
   computed: {
     importExcelUrl: function(){
       return `${window._CONFIG['domianURL']}/${this.url.importExcelUrl}`;
     }
-  },
-  mounted(){
-    this.pp = this.$route.query.id;
-    this.searchQuery();
   },
     methods: {
       onChange(date, dateString) {
         console.log(date, dateString);
       },
       FanHui(){
-        this.$router.push({path:'/casetable/CaseTableList'}); 
-        var key = "/MaximumBalance/MaximumBalanceList?id=%22%E5%95%AA%E5%95%AA%E5%95%AA%E5%95%AA%E5%95%AA%E5%95%AA%E9%93%BA%E9%93%BA%E9%93%BA%E9%93%BA%22%20%20%20%20%20%20%20%20%20%E6%A1%88%E4%BB%B6";
+        // alert(encodeURIComponent(this.$route.query.id));
+        var key = "/MaximumBalance/MaximumBalanceList?id="+encodeURIComponent(this.$route.query.id);
         Utils.$emit('demo',key);
+        this.$router.push({path:'/casetable/CaseTableList'}); 
+      },
+      update(){
+        alert(1)
+        if(this.pp != this.$route.query.id){
+          this.pp = this.$route.query.id;
+        }
       }
     }
   }

@@ -189,6 +189,7 @@ export const JeecgListMixin = {
       this.$refs.modalForm.disableSubmit = false;
     },
     ckfx: function (id){
+      // console.log("---------:"+JSON.stringify(id));
       this.$router.push({path:'/MaximumBalance/MaximumBalanceList',query:{id:'"'+id+'"         案件'}}); 
     },
     handleAdd: function () {
