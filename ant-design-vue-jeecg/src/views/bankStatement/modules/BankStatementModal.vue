@@ -14,12 +14,6 @@
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="案件id">
-          <a-input placeholder="请输入案件id" v-decorator="['caseId', validatorRules.caseId ]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
           label="交易日期">
           <a-date-picker v-decorator="[ 'transactionDate', {}]" />
         </a-form-item>
@@ -71,37 +65,6 @@
           label="户名">
           <a-input placeholder="请输入户名" v-decorator="['accountName', {}]" />
         </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="删除标识">
-          <a-input-number v-decorator="[ 'deleteIdentifier', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="创建人">
-          <a-input placeholder="请输入创建人" v-decorator="['createId', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="时间戳">
-          <a-input placeholder="请输入时间戳" v-decorator="['timeStamp', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="Reserve1">
-          <a-input placeholder="请输入Reserve1" v-decorator="['reserve1', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="Reserve2">
-          <a-input placeholder="请输入Reserve2" v-decorator="['reserve2', {}]" />
-        </a-form-item>
-		
       </a-form>
     </a-spin>
   </a-modal>

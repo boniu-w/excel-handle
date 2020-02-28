@@ -1,16 +1,16 @@
 <template>
-  <a-card :bordered="false">
+  <a-card :title="this.caseName">
 
     <!-- 查询区域 -->
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
         <a-row :gutter="24">
 
-          <a-col :md="6" :sm="8">
+          <!-- <a-col :md="6" :sm="8">
             <a-form-item label="案件id">
               <a-input placeholder="请输入案件id" v-model="queryParam.caseId"></a-input>
             </a-form-item>
-          </a-col>
+          </a-col> -->
           <a-col :md="6" :sm="8">
             <a-form-item label="交易日期">
               <a-input placeholder="请输入交易日期" v-model="queryParam.transactionDate"></a-input>
@@ -51,7 +51,7 @@
     <!-- 操作按钮区域 -->
     <div class="table-operator">
       <a-button @click="handleAdd" type="primary" icon="plus">新增</a-button>
-      <a-button type="primary" icon="download" @click="handleExportXls('银行流水表')">导出</a-button>
+      <a-button type="primary" icon="download" @click="handleExportXls('流水表')">导出</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
         <a-button type="primary" icon="import">导入</a-button>
       </a-upload>
@@ -110,33 +110,32 @@
 <script>
   import BankStatementModal from './modules/BankStatementModal'
   import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+  import Utils from '@/views/MaximumBalance/util.js';
 
   export default {
     name: "BankStatementList",
     mixins:[JeecgListMixin],
     components: {
-      BankStatementModal
+      BankStatementModal,
+      Utils
     },
     data () {
       return {
-        description: '银行流水表管理页面',
+        description: '流水表管理页面',
+        caseName:this.$route.query.id.caseName+'"         案件',
+        id:this.$route.query.id.id,
         // 表头
         columns: [
-          {
-            title: '#',
-            dataIndex: '',
-            key:'rowIndex',
-            width:60,
-            align:"center",
-            customRender:function (t,r,index) {
-              return parseInt(index)+1;
-            }
-           },
-		   {
-            title: '案件id',
-            align:"center",
-            dataIndex: 'caseId'
-           },
+          // {
+          //   title: '#',
+          //   dataIndex: '',
+          //   key:'rowIndex',
+          //   width:60,
+          //   align:"center",
+          //   customRender:function (t,r,index) {
+          //     return parseInt(index)+1;
+          //   }
+          //  },
 		   {
             title: '交易日期',
             align:"center",
@@ -182,31 +181,6 @@
             align:"center",
             dataIndex: 'accountName'
            },
-		   {
-            title: '删除标识',
-            align:"center",
-            dataIndex: 'deleteIdentifier'
-           },
-		   {
-            title: '创建人',
-            align:"center",
-            dataIndex: 'createId'
-           },
-		   {
-            title: '时间戳',
-            align:"center",
-            dataIndex: 'timeStamp'
-           },
-		   {
-            title: 'Reserve1',
-            align:"center",
-            dataIndex: 'reserve1'
-           },
-		   {
-            title: 'Reserve2',
-            align:"center",
-            dataIndex: 'reserve2'
-           },
           {
             title: '操作',
             dataIndex: 'action',
@@ -215,11 +189,11 @@
           }
         ],
 		url: {
-          list: "/bank_statement/bankStatement/list",
-          delete: "/bank_statement/bankStatement/delete",
-          deleteBatch: "/bank_statement/bankStatement/deleteBatch",
-          exportXlsUrl: "bank_statement/bankStatement/exportXls",
-          importExcelUrl: "bank_statement/bankStatement/importExcel",
+          list: "/bankstatement/bankStatement/list",
+          delete: "/bankstatement/bankStatement/delete",
+          deleteBatch: "/bankstatement/bankStatement/deleteBatch",
+          exportXlsUrl: "bankstatement/bankStatement/exportXls",
+          importExcelUrl: "bankstatement/bankStatement/importExcel",
        },
     }
   },
@@ -228,8 +202,23 @@
       return `${window._CONFIG['domianURL']}/${this.url.importExcelUrl}`;
     }
   },
+  
+  activated: function() {
+    this.update();
+    this.loadData1(1,1);
+  },
     methods: {
-     
+      FanHui(){
+       // alert(encodeURIComponent(this.$route.query.id));
+       var key = "/bankStatement/BankStatementList?id="+encodeURIComponent(this.$route.query.id);
+       Utils.$emit('demo',key);
+     },
+     update(){
+       if(this.caseName != this.$route.query.id.caseName+'"         案件'){
+         this.caseName = this.$route.query.id.caseName+'"         案件';
+         this.queryParam.caseId = this.$route.query.id.id
+       }
+     }
     }
   }
 </script>

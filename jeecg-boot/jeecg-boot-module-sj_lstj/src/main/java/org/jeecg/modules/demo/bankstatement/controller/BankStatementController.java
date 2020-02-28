@@ -1,4 +1,4 @@
-package org.jeecg.modules.demo.bank_statement.controller;
+package org.jeecg.modules.demo.bankstatement.controller;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +12,8 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.util.oConvertUtils;
-import org.jeecg.modules.demo.bank_statement.entity.BankStatement;
-import org.jeecg.modules.demo.bank_statement.service.IBankStatementService;
+import org.jeecg.modules.demo.bankstatement.entity.BankStatement;
+import org.jeecg.modules.demo.bankstatement.service.IBankStatementService;
 import java.util.Date;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -36,15 +36,15 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
  /**
- * @Description: 银行流水表
+ * @Description: 流水表
  * @Author: jeecg-boot
- * @Date:   2020-02-27
+ * @Date:   2020-02-28
  * @Version: V1.0
  */
 @Slf4j
-@Api(tags="银行流水表")
+@Api(tags="流水表")
 @RestController
-@RequestMapping("/bank_statement/bankStatement")
+@RequestMapping("/bankstatement/bankStatement")
 public class BankStatementController extends JeecgController<BankStatement, IBankStatementService> {
 	@Autowired
 	private IBankStatementService bankStatementService;
@@ -58,8 +58,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 	 * @param req
 	 * @return
 	 */
-	@AutoLog(value = "银行流水表-分页列表查询")
-	@ApiOperation(value="银行流水表-分页列表查询", notes="银行流水表-分页列表查询")
+	@AutoLog(value = "流水表-分页列表查询")
+	@ApiOperation(value="流水表-分页列表查询", notes="流水表-分页列表查询")
 	@GetMapping(value = "/list")
 	public Result<?> queryPageList(BankStatement bankStatement,
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
@@ -68,6 +68,7 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 		QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
 		Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
 		IPage<BankStatement> pageList = bankStatementService.page(page, queryWrapper);
+		Result.ok(pageList);
 		return Result.ok(pageList);
 	}
 	
@@ -77,8 +78,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 	 * @param bankStatement
 	 * @return
 	 */
-	@AutoLog(value = "银行流水表-添加")
-	@ApiOperation(value="银行流水表-添加", notes="银行流水表-添加")
+	@AutoLog(value = "流水表-添加")
+	@ApiOperation(value="流水表-添加", notes="流水表-添加")
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody BankStatement bankStatement) {
 		bankStatementService.save(bankStatement);
@@ -91,8 +92,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 	 * @param bankStatement
 	 * @return
 	 */
-	@AutoLog(value = "银行流水表-编辑")
-	@ApiOperation(value="银行流水表-编辑", notes="银行流水表-编辑")
+	@AutoLog(value = "流水表-编辑")
+	@ApiOperation(value="流水表-编辑", notes="流水表-编辑")
 	@PutMapping(value = "/edit")
 	public Result<?> edit(@RequestBody BankStatement bankStatement) {
 		bankStatementService.updateById(bankStatement);
@@ -105,8 +106,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 	 * @param id
 	 * @return
 	 */
-	@AutoLog(value = "银行流水表-通过id删除")
-	@ApiOperation(value="银行流水表-通过id删除", notes="银行流水表-通过id删除")
+	@AutoLog(value = "流水表-通过id删除")
+	@ApiOperation(value="流水表-通过id删除", notes="流水表-通过id删除")
 	@DeleteMapping(value = "/delete")
 	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
 		bankStatementService.removeById(id);
@@ -119,8 +120,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 	 * @param ids
 	 * @return
 	 */
-	@AutoLog(value = "银行流水表-批量删除")
-	@ApiOperation(value="银行流水表-批量删除", notes="银行流水表-批量删除")
+	@AutoLog(value = "流水表-批量删除")
+	@ApiOperation(value="流水表-批量删除", notes="流水表-批量删除")
 	@DeleteMapping(value = "/deleteBatch")
 	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
 		this.bankStatementService.removeByIds(Arrays.asList(ids.split(",")));
@@ -133,8 +134,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 	 * @param id
 	 * @return
 	 */
-	@AutoLog(value = "银行流水表-通过id查询")
-	@ApiOperation(value="银行流水表-通过id查询", notes="银行流水表-通过id查询")
+	@AutoLog(value = "流水表-通过id查询")
+	@ApiOperation(value="流水表-通过id查询", notes="流水表-通过id查询")
 	@GetMapping(value = "/queryById")
 	public Result<?> queryById(@RequestParam(name="id",required=true) String id) {
 		BankStatement bankStatement = bankStatementService.getById(id);
@@ -149,7 +150,7 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
    */
   @RequestMapping(value = "/exportXls")
   public ModelAndView exportXls(HttpServletRequest request, BankStatement bankStatement) {
-      return super.exportXls(request, bankStatement, BankStatement.class, "银行流水表");
+      return super.exportXls(request, bankStatement, BankStatement.class, "流水表");
   }
 
   /**

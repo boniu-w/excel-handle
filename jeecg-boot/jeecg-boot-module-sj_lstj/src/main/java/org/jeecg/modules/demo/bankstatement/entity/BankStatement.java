@@ -1,4 +1,4 @@
-package org.jeecg.modules.demo.bank_statement.entity;
+package org.jeecg.modules.demo.bankstatement.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,16 +16,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.jeecgframework.poi.excel.annotation.Excel;
 
 /**
- * @Description: 银行流水表
+ * @Description: 流水表
  * @Author: jeecg-boot
- * @Date:   2020-02-27
+ * @Date:   2020-02-28
  * @Version: V1.0
  */
 @Data
 @TableName("bank_statement")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value="bank_statement对象", description="银行流水表")
+@ApiModel(value="bank_statement对象", description="流水表")
 public class BankStatement {
     
 	/**id*/
@@ -73,10 +73,6 @@ public class BankStatement {
 	@Excel(name = "户名", width = 15)
     @ApiModelProperty(value = "户名")
 	private java.lang.String accountName;
-	/**删除标识*/
-	@Excel(name = "删除标识", width = 15)
-    @ApiModelProperty(value = "删除标识")
-	private java.lang.Integer deleteIdentifier;
 	/**创建时间*/
 	@Excel(name = "创建时间", width = 20, format = "yyyy-MM-dd HH:mm:ss")
 	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
@@ -87,10 +83,6 @@ public class BankStatement {
 	@Excel(name = "创建人", width = 15)
     @ApiModelProperty(value = "创建人")
 	private java.lang.String createId;
-	/**时间戳*/
-	@Excel(name = "时间戳", width = 15)
-    @ApiModelProperty(value = "时间戳")
-	private java.lang.String timeStamp;
 	/**Reserve1*/
 	@Excel(name = "Reserve1", width = 15)
     @ApiModelProperty(value = "Reserve1")

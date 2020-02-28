@@ -69,6 +69,9 @@ export const JeecgListMixin = {
         this.ipagination.current = 1;
       }
       var params = this.getQueryParams();//查询条件
+      if(this.id != undefined){
+        params.caseId = this.$route.query.id.id;
+      }
       this.loading = true;
       getAction(this.url.list, params).then((res) => {
         if (res.success) {
@@ -94,10 +97,10 @@ export const JeecgListMixin = {
       params.caseId = this.$route.query.id.id;
       this.loading = true;
       getAction(this.url.list, params).then((res) => {
-        if (res.success) {
+        // if (res.success) {
           this.dataSource = res.result.records;
           this.ipagination.total = res.result.total;
-        }
+        // }
         if(res.code===510){
           this.$message.warning(res.message)
         }

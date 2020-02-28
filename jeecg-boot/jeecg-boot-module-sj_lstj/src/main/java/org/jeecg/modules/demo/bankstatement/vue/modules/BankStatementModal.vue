@@ -1,13 +1,13 @@
 <template>
-  <a-drawer
-      :title="title"
-      :width="800"
-      placement="right"
-      :closable="false"
-      @close="close"
-      :visible="visible"
-  >
-
+  <a-modal
+    :title="title"
+    :width="800"
+    :visible="visible"
+    :confirmLoading="confirmLoading"
+    @ok="handleOk"
+    @cancel="handleCancel"
+    cancelText="关闭">
+    
     <a-spin :spinning="confirmLoading">
       <a-form :form="form">
       
@@ -74,20 +74,8 @@
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="删除标识">
-          <a-input-number v-decorator="[ 'deleteIdentifier', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
           label="创建人">
           <a-input placeholder="请输入创建人" v-decorator="['createId', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="时间戳">
-          <a-input placeholder="请输入时间戳" v-decorator="['timeStamp', {}]" />
         </a-form-item>
         <a-form-item
           :labelCol="labelCol"
@@ -104,9 +92,7 @@
 		
       </a-form>
     </a-spin>
-    <a-button type="primary" @click="handleOk">确定</a-button>
-    <a-button type="primary" @click="handleCancel">取消</a-button>
-  </a-drawer>
+  </a-modal>
 </template>
 
 <script>
@@ -138,8 +124,8 @@
         accountBalance:{rules: [{ required: true, message: '请输入账号余额!' }]},
         },
         url: {
-          add: "/bank_statement/bankStatement/add",
-          edit: "/bank_statement/bankStatement/edit",
+          add: "/bankstatement/bankStatement/add",
+          edit: "/bankstatement/bankStatement/edit",
         },
       }
     },
@@ -154,7 +140,7 @@
         this.model = Object.assign({}, record);
         this.visible = true;
         this.$nextTick(() => {
-          this.form.setFieldsValue(pick(this.model,'caseId','transactionTime','queryCardNumber','fullName','accountBalance','transactionAmount','loanIdentification','opponentAccountNumber','accountName','deleteIdentifier','createId','timeStamp','reserve1','reserve2'))
+          this.form.setFieldsValue(pick(this.model,'caseId','transactionTime','queryCardNumber','fullName','accountBalance','transactionAmount','loanIdentification','opponentAccountNumber','accountName','createId','reserve1','reserve2'))
 		  //时间格式化
           this.form.setFieldsValue({transactionDate:this.model.transactionDate?moment(this.model.transactionDate):null})
         });
@@ -211,10 +197,5 @@
 </script>
 
 <style lang="less" scoped>
-/** Button按钮间距 */
-  .ant-btn {
-    margin-left: 30px;
-    margin-bottom: 30px;
-    float: right;
-  }
+
 </style>
