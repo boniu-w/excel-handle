@@ -236,8 +236,6 @@
        onChange(date, dateString) {
                console.log(date, dateString);
                this.datetime = dateString;
-               // // dateString.createTime = null;
-               // alert(dateString.Reserve1);
                return dateString;
        },
        ckfx: function (id){
