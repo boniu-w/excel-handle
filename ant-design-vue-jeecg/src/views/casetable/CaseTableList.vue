@@ -37,7 +37,7 @@
           </a-col>
           <a-col :md="6" :sm="8">
             <a-form-item label="创建时间">
-              <a-date-picker @change="onChange" v-model="queryParam.createTime"/>
+              <a-range-picker @change="onChange" v-model="queryParam.Reserve1"/>
             </a-form-item>
           </a-col>
         <template v-if="toggleSearchStatus">
@@ -138,6 +138,7 @@
     data () {
       return {
         description: '案件表管理页面',
+        datetime:null,
         // 表头
         columns: [
           // {
@@ -234,6 +235,9 @@
     methods: {
        onChange(date, dateString) {
                console.log(date, dateString);
+               this.datetime = dateString;
+               // // dateString.createTime = null;
+               // alert(dateString.Reserve1);
                return dateString;
        },
        ckfx: function (id){

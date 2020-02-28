@@ -72,6 +72,11 @@ export const JeecgListMixin = {
       if(this.id != undefined){
         params.caseId = this.$route.query.id.id;
       }
+      if(this.datetime != null){
+        params.Reserve1 = this.datetime[0]+","+this.datetime[1]
+        alert(this.datetime[0]+","+this.datetime[1])
+      }
+      alert(JSON.stringify(params))
       this.loading = true;
       getAction(this.url.list, params).then((res) => {
         if (res.success) {
@@ -94,6 +99,7 @@ export const JeecgListMixin = {
         this.ipagination.current = 1;
       }
       var params = this.getQueryParams();//查询条件
+      alert(JSON.stringify(params))
       params.caseId = this.$route.query.id.id;
       this.loading = true;
       getAction(this.url.list, params).then((res) => {
