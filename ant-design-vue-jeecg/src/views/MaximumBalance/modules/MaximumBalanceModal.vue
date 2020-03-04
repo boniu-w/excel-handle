@@ -29,25 +29,7 @@
           label="最大余额">
           <a-input-number v-decorator="[ 'maxBalance', {}]" />
         </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="案件id">
-          <a-input placeholder="请输入案件id" v-decorator="['caseId', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="Reserve1">
-          <a-input placeholder="请输入Reserve1" v-decorator="['reserve1', {}]" />
-        </a-form-item>
-        <a-form-item
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          label="Reserve2">
-          <a-input placeholder="请输入Reserve2" v-decorator="['reserve2', {}]" />
-        </a-form-item>
-		
+        
       </a-form>
     </a-spin>
   </a-modal>

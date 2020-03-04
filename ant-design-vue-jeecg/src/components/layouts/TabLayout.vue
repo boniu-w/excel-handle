@@ -146,10 +146,10 @@
         this[action](key)
       },
       remove(key) {
-        if (key == indexKey) {
-          this.$message.warning('首页不能关闭!')
-          return
-        }
+        // if (key == indexKey) {
+        //   this.$message.warning('首页不能关闭!')
+        //   return
+        // }
         if (this.pageList.length === 1) {
           this.$message.warning('这是最后一页，不能再关闭了啦')
           return

@@ -10,9 +10,8 @@ export const asyncRouterMap = [
     path: '/',
     name: 'dashboard',
     component: TabLayout,
-    meta: { title: '案件' },
-    // redirect: '/dashboard/workplace',
-    redirect: '/casetable/CaseTableList',
+    meta: { title: '首页' },
+    redirect: '/dashboard/workplace',
     children: [
 
       // // dashboard
@@ -360,14 +359,14 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/',
-    name: 'ckfx',
-    component: TabLayout,
-    meta: { title: '查控分析' },
-    redirect: '/MaximumBalance/MaximumBalanceList',
-    children: []
-  },
+  // {
+  //   path: '/',
+  //   name: 'ckfx',
+  //   component: TabLayout,
+  //   meta: { title: '查控分析' },
+  //   redirect: '/MaximumBalance/MaximumBalanceList',
+  //   children: []
+  // },
   {
     path: '/404',
     component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404')

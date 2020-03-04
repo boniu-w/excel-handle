@@ -125,10 +125,11 @@
     data () {
       return {
         description: '流水表管理页面',
-        caseName:this.$route.query.id.caseName+'"         案件',
+        caseName:this.$route.query.id.caseName,
         id:this.$route.query.id.id,
         open2: false,
         datetime:null,
+        type:"2",
         time: null,
         // 表头
         columns: [
@@ -212,6 +213,10 @@
   },
   
   activated: function() {
+    if(this.caseName == null){
+      var key = "/bankStatement/BankStatementList?id=%5Bobject%20Object%5D";
+      Utils.$emit('demo',key);
+    }
     this.update();
     this.loadData1(1,1);
   },

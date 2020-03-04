@@ -1,5 +1,5 @@
 <template>
-  <page-layout>
+  <a-layout>
     <!-- 查询区域 -->
     <a-card  :title="this.caseName">
       <a-button type="primary" style="background-color: #E78C45;border-color: #E78C45; position: absolute; right: 50px;top: 10px;" @click="FanHui()" icon="enter">返回</a-button>
@@ -59,7 +59,7 @@
     <!-- 操作按钮区域 -->
     <div class="table-operator">
       <a-button @click="ckls" style="background-color: #006400;border-color: #006400;" type="primary" icon="search">查看全部流水</a-button>
-      <a-button type="primary" icon="download" @click="handleExportXls('最大余额表')">导出</a-button>
+      <!-- <a-button type="primary" icon="download" @click="handleExportXls('最大余额表')">导出</a-button> -->
       <!-- <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
         <a-button type="primary" icon="import">导入</a-button>
       </a-upload> -->
@@ -113,7 +113,7 @@
     <!-- 表单区域 -->
     <maximumBalance-modal ref="modalForm" @ok="modalFormOk"></maximumBalance-modal>
   </a-card>
-  </page-layout>
+  </a-layout>
 </template>
 
 <script>
@@ -134,9 +134,10 @@
     data () {
       return {
         description: '最大余额表管理页面',
-        caseName:this.$route.query.id.caseName+'"         案件',
+        caseName:this.$route.query.id.caseName,
         id:this.$route.query.id.id,
         visitFields:['最大余额','最大金额'],
+        type:"1",
         visitInfo:[],
         // 表头
         columns: [

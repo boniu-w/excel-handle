@@ -7,6 +7,7 @@ import { filterObj } from '@/utils/util';
 import { deleteAction, getAction,downFile } from '@/api/manage'
 import Vue from 'vue'
 import { ACCESS_TOKEN } from "@/store/mutation-types"
+import Utils from '@/views/MaximumBalance/util.js';
 
 export const JeecgListMixin = {
   data(){
@@ -52,10 +53,10 @@ export const JeecgListMixin = {
   },
   created() {
     if(!this.disableMixinCreated){
-      console.log(' -- mixin created -- ')
-      this.loadData();
-      //初始化字典配置 在自己页面定义
-      this.initDictConfig();
+        console.log(' -- mixin created -- ')
+        this.loadData();
+        //初始化字典配置 在自己页面定义
+        this.initDictConfig();
     }
   },
   methods:{
@@ -75,9 +76,9 @@ export const JeecgListMixin = {
       if(this.id != undefined){
         params.caseId = this.$route.query.id.id;
       }
-      // alert(JSON.stringify(params))
       this.loading = true;
       getAction(this.url.list, params).then((res) => {
+      console.log("8888888888888888888888888")
         if (res.success) {
           this.dataSource = res.result.records;
           this.ipagination.total = res.result.total;

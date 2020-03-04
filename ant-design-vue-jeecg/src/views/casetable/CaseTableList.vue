@@ -139,6 +139,7 @@
       return {
         description: '案件表管理页面',
         datetime:null,
+        caseName:'1',
         // 表头
         columns: [
           // {
