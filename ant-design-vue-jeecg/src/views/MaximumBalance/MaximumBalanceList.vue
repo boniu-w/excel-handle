@@ -9,7 +9,7 @@
       
             <a-col :md="6" :sm="8">
               <a-form-item label="日期">
-                <a-range-picker @change="onChange"  v-model="queryParam.date" />
+                <a-range-picker @change="onChange" v-model="queryParam.reserve1"/>
               </a-form-item>
             </a-col>
           <template v-if="toggleSearchStatus">
@@ -23,7 +23,7 @@
                 <a-input placeholder="请输入最大余额" v-model="queryParam.maxBalance"></a-input>
               </a-form-item>
             </a-col>
-            <a-col :md="6" :sm="8" style="">
+            <a-col :md="6" :sm="8" style="" style="display: none;">
               <a-form-item label="案件id">
                 <a-input id="ajid" placeholder="请输入案件id" v-model="queryParam.caseId"/>
               </a-form-item>
@@ -36,8 +36,8 @@
             </template>
             <a-col :md="6" :sm="8" >
               <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
-                <a-button type="primary" @click="loadData1(1)" icon="search">查询</a-button>
-                <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
+                <a-button type="primary" @click="loadData1(1,1)" icon="search">查询</a-button>
+                <a-button type="primary" @click="loadData1(1,2)" icon="reload" style="margin-left: 8px">重置</a-button>
                 <a @click="handleToggleSearch" style="margin-left: 8px">
                   {{ toggleSearchStatus ? '收起' : '展开' }}
                   <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
@@ -125,6 +125,7 @@
   export default {
     name: "MaximumBalanceList",
     mixins:[JeecgListMixin],
+    datetime:null,
     components: {
       MaximumBalanceModal,
       LineChartMultid,
@@ -182,6 +183,8 @@
     methods: {
       onChange(date, dateString) {
         console.log(date, dateString);
+        this.datetime = dateString;
+        return dateString;
       },
       FanHui(){
         // alert(encodeURIComponent(this.$route.query.id));

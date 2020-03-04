@@ -69,12 +69,13 @@ export const JeecgListMixin = {
         this.ipagination.current = 1;
       }
       var params = this.getQueryParams();//查询条件
+      if(this.datetime != null){
+        params.reserve1 = this.datetime[0]+","+this.datetime[1]
+      }
       if(this.id != undefined){
         params.caseId = this.$route.query.id.id;
       }
-      if(this.datetime != null){
-        params.Reserve1 = this.datetime[0]+","+this.datetime[1]
-      }
+      // alert(JSON.stringify(params))
       this.loading = true;
       getAction(this.url.list, params).then((res) => {
         if (res.success) {
@@ -97,8 +98,20 @@ export const JeecgListMixin = {
         this.ipagination.current = 1;
       }
       var params = this.getQueryParams();//查询条件
+      if(this.datetime != null){
+        params.reserve1 = this.datetime[0]+","+this.datetime[1]
+      }
+      if(a == 3){
+        params.transactionTime = this.time;
+      }
+      if(a == 2){
+        params.maxBalance = null;
+        params.maxMoney = null;
+        params.reserve1 = null;
+      }
       params.caseId = this.$route.query.id.id;
       this.loading = true;
+      // alert(JSON.stringify(params))
       getAction(this.url.list, params).then((res) => {
         // if (res.success) {
           this.dataSource = res.result.records;
@@ -109,7 +122,7 @@ export const JeecgListMixin = {
         }
         this.loading = false;
         //折线图传值
-        if(a ==1){
+        if(a ==1 || a ==2){
           var Line = [];
           for(var i = 0;i<this.dataSource.length;i++){
             var pp = {"最大余额":this.dataSource[i].maxBalance,"最大金额":this.dataSource[i].maxMoney,"type":this.dataSource[i].date};
@@ -170,6 +183,7 @@ export const JeecgListMixin = {
     },
     searchReset() {
       this.queryParam = {}
+      this.datetime = null;
       this.loadData(1);
     },
     batchDel: function () {

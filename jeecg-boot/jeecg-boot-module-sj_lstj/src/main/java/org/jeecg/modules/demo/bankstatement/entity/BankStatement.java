@@ -43,6 +43,8 @@ public class BankStatement {
     @ApiModelProperty(value = "交易日期")
 	private java.util.Date transactionDate;
 	/**交易时间*/
+	@Excel(name = "交易日期", width = 15, format = "yyyy-MM-dd")
+	@JsonFormat(timezone = "GMT+8",pattern = "HH:mm:ss")
     @ApiModelProperty(value = "交易时间")
 	private java.util.Date transactionTime;
 	/**查询卡号*/

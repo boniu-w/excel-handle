@@ -37,7 +37,7 @@
           </a-col>
           <a-col :md="6" :sm="8">
             <a-form-item label="创建时间">
-              <a-range-picker @change="onChange" v-model="queryParam.Reserve1"/>
+              <a-range-picker @change="onChange" v-model="queryParam.reserve1"/>
             </a-form-item>
           </a-col>
         <template v-if="toggleSearchStatus">
@@ -241,6 +241,9 @@
        ckfx: function (id){
          // console.log("---------:"+JSON.stringify(id));
          this.$router.push({path:'/MaximumBalance/MaximumBalanceList',query:{id:id}}); 
+       },
+        handleChange(value) {
+               this.queryParam.caseTypeId = `${value}`;
        },
     }
   }

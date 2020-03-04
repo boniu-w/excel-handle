@@ -1,5 +1,6 @@
 <template>
   <a-card :title="this.caseName">
+    <a-button type="primary" style="background-color: #E78C45;border-color: #E78C45; position: absolute; right: 50px;top: 10px;" @click="FanHui()" icon="enter">返回</a-button>
 
     <!-- 查询区域 -->
     <div class="table-page-search-wrapper">
@@ -13,13 +14,15 @@
           </a-col> -->
           <a-col :md="6" :sm="8">
             <a-form-item label="交易日期">
-              <a-input placeholder="请输入交易日期" v-model="queryParam.transactionDate"></a-input>
+              <a-range-picker @change="onChange" v-model="queryParam.reserve1"/>
             </a-form-item>
           </a-col>
         <template v-if="toggleSearchStatus">
         <a-col :md="6" :sm="8">
             <a-form-item label="交易时间">
-              <a-input placeholder="请输入交易时间" v-model="queryParam.transactionTime"></a-input>
+              <a-time-picker :open.sync="open2" @change="onChange1" format="HH:mm:ss" v-model="queryParam.transactionTime">
+                <a-button slot="addon" size="small" type="primary" @click="handleClose">Ok</a-button>
+              </a-time-picker>
             </a-form-item>
           </a-col>
           <a-col :md="6" :sm="8">
@@ -35,8 +38,8 @@
           </template>
           <a-col :md="6" :sm="8" >
             <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
-              <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
-              <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
+              <a-button type="primary" @click="loadData1(1,3)" icon="search">查询</a-button>
+              <a-button type="primary" @click="loadData1(1,2)" icon="reload" style="margin-left: 8px">重置</a-button>
               <a @click="handleToggleSearch" style="margin-left: 8px">
                 {{ toggleSearchStatus ? '收起' : '展开' }}
                 <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
@@ -124,6 +127,9 @@
         description: '流水表管理页面',
         caseName:this.$route.query.id.caseName+'"         案件',
         id:this.$route.query.id.id,
+        open2: false,
+        datetime:null,
+        time: null,
         // 表头
         columns: [
           // {
@@ -139,11 +145,13 @@
 		   {
             title: '交易日期',
             align:"center",
+            format: 'yyyy-MM-dd',
             dataIndex: 'transactionDate'
            },
 		   {
             title: '交易时间',
             align:"center",
+            format: 'HH:mm:ss',
             dataIndex: 'transactionTime'
            },
 		   {
@@ -208,6 +216,15 @@
     this.loadData1(1,1);
   },
     methods: {
+      onChange(date, dateString) {
+         console.log(date, dateString);
+         this.datetime = dateString;
+         return dateString;
+      },
+      onChange1(time, timeString) {
+              alert(timeString);
+              this.time = timeString;
+      },
       FanHui(){
        // alert(encodeURIComponent(this.$route.query.id));
        var key = "/bankStatement/BankStatementList?id="+encodeURIComponent(this.$route.query.id);
@@ -218,7 +235,10 @@
          this.caseName = this.$route.query.id.caseName+'"         案件';
          this.queryParam.caseId = this.$route.query.id.id
        }
-     }
+     },
+     handleClose() {
+       this.open2 = false;
+     },
     }
   }
 </script>

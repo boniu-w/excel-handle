@@ -65,10 +65,19 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
 								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
 								   HttpServletRequest req) {
-		QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
-		Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
-		IPage<BankStatement> pageList = bankStatementService.page(page, queryWrapper);
-		Result.ok(pageList);
+		IPage<BankStatement> pageList = null;
+		if(bankStatement.getReserve1() != null) {
+			String[] split = bankStatement.getReserve1().split(",");
+			bankStatement.setReserve1(null);
+			QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
+			queryWrapper.between("transaction_date", split[0], split[1]);
+			Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
+			pageList = bankStatementService.page(page, queryWrapper);
+		} else {
+			QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
+			Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
+			pageList = bankStatementService.page(page, queryWrapper);
+		}
 		return Result.ok(pageList);
 	}
 	

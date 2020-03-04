@@ -68,9 +68,19 @@ public class CaseTableController extends JeecgController<CaseTable, ICaseTableSe
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
 								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
 								   HttpServletRequest req) {
-		QueryWrapper<CaseTable> queryWrapper = QueryGenerator.initQueryWrapper(caseTable, req.getParameterMap());
-		Page<CaseTable> page = new Page<CaseTable>(pageNo, pageSize);
-		IPage<CaseTable> pageList = caseTableService.page(page, queryWrapper);
+		IPage<CaseTable> pageList = null;
+		if(caseTable.getReserve1() != null) {
+			String[] split = caseTable.getReserve1().split(",");
+			caseTable.setReserve1(null);
+			QueryWrapper<CaseTable> queryWrapper = QueryGenerator.initQueryWrapper(caseTable, req.getParameterMap());
+			queryWrapper.between("create_time", split[0], split[1]);
+			Page<CaseTable> page = new Page<CaseTable>(pageNo, pageSize);
+			pageList = caseTableService.page(page, queryWrapper);
+		}else {
+			QueryWrapper<CaseTable> queryWrapper = QueryGenerator.initQueryWrapper(caseTable, req.getParameterMap());
+			Page<CaseTable> page = new Page<CaseTable>(pageNo, pageSize);
+			pageList = caseTableService.page(page, queryWrapper);
+		}
 		return Result.ok(pageList);
 	}
 	

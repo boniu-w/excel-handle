@@ -12,6 +12,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.util.oConvertUtils;
+import org.jeecg.modules.demo.casetable.entity.CaseTable;
 import org.jeecg.modules.demo.maximumbalance.entity.MaximumBalance;
 import org.jeecg.modules.demo.maximumbalance.service.IMaximumBalanceService;
 import java.util.Date;
@@ -65,9 +66,19 @@ public class MaximumBalanceController extends JeecgController<MaximumBalance, IM
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
 								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
 								   HttpServletRequest req) {
-		QueryWrapper<MaximumBalance> queryWrapper = QueryGenerator.initQueryWrapper(maximumBalance, req.getParameterMap());
-		Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
-		IPage<MaximumBalance> pageList = maximumBalanceService.page(page, queryWrapper);
+		IPage<MaximumBalance> pageList = null;
+		if(maximumBalance.getReserve1() != null) {
+			String[] split = maximumBalance.getReserve1().split(",");
+			maximumBalance.setReserve1(null);
+			QueryWrapper<MaximumBalance> queryWrapper = QueryGenerator.initQueryWrapper(maximumBalance, req.getParameterMap());
+			queryWrapper.between("date", split[0], split[1]);
+			Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
+			pageList = maximumBalanceService.page(page, queryWrapper);
+		}else {
+			QueryWrapper<MaximumBalance> queryWrapper = QueryGenerator.initQueryWrapper(maximumBalance, req.getParameterMap());
+			Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
+			pageList = maximumBalanceService.page(page, queryWrapper);
+		}
 		return Result.ok(pageList);
 	}
 	

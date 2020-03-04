@@ -10,8 +10,9 @@ export const asyncRouterMap = [
     path: '/',
     name: 'dashboard',
     component: TabLayout,
-    meta: { title: '首页' },
-    redirect: '/dashboard/workplace',
+    meta: { title: '案件' },
+    // redirect: '/dashboard/workplace',
+    redirect: '/casetable/CaseTableList',
     children: [
 
       // // dashboard
