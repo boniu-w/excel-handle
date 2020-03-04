@@ -2,6 +2,7 @@ package org.jeecg.common.system.base.controller;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,43 @@ public class JeecgController<T, S extends IService<T>> {
         mv.addObject(NormalExcelConstants.CLASS, clazz);
         mv.addObject(NormalExcelConstants.PARAMS, new ExportParams(title + "报表", "导出人:" + sysUser.getRealname(), title));
         mv.addObject(NormalExcelConstants.DATA_LIST, exportList);
+        return mv;
+    }
+    
+    
+    
+
+    /**
+     * 导出excel
+     *
+     * @param request
+     */
+    protected ModelAndView exportXls1(HttpServletRequest request, T object, Class<T> clazz, String title) {
+        // Step.1 组装查询条件
+        QueryWrapper<T> queryWrapper = QueryGenerator.initQueryWrapper(object, request.getParameterMap());
+        LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+
+        // Step.2 获取导出数据
+        List<T> pageList = service.list(queryWrapper);
+        List<T> exportList = null;
+
+        // 过滤选中数据
+        String selections = request.getParameter("selections");
+        if (oConvertUtils.isNotEmpty(selections)) {
+            List<String> selectionList = Arrays.asList(selections.split(","));
+            exportList = pageList.stream().filter(item -> selectionList.contains(getId(item))).collect(Collectors.toList());
+        } else {
+            exportList = pageList;
+        }
+        List<T> aa = new  ArrayList<T>();
+        System.out.println(exportList.get(0));
+        aa.add(object);
+        // Step.3 AutoPoi 导出Excel
+        ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
+        mv.addObject(NormalExcelConstants.FILE_NAME, title); //此处设置的filename无效 ,前端会重更新设置一下
+        mv.addObject(NormalExcelConstants.CLASS, clazz);
+        mv.addObject(NormalExcelConstants.PARAMS, new ExportParams(title + "报表", "导出人:" + sysUser.getRealname(), title));
+        mv.addObject(NormalExcelConstants.DATA_LIST, aa);
         return mv;
     }
 

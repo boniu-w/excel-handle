@@ -161,6 +161,17 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
   public ModelAndView exportXls(HttpServletRequest request, BankStatement bankStatement) {
       return super.exportXls(request, bankStatement, BankStatement.class, "流水表");
   }
+  
+  /**
+   * 导出excel模板
+   *
+   * @param request
+   * @param bankStatement
+   */
+  @RequestMapping(value = "/exportXls1")
+  public ModelAndView exportXls1(HttpServletRequest request, BankStatement bankStatement) {
+      return super.exportXls1(request, bankStatement, BankStatement.class, "流水表");
+  }
 
   /**
    * 通过excel导入数据

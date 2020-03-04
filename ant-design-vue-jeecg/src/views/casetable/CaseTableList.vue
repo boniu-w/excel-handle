@@ -65,9 +65,10 @@
 
     <!-- 操作按钮区域 -->
     <div class="table-operator" style="margin-top: 50px;">
-      <a-button style="background-color: #EE9900;border-color: #EE9900;width: 15%;height: 40px;" @click="handleAdd" type="primary" icon="plus">添加案件</a-button>
       <a-button style="background-color: #008000;border-color: #008000;width: 15%;height: 40px; margin-left: 20px;" @click="a" type="primary" icon="plus">导入银行流水</a-button>
-      <a-button type="primary" icon="download" @click="handleExportXls('案件表')" style="height: 40px; margin-left: 20px;">导出案件</a-button>
+      <a-button type="primary" icon="download" @click="handleExportXls3('银行流水模板')" style="height: 40px; ">银行流水模板</a-button>
+      <a-button style="background-color: #EE9900;border-color: #EE9900;margin-left: 40px;width: 15%;height: 40px;" @click="handleAdd" type="primary" icon="plus">添加案件</a-button>
+      <a-button type="primary" icon="download" @click="handleExportXls('案件表')" style="height: 40px; ">导出案件</a-button>
       <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
         <a-button type="primary" icon="import" style="height: 40px; ">导入案件</a-button>
       </a-upload>
@@ -224,6 +225,7 @@
           delete: "/casetable/caseTable/delete",
           deleteBatch: "/casetable/caseTable/deleteBatch",
           exportXlsUrl: "casetable/caseTable/exportXls",
+          exportXlsUrl1: "bankstatement/bankStatement/exportXls1",
           importExcelUrl: "casetable/caseTable/importExcel",
        },
     }
