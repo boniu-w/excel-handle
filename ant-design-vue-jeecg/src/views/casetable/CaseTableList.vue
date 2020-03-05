@@ -62,23 +62,18 @@
     <!-- 操作按钮区域 -->
     <div class="table-operator" style="margin-top: 50px;">
       <a-upload
+        id="upload"
         name="file"
+        :disabled="disabled"
+        :beforeUpload="beforeUpload"
         :showUploadList="false"
         :multiple="false"
         :headers="tokenHeader"
         :action="importExcelUrl"
         @change="handleImportExcel"
       >
-        <a-button type="primary" icon="import" style="height: 40px; ">导入银行流水</a-button>
+        <a-button type="primary" icon="import" style="height: 40px; " @click="importExcel">导入银行流水</a-button>
       </a-upload>
-
-      <!-- <a-button
-        style="background-color: #008000;border-color: #008000;width: 15%;height: 40px; margin-left: 20px;"
-        @click="a"
-        type="primary"
-        icon="plus"
-        >导入银行流水</a-button
-      > -->
 
       <a-button type="primary" icon="download" @click="handleExportXls3('银行流水模板')" style="height: 40px; "
         >银行流水模板</a-button
@@ -173,6 +168,7 @@ export default {
       description: '案件表管理页面',
       datetime: null,
       caseName: '1',
+      disabled: false,
       // 表头
       columns: [
         // {
@@ -279,7 +275,8 @@ export default {
     },
     handleChange(value) {
       this.queryParam.caseTypeId = `${value}`
-    }
+    },
+    checkCase: function() {}
   }
 }
 </script>
