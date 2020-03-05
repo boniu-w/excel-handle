@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="org.jeecg.modules.demo.bankstatement.mapper.BankStatementMapper">
+
+
+
+    <!--插入到最大金额表-->
+    <insert id="insertMaximumBalance" parameterType="HashMap">
+        INSERT INTO maximum_balance
+        SELECT
+            UUID( ) AS 'id',
+            b.transaction_date AS 'date',
+            '' AS 'card_id',
+            MAX( b.account_balance ) AS 'max_money',
+            MAX( b.transaction_amount ) AS 'max_balance',
+            #{caseId} AS 'case_id',
+            '' AS 'Reserve1',
+            '' AS 'Reserve2'
+        FROM
+            bank_statement b
+        WHERE
+            b.case_id = #{caseId}
+        GROUP BY
+            b.transaction_date
+    </insert>
+
 
 </mapper>

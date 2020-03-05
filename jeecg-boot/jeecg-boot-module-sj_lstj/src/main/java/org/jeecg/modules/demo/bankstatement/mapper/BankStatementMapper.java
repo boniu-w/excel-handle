@@ -1,5 +1,6 @@
 package org.jeecg.modules.demo.bankstatement.mapper;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
@@ -13,5 +14,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @Version: V1.0
  */
 public interface BankStatementMapper extends BaseMapper<BankStatement> {
+    int insertMaximumBalance(HashMap hashMap);
 
 }

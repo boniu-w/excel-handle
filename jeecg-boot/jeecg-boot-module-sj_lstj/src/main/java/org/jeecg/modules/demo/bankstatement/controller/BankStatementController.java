@@ -1,8 +1,6 @@
 package org.jeecg.modules.demo.bankstatement.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -14,7 +12,6 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.demo.bankstatement.entity.BankStatement;
 import org.jeecg.modules.demo.bankstatement.service.IBankStatementService;
-import java.util.Date;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -182,7 +179,23 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
    */
   @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
   public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
-      return super.importExcel(request, response, BankStatement.class);
+	  Result<?> result = super.importExcel(request, response, BankStatement.class);
+
+	  System.out.println("><><><><><"+result.toString());
+
+	  //String caseId = bankStatement.getCaseId();
+	  String caseId = "11111111";
+
+	  System.out.println(caseId+"---------");
+
+	  HashMap<Object, Object> hashMap = new HashMap<>();
+	  hashMap.put("caseId", caseId);
+
+	  int i = bankStatementService.insertMaximumBalance(hashMap);
+
+	  System.out.println(i+">>>>>>>");
+
+	  return result;
   }
 
 }
