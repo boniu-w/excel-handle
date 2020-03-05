@@ -230,6 +230,7 @@ export const JeecgListMixin = {
     importExcel: function(a) {
       if (this.selectedRowKeys.length == 1) {
         this.disabled = false
+        this.id = this.selectedRowKeys[0]
         if (a == 1) {
           importExcel(1)
           a = a + 1
@@ -352,7 +353,8 @@ export const JeecgListMixin = {
     },
     /* 导入 */
     handleImportExcel(info) {
-      // alert(JSON.stringify(info))
+      info.id = this.selectedRowKeys[0]
+      alert(JSON.stringify(info))
       if (info.file.status !== 'uploading') {
         console.log(info.file, info.fileList)
       }
@@ -360,10 +362,7 @@ export const JeecgListMixin = {
         if (info.file.response.success) {
           // this.$message.success(`${info.file.name} 文件上传成功`);
           if (info.file.response.code === 201) {
-            let {
-              message,
-              result: { msg, fileUrl, fileName }
-            } = info.file.response
+            let {message,result: { msg, fileUrl, fileName }} = info.file.response
             let href = window._CONFIG['domianURL'] + fileUrl
             this.$warning({
               title: message,

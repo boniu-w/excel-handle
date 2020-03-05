@@ -69,6 +69,7 @@
         :showUploadList="false"
         :multiple="false"
         :headers="tokenHeader"
+        :data="this.id" 
         :action="importExcelUrl"
         @change="handleImportExcel"
       >
@@ -88,7 +89,7 @@
       <a-button type="primary" icon="download" @click="handleExportXls('案件表')" style="height: 40px; "
         >导出案件</a-button
       >
-      <a-upload
+      <!-- <a-upload
         name="file"
         :showUploadList="false"
         :multiple="false"
@@ -97,7 +98,7 @@
         @change="handleImportExcel"
       >
         <a-button type="primary" icon="import" style="height: 40px; ">导入案件</a-button>
-      </a-upload>
+      </a-upload> -->
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="batchDel"><a-icon type="delete" />删除</a-menu-item>
@@ -169,6 +170,7 @@ export default {
       datetime: null,
       caseName: '1',
       disabled: false,
+      id:null,
       // 表头
       columns: [
         // {
@@ -181,6 +183,11 @@ export default {
         //     return parseInt(index)+1;
         //   }
         //  },
+        {
+          title: '案件id',
+          align: 'center',
+          dataIndex: 'id'
+        },
         {
           title: '案件名称',
           align: 'center',
@@ -254,7 +261,7 @@ export default {
         deleteBatch: '/casetable/caseTable/deleteBatch',
         exportXlsUrl: 'casetable/caseTable/exportXls',
         exportXlsUrl1: 'bankstatement/bankStatement/exportXls1',
-        importExcelUrl: 'casetable/caseTable/importExcel'
+        importExcelUrl: 'bankstatement/bankStatement/importExcel'
       }
     }
   },

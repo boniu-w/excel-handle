@@ -178,7 +178,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
    * @return
    */
   @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
-  public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
+  public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response,String id) {
+	  System.out.println(111111);
 	  Result<?> result = super.importExcel(request, response, BankStatement.class);
 
 	  System.out.println("><><><><><"+result.toString());
