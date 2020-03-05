@@ -280,7 +280,6 @@
               loginParams.captcha = values.captcha
               loginParams.remember_me = values.rememberMe
               that.PhoneLogin(loginParams).then((res) => {
-                console.log(res.result);
                 this.departConfirm(res)
               }).catch((err) => {
                 that.requestFailed(err);
@@ -343,7 +342,8 @@
         // update-begin- author:sunjianlei --- date:20190812 --- for: 登录成功后不解除禁用按钮，防止多次点击
         // this.loginBtn = false
         // update-end- author:sunjianlei --- date:20190812 --- for: 登录成功后不解除禁用按钮，防止多次点击
-        this.$router.push({ name: "dashboard" })
+        // this.$router.push({ name: "dashboard" })
+        this.$router.push({path:'/dashboard/workplace'}); 
         this.$notification.success({
           message: '欢迎',
           description: `${timeFix()}，欢迎回来`,
