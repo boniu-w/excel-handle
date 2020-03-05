@@ -13,8 +13,8 @@
           </a-radio-group>
         </div> -->
        <img src="./img/timg.jpg" style="width: 150px; height: 160px;position: absolute; left: 550px;top: 180px;" />
-       <a style="position: absolute; left: 800px; font-size: 50px;top: 220px; color: #000000;">资  金  查  控  平  台</a>
-       <a-button @click="TZ" style="font-size: 30px;width: 350px; height: 60px;position: absolute; left: 700px;top: 440px; font-size: 35px;background-color: #EE9900;color: #fcfcfc;">
+       <a style="position: absolute; left: 750px; font-size: 50px;top: 220px; color: #000000;">资  金  查  控  平  台</a>
+       <a-button @click="TZ" style="font-size: 20px;width: 350px; height: 55px;position: absolute; left: 700px;top: 440px; font-size: 35px;background-color: #EE9900;color: #fcfcfc;">
          查 看 案 件
        </a-button>
       </div>

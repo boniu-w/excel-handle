@@ -1,5 +1,5 @@
 <template>
-  <div class="exception">
+  <!-- <div class="exception">
     <div class="img">
       <img :src="config[type].img"/>
     </div>
@@ -10,7 +10,7 @@
         <a-button type="primary" @click="handleToHome">返回首页</a-button>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script>
@@ -29,9 +29,13 @@
         config: types
       }
     },
+    mounted() {
+      this.$router.push({path:'/dashboard/workplace'});
+    },
     methods: {
       handleToHome () {
-        this.$router.push({ name: 'dashboard' })
+        // this.$router.push({ name: 'dashboard' })
+        this.$router.push({path:'/dashboard/workplace'}); 
       }
     }
   }
