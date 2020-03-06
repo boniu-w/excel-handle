@@ -112,7 +112,6 @@
         this.visible = false;
       },
       handleOk () {
-        alert(1)
         const that = this;
         // 触发表单验证
         this.form.validateFields((err, values) => {

@@ -103,7 +103,6 @@ public class JeecgController<T, S extends IService<T>> {
             exportList = pageList;
         }
         List<T> aa = new  ArrayList<T>();
-        System.out.println(exportList.get(0));
         aa.add(object);
         // Step.3 AutoPoi 导出Excel
         ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
