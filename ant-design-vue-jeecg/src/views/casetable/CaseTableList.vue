@@ -69,7 +69,7 @@
         :showUploadList="false"
         :multiple="false"
         :headers="tokenHeader"
-        :data="this.id" 
+        :data="this.uploadData" 
         :action="importExcelUrl"
         @change="handleImportExcel"
       >
@@ -170,7 +170,7 @@ export default {
       datetime: null,
       caseName: '1',
       disabled: false,
-      id:null,
+      uploadData:null,
       // 表头
       columns: [
         // {
@@ -271,6 +271,10 @@ export default {
     }
   },
   methods: {
+    beforeUpload(){
+      this.uploadData = {"uploadData":this.selectedRowKeys[0]}
+      alert(this.uploadData)
+    },
     onChange(date, dateString) {
       console.log(date, dateString)
       this.datetime = dateString
