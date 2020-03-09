@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.formula.functions.T;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
@@ -32,171 +34,210 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
- /**
+/**
  * @Description: 流水表
  * @Author: jeecg-boot
- * @Date:   2020-02-28
+ * @Date: 2020-02-28
  * @Version: V1.0
  */
 @Slf4j
-@Api(tags="流水表")
+@Api(tags = "流水表")
 @RestController
 @RequestMapping("/bankstatement/bankStatement")
 public class BankStatementController extends JeecgController<BankStatement, IBankStatementService> {
-	@Autowired
-	private IBankStatementService bankStatementService;
-	
-	/**
-	 * 分页列表查询
-	 *
-	 * @param bankStatement
-	 * @param pageNo
-	 * @param pageSize
-	 * @param req
-	 * @return
-	 */
-	@AutoLog(value = "流水表-分页列表查询")
-	@ApiOperation(value="流水表-分页列表查询", notes="流水表-分页列表查询")
-	@GetMapping(value = "/list")
-	public Result<?> queryPageList(BankStatement bankStatement,
-								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
-								   HttpServletRequest req) {
-		IPage<BankStatement> pageList = null;
-		if(bankStatement.getReserve1() != null) {
-			String[] split = bankStatement.getReserve1().split(",");
-			bankStatement.setReserve1(null);
-			QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
-			queryWrapper.between("transaction_date", split[0], split[1]);
-			Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
-			pageList = bankStatementService.page(page, queryWrapper);
-		} else {
-			QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
-			Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
-			pageList = bankStatementService.page(page, queryWrapper);
-		}
-		return Result.ok(pageList);
-	}
-	
-	/**
-	 * 添加
-	 *
-	 * @param bankStatement
-	 * @return
-	 */
-	@AutoLog(value = "流水表-添加")
-	@ApiOperation(value="流水表-添加", notes="流水表-添加")
-	@PostMapping(value = "/add")
-	public Result<?> add(@RequestBody BankStatement bankStatement) {
-		bankStatementService.save(bankStatement);
-		return Result.ok("添加成功！");
-	}
-	
-	/**
-	 * 编辑
-	 *
-	 * @param bankStatement
-	 * @return
-	 */
-	@AutoLog(value = "流水表-编辑")
-	@ApiOperation(value="流水表-编辑", notes="流水表-编辑")
-	@PutMapping(value = "/edit")
-	public Result<?> edit(@RequestBody BankStatement bankStatement) {
-		bankStatementService.updateById(bankStatement);
-		return Result.ok("编辑成功!");
-	}
-	
-	/**
-	 * 通过id删除
-	 *
-	 * @param id
-	 * @return
-	 */
-	@AutoLog(value = "流水表-通过id删除")
-	@ApiOperation(value="流水表-通过id删除", notes="流水表-通过id删除")
-	@DeleteMapping(value = "/delete")
-	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
-		bankStatementService.removeById(id);
-		return Result.ok("删除成功!");
-	}
-	
-	/**
-	 * 批量删除
-	 *
-	 * @param ids
-	 * @return
-	 */
-	@AutoLog(value = "流水表-批量删除")
-	@ApiOperation(value="流水表-批量删除", notes="流水表-批量删除")
-	@DeleteMapping(value = "/deleteBatch")
-	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
-		this.bankStatementService.removeByIds(Arrays.asList(ids.split(",")));
-		return Result.ok("批量删除成功！");
-	}
-	
-	/**
-	 * 通过id查询
-	 *
-	 * @param id
-	 * @return
-	 */
-	@AutoLog(value = "流水表-通过id查询")
-	@ApiOperation(value="流水表-通过id查询", notes="流水表-通过id查询")
-	@GetMapping(value = "/queryById")
-	public Result<?> queryById(@RequestParam(name="id",required=true) String id) {
-		BankStatement bankStatement = bankStatementService.getById(id);
-		return Result.ok(bankStatement);
-	}
+    @Autowired
+    private IBankStatementService bankStatementService;
 
-  /**
-   * 导出excel
-   *
-   * @param request
-   * @param bankStatement
-   */
-  @RequestMapping(value = "/exportXls")
-  public ModelAndView exportXls(HttpServletRequest request, BankStatement bankStatement) {
-      return super.exportXls(request, bankStatement, BankStatement.class, "流水表");
-  }
-  
-  /**
-   * 导出excel模板
-   *
-   * @param request
-   * @param bankStatement
-   */
-  @RequestMapping(value = "/exportXls1")
-  public ModelAndView exportXls1(HttpServletRequest request, BankStatement bankStatement) {
-      return super.exportXls1(request, bankStatement, BankStatement.class, "流水表");
-  }
+    /**
+     * 分页列表查询
+     *
+     * @param bankStatement
+     * @param pageNo
+     * @param pageSize
+     * @param req
+     * @return
+     */
+    @AutoLog(value = "流水表-分页列表查询")
+    @ApiOperation(value = "流水表-分页列表查询", notes = "流水表-分页列表查询")
+    @GetMapping(value = "/list")
+    public Result<?> queryPageList(BankStatement bankStatement,
+                                   @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+                                   @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                   HttpServletRequest req) {
+        IPage<BankStatement> pageList = null;
+        if (bankStatement.getReserve1() != null) {
+            String[] split = bankStatement.getReserve1().split(",");
+            bankStatement.setReserve1(null);
+            QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
+            queryWrapper.between("transaction_date", split[0], split[1]);
+            Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
+            pageList = bankStatementService.page(page, queryWrapper);
+        } else {
+            QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
+            Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
+            pageList = bankStatementService.page(page, queryWrapper);
+        }
+        return Result.ok(pageList);
+    }
 
-  /**
-   * 通过excel导入数据
-   *
-   * @param request
-   * @param response
-   * @return
-   */
-  @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
-  public Result<?> importExcel(String uploadData,HttpServletRequest request, HttpServletResponse response,String id) {
-	  System.out.println(request.getParameter("uploadData"));
-	  Result<?> result = super.importExcel(request, response, BankStatement.class);
+    /**
+     * 添加
+     *
+     * @param bankStatement
+     * @return
+     */
+    @AutoLog(value = "流水表-添加")
+    @ApiOperation(value = "流水表-添加", notes = "流水表-添加")
+    @PostMapping(value = "/add")
+    public Result<?> add(@RequestBody BankStatement bankStatement) {
+        bankStatementService.save(bankStatement);
+        return Result.ok("添加成功！");
+    }
 
-	  System.out.println("><><><><><"+result.toString());
+    /**
+     * 编辑
+     *
+     * @param bankStatement
+     * @return
+     */
+    @AutoLog(value = "流水表-编辑")
+    @ApiOperation(value = "流水表-编辑", notes = "流水表-编辑")
+    @PutMapping(value = "/edit")
+    public Result<?> edit(@RequestBody BankStatement bankStatement) {
+        bankStatementService.updateById(bankStatement);
+        return Result.ok("编辑成功!");
+    }
 
-	  //String caseId = bankStatement.getCaseId();
-	  String caseId = "11111111";
+    /**
+     * 通过id删除
+     *
+     * @param id
+     * @return
+     */
+    @AutoLog(value = "流水表-通过id删除")
+    @ApiOperation(value = "流水表-通过id删除", notes = "流水表-通过id删除")
+    @DeleteMapping(value = "/delete")
+    public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
+        bankStatementService.removeById(id);
+        return Result.ok("删除成功!");
+    }
 
-	  System.out.println(caseId+"---------");
+    /**
+     * 批量删除
+     *
+     * @param ids
+     * @return
+     */
+    @AutoLog(value = "流水表-批量删除")
+    @ApiOperation(value = "流水表-批量删除", notes = "流水表-批量删除")
+    @DeleteMapping(value = "/deleteBatch")
+    public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
+        this.bankStatementService.removeByIds(Arrays.asList(ids.split(",")));
+        return Result.ok("批量删除成功！");
+    }
 
-	  HashMap<Object, Object> hashMap = new HashMap<>();
-	  hashMap.put("caseId", caseId);
+    /**
+     * 通过id查询
+     *
+     * @param id
+     * @return
+     */
+    @AutoLog(value = "流水表-通过id查询")
+    @ApiOperation(value = "流水表-通过id查询", notes = "流水表-通过id查询")
+    @GetMapping(value = "/queryById")
+    public Result<?> queryById(@RequestParam(name = "id", required = true) String id) {
+        BankStatement bankStatement = bankStatementService.getById(id);
+        return Result.ok(bankStatement);
+    }
 
-	  int i = bankStatementService.insertMaximumBalance(hashMap);
+    /**
+     * 导出excel
+     *
+     * @param request
+     * @param bankStatement
+     */
+    @RequestMapping(value = "/exportXls")
+    public ModelAndView exportXls(HttpServletRequest request, BankStatement bankStatement) {
+        return super.exportXls(request, bankStatement, BankStatement.class, "流水表");
+    }
 
-	  System.out.println(i+">>>>>>>");
+    /**
+     * 导出excel模板
+     *
+     * @param request
+     * @param bankStatement
+     */
+    @RequestMapping(value = "/exportXls1")
+    public ModelAndView exportXls1(HttpServletRequest request, BankStatement bankStatement) {
+        return super.exportXls1(request, bankStatement, BankStatement.class, "流水表");
+    }
 
-	  return result;
-  }
+
+    public Result<?> importExcel1(HttpServletRequest request, HttpServletResponse response, Class<BankStatement> clazz) {
+
+        String id = request.getParameter("upload");
+        System.out.println(id+"----------------------");
+
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
+        for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
+            MultipartFile file = entity.getValue();// 获取上传文件对象
+
+
+            ImportParams params = new ImportParams();
+            params.setTitleRows(2);
+            params.setHeadRows(1);
+            params.setNeedSave(true);
+            try {
+                List<BankStatement> list = ExcelImportUtil.importExcel(file.getInputStream(), clazz, params);
+                for (int i = 0; i < list.size(); i++) {
+                    list.get(i).setCaseId(id);
+                }
+                //update-begin-author:taoyan date:20190528 for:批量插入数据
+                long start = System.currentTimeMillis();
+                bankStatementService.saveBatch(list);
+                //400条 saveBatch消耗时间1592毫秒  循环插入消耗时间1947毫秒
+                //1200条  saveBatch消耗时间3687毫秒 循环插入消耗时间5212毫秒
+                log.info("消耗时间" + (System.currentTimeMillis() - start) + "毫秒");
+                //update-end-author:taoyan date:20190528 for:批量插入数据
+
+                HashMap<Object, Object> hashMap = new HashMap<>();
+                Date a = new Date();
+                hashMap.put("caseId", id);
+                hashMap.put("createTime",a);
+
+                int i = bankStatementService.insertMaximumBalance(hashMap);
+
+                System.out.println(i + ">>>>>>>");
+
+
+                return Result.ok("文件导入成功！数据行数：" + list.size());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return Result.error("文件导入失败:" + e.getMessage());
+            } finally {
+                try {
+                    file.getInputStream().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return Result.error("文件导入失败！");
+    }
+
+    /**
+     * 通过excel导入数据
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
+    public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
+        Result<?> result = importExcel1(request, response, BankStatement.class);
+
+        return result;
+    }
 
 }

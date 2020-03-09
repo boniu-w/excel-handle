@@ -64,12 +64,12 @@
       <a-upload
         id="upload"
         name="file"
+        :data="this.upload"
         :disabled="disabled"
         :beforeUpload="beforeUpload"
         :showUploadList="false"
         :multiple="false"
         :headers="tokenHeader"
-        :data="this.uploadData" 
         :action="importExcelUrl"
         @change="handleImportExcel"
       >
@@ -89,7 +89,7 @@
       <a-button type="primary" icon="download" @click="handleExportXls('案件表')" style="height: 40px; "
         >导出案件</a-button
       >
-      <!-- <a-upload
+      <a-upload
         name="file"
         :showUploadList="false"
         :multiple="false"
@@ -98,7 +98,7 @@
         @change="handleImportExcel"
       >
         <a-button type="primary" icon="import" style="height: 40px; ">导入案件</a-button>
-      </a-upload> -->
+      </a-upload>
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="batchDel"><a-icon type="delete" />删除</a-menu-item>
@@ -156,6 +156,7 @@
 
 <script>
 import CaseTableModal from './modules/CaseTableModal'
+import { getAction, postAction } from '@/api/manage'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
 
 export default {
@@ -170,7 +171,8 @@ export default {
       datetime: null,
       caseName: '1',
       disabled: false,
-      uploadData:null,
+      id: null,
+      upload: null,
       // 表头
       columns: [
         // {
@@ -183,11 +185,6 @@ export default {
         //     return parseInt(index)+1;
         //   }
         //  },
-        {
-          title: '案件id',
-          align: 'center',
-          dataIndex: 'id'
-        },
         {
           title: '案件名称',
           align: 'center',
@@ -218,36 +215,7 @@ export default {
           align: 'center',
           dataIndex: 'remarks'
         },
-        // {
-        //        title: '时间戳',
-        //        align:"center",
-        //        dataIndex: 'timeStamp'
-        //       },
-        // {
-        //        title: '更改次数',
-        //        align:"center",
-        //        dataIndex: 'updateCount'
-        //       },
-        // {
-        //        title: '删除标识',
-        //        align:"center",
-        //        dataIndex: 'deleteIdentifier'
-        //       },
-        // {
-        //        title: 'Reserve1',
-        //        align:"center",
-        //        dataIndex: 'reserve1'
-        //       },
-        // {
-        //        title: 'Reserve2',
-        //        align:"center",
-        //        dataIndex: 'reserve2'
-        //       },
-        // {
-        //        title: 'Reserve3',
-        //        align:"center",
-        //        dataIndex: 'reserve3'
-        //       },
+
         {
           title: '操作',
           dataIndex: 'action',
@@ -271,10 +239,6 @@ export default {
     }
   },
   methods: {
-    beforeUpload(){
-      this.uploadData = {"uploadData":this.selectedRowKeys[0]}
-      alert(this.uploadData)
-    },
     onChange(date, dateString) {
       console.log(date, dateString)
       this.datetime = dateString
@@ -287,7 +251,68 @@ export default {
     handleChange(value) {
       this.queryParam.caseTypeId = `${value}`
     },
-    checkCase: function() {}
+    importExcel: function(a) {
+      if (this.selectedRowKeys.length == 1) {
+        this.disabled = false
+
+        var ids = ''
+        for (var a = 0; a < this.selectedRowKeys.length; a++) {
+          ids += this.selectedRowKeys[a]
+        }
+        // this.queryParam.id = ids
+        // getAction(this.url.list, this.queryParam).then(res => {
+        //   console.log(res)
+        //   this.mydata = res.result.records[0]
+        // })
+      } else {
+        this.disabled = true
+        this.$message.warning('请选择一个案件!')
+      }
+    },
+    handleImportExcel(info) {
+      // alert(JSON.stringify(info))
+      if (info.file.status !== ' ') {
+        console.log(info.file, info.fileList)
+      }
+      if (info.file.status === 'done') {
+        if (info.file.response.success) {
+          // this.$message.success(`${info.file.name} 文件上传成功`);
+          if (info.file.response.code === 201) {
+            let {
+              message,
+              result: { msg, fileUrl, fileName }
+            } = info.file.response
+            let href = window._CONFIG['domianURL'] + fileUrl
+            this.$warning({
+              title: message,
+              content: (
+                <div>
+                  <span>{msg}</span>
+                  <br />
+                  <span>
+                    具体详情请{' '}
+                    <a href={href} target="_blank" download={fileName}>
+                      点击下载
+                    </a>{' '}
+                  </span>
+                </div>
+              )
+            })
+          } else {
+            this.$message.success(info.file.response.message || `${info.file.name} 文件上传成功`)
+          }
+          // this.loadData()
+        } else {
+          this.$message.error(`${info.file.name} ${info.file.response.message}.`)
+        }
+      } else if (info.file.status === 'error') {
+        this.$message.error(`文件上传失败: ${info.file.msg} `)
+      }
+    },
+
+    beforeUpload() {
+      this.upload = { upload: this.selectedRowKeys[0] }
+    }
   }
 }
 </script>

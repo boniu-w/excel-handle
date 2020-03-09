@@ -133,7 +133,7 @@ export const JeecgListMixin = {
             }
             Line[i] = pp
           }
-          this.visitInfo = Line
+          console.log(this.visitInfo)
         }
       })
     },
@@ -225,19 +225,6 @@ export const JeecgListMixin = {
               })
           }
         })
-      }
-    },
-    importExcel: function(a) {
-      if (this.selectedRowKeys.length == 1) {
-        this.disabled = false
-        this.id = this.selectedRowKeys[0]
-        if (a == 1) {
-          importExcel(1)
-          a = a + 1
-        }
-      } else {
-        this.disabled = true
-        this.$message.warning('请选择一个案件!')
       }
     },
     handleDelete: function(id) {
@@ -353,16 +340,18 @@ export const JeecgListMixin = {
     },
     /* 导入 */
     handleImportExcel(info) {
-      info.id = this.selectedRowKeys[0]
-      alert(JSON.stringify(info))
-      if (info.file.status !== 'uploading') {
+      // alert(JSON.stringify(info))
+      if (info.file.status !== ' ') {
         console.log(info.file, info.fileList)
       }
       if (info.file.status === 'done') {
         if (info.file.response.success) {
           // this.$message.success(`${info.file.name} 文件上传成功`);
           if (info.file.response.code === 201) {
-            let {message,result: { msg, fileUrl, fileName }} = info.file.response
+            let {
+              message,
+              result: { msg, fileUrl, fileName }
+            } = info.file.response
             let href = window._CONFIG['domianURL'] + fileUrl
             this.$warning({
               title: message,

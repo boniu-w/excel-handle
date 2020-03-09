@@ -64,19 +64,23 @@ public class MaximumBalanceController extends JeecgController<MaximumBalance, IM
 	@GetMapping(value = "/list")
 	public Result<?> queryPageList(MaximumBalance maximumBalance,
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
+								   @RequestParam(name="pageSize", defaultValue="100000") Integer pageSize,
 								   HttpServletRequest req) {
 		IPage<MaximumBalance> pageList = null;
 		if(maximumBalance.getReserve1() != null) {
 			String[] split = maximumBalance.getReserve1().split(",");
 			maximumBalance.setReserve1(null);
 			QueryWrapper<MaximumBalance> queryWrapper = QueryGenerator.initQueryWrapper(maximumBalance, req.getParameterMap());
+			queryWrapper.orderByAsc("date");
 			queryWrapper.between("date", split[0], split[1]);
 			Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
+			page.setSize(100000);
 			pageList = maximumBalanceService.page(page, queryWrapper);
 		}else {
 			QueryWrapper<MaximumBalance> queryWrapper = QueryGenerator.initQueryWrapper(maximumBalance, req.getParameterMap());
+			queryWrapper.orderByAsc("date");
 			Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
+			page.setSize(100000);
 			pageList = maximumBalanceService.page(page, queryWrapper);
 		}
 		return Result.ok(pageList);
