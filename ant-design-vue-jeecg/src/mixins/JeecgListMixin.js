@@ -133,7 +133,7 @@ export const JeecgListMixin = {
             }
             Line[i] = pp
           }
-          console.log(this.visitInfo)
+          this.visitInfo = Line;
         }
       })
     },

@@ -11,8 +11,8 @@
         SELECT
             UUID( ) AS 'id',
             b.transaction_date AS 'date',
-            MAX( b.account_balance ) AS 'max_money',
-            MAX( b.transaction_amount ) AS 'max_balance',
+            MAX( b.transaction_amount ) AS 'max_money',
+            MAX( b.account_balance ) AS 'max_balance',
             #{caseId} AS 'case_id',
             '' AS 'Reserve1',
             '' AS 'Reserve2',
