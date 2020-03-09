@@ -4,7 +4,6 @@
 <mapper namespace="org.jeecg.modules.demo.bankstatement.mapper.BankStatementMapper">
 
 
-
     <!--插入到最大金额表-->
     <insert id="insertMaximumBalance" parameterType="HashMap">
         INSERT INTO maximum_balance
@@ -15,7 +14,7 @@
             MAX( b.transaction_amount ) AS 'max_balance',
             #{caseId} AS 'case_id',
             '' AS 'Reserve1',
-            '' AS 'Reserve2',
+            sum(b.transaction_amount) AS 'Reserve2',
             #{createTime} AS 'create_time'
         FROM
             bank_statement b
