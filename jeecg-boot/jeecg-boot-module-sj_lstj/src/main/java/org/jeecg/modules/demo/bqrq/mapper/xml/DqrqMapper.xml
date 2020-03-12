@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.demo.bqrq.mapper.DqrqMapper">
+
+    <!--查询到最大金额表-->
+    <resultMap type="org.jeecg.modules.demo.bqrq.entity.Dqrq" id="userMap1">
+    </resultMap>
+    <select id="selectbqrq" parameterType="HashMap"  resultMap="userMap1">
+			select UUID() as 'id', b.date,a.MAXReserve2,a.MinBalance,a.MaxAmount,b.query_card_number,b.case_id,b.num from 
+			(select b.account_balance as 'MinBalance',p.MaxAmount,p.query_card_number,p.case_id,p.MAXReserve2,p.date from bank_statement b LEFT JOIN 
+			(select a.*,b.MaxAmount from(select b.query_card_number,b.case_id,b.transaction_date as 'date',MAX(b.Reserve2) as 'MAXReserve2',MIN(b.transaction_time) as 'MinTime' from
+			bank_statement b where b.query_card_number = #{queryCardNumber} and b.case_id =  #{caseId}   group BY b.transaction_date order by b.transaction_date) a
+			left join
+			(select Max(b.transaction_amount) as 'MaxAmount',b.transaction_date as 'date' from bank_statement b where b.query_card_number = #{queryCardNumber} and b.case_id =  #{caseId}   group BY b.transaction_date order by b.transaction_date) b on a.date = b.date) p on p.case_id = b.case_id
+			where  b.query_card_number = p.query_card_number and b.transaction_date = p.date and b.Reserve2 = p.MAXReserve2
+			) a
+			right join
+			(SELECT COUNT(u.id) AS num,MAX(u.Reserve2) as 'MAXReserve2',#{queryCardNumber} as 'query_card_number', #{caseId} as 'case_id', c.date FROM calendar AS c
+			LEFT JOIN (select * from bank_statement b where b.query_card_number = #{queryCardNumber} and b.case_id =  #{caseId}) AS u ON c.date = u.transaction_date
+			WHERE c.date BETWEEN (select MIN(b.transaction_date) from bank_statement b) AND (select MAX(b.transaction_date) from bank_statement b) 
+			GROUP BY c.`date` ORDER BY c.`date`) b
+			on a.MAXReserve2 = b.MAXReserve2 right join
+			(select date from calendar c where c.date BETWEEN #{MinDate} and #{MaxDate}) c 
+			on b.date = c.date
+    </select>
+    
+
+
+</mapper>

@@ -4,6 +4,8 @@ import org.jeecg.modules.demo.bankstatement.entity.BankStatement;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 流水表
@@ -13,4 +15,6 @@ import java.util.HashMap;
  */
 public interface IBankStatementService extends IService<BankStatement> {
     int insertMaximumBalance(HashMap hashMap);
+    List<BankStatement> selectCard(HashMap hashMap);
+    List<BankStatement> selectMaxDate();
 }

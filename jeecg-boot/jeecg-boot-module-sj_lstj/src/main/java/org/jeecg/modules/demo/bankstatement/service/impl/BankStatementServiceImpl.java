@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 流水表
@@ -26,4 +28,16 @@ public class BankStatementServiceImpl extends ServiceImpl<BankStatementMapper, B
     public int insertMaximumBalance(HashMap hashMap) {
         return bankStatementMapper.insertMaximumBalance(hashMap);
     }
+
+	@Override
+	public List<BankStatement> selectCard(HashMap hashMap) {
+		// TODO Auto-generated method stub
+		return bankStatementMapper.selectCard(hashMap);
+	}
+
+	@Override
+	public List<BankStatement> selectMaxDate() {
+		// TODO Auto-generated method stub
+		return bankStatementMapper.selectMaxDate();
+	}
 }

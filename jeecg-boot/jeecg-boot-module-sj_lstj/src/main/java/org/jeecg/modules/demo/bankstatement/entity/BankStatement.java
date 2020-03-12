@@ -86,6 +86,7 @@ public class BankStatement {
     @ApiModelProperty(value = "Reserve1")
 	private java.lang.String reserve1;
 	/**Reserve2*/
+    @Excel(name = "序号", width = 15)
     @ApiModelProperty(value = "Reserve2")
-	private java.lang.String reserve2;
+	private java.lang.Integer reserve2;
 }

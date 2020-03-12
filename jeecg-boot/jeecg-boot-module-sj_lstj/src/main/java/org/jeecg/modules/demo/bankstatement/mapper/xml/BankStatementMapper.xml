@@ -15,15 +15,26 @@
             MAX( b.account_balance ) AS 'max_balance',
             #{caseId} AS 'case_id',
             '' AS 'Reserve1',
-            '' AS 'Reserve2',
+            a.MaxAmount AS 'Reserve2',
             #{createTime} AS 'create_time'
         FROM
-            bank_statement b
+            bank_statement b right join (select sum(d.MaxAmount) as 'MaxAmount',date from bqrq d where d.case_id = #{caseId} GROUP BY d.date) a on b.transaction_date = a.date
+            
         WHERE
             b.case_id = #{caseId}
         GROUP BY
             b.transaction_date
     </insert>
-
+    
+    <resultMap type="org.jeecg.modules.demo.bankstatement.entity.BankStatement" id="userMap">
+    	<result property="queryCardNumber" column="queryCardNumber"/>
+    </resultMap>
+    <select id="selectCard" parameterType="HashMap" resultMap="userMap">
+    	select b.query_card_number as 'queryCardNumber' from bank_statement b where b.case_id = #{caseId}  GROUP BY b.query_card_number
+    </select>
+    
+    <select id="selectMaxDate" parameterType="HashMap" resultMap="userMap">
+    	select MAX(b.transaction_date) as 'Reserve1',MIN(b.transaction_date) as 'transaction_date' from bank_statement b  
+    </select>
 
 </mapper>

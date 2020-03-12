@@ -127,8 +127,7 @@ export const JeecgListMixin = {
           var Line = []
           for (var i = 0; i < this.dataSource.length; i++) {
             var pp = {
-              最大余额: this.dataSource[i].maxBalance,
-              最大金额: this.dataSource[i].maxMoney,
+              最大金额: this.dataSource[i].reserve2,
               type: this.dataSource[i].date
             }
             Line[i] = pp

@@ -57,7 +57,7 @@ public class MaximumBalance {
 	/**Reserve2*/
 	@Excel(name = "Reserve2", width = 15)
     @ApiModelProperty(value = "Reserve2")
-	private java.lang.String reserve2;
+	private java.lang.Double reserve2;
 	/**日期*/
 	@Excel(name = "日期", width = 15, format = "yyyy-MM-dd hh:mm:ss")
 	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd hh:mm:ss")

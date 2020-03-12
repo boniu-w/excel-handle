@@ -14,6 +14,10 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.demo.bankstatement.entity.BankStatement;
 import org.jeecg.modules.demo.bankstatement.service.IBankStatementService;
+import org.jeecg.modules.demo.bqrq.controller.DqrqController;
+import org.jeecg.modules.demo.bqrq.entity.Dqrq;
+import org.jeecg.modules.demo.bqrq.service.IDqrqService;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -47,6 +51,10 @@ import io.swagger.annotations.ApiOperation;
 public class BankStatementController extends JeecgController<BankStatement, IBankStatementService> {
     @Autowired
     private IBankStatementService bankStatementService;
+    @Autowired
+    private DqrqController  dqrq;
+    @Autowired
+	private IDqrqService dqrqService;
 
     /**
      * 分页列表查询
@@ -69,11 +77,13 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
             String[] split = bankStatement.getReserve1().split(",");
             bankStatement.setReserve1(null);
             QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
+            queryWrapper.orderByAsc("Reserve2");
             queryWrapper.between("transaction_date", split[0], split[1]);
             Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
             pageList = bankStatementService.page(page, queryWrapper);
         } else {
             QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
+            queryWrapper.orderByAsc("Reserve2");
             Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
             pageList = bankStatementService.page(page, queryWrapper);
         }
@@ -198,19 +208,38 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
                 bankStatementService.saveBatch(list);
                 //400条 saveBatch消耗时间1592毫秒  循环插入消耗时间1947毫秒
                 //1200条  saveBatch消耗时间3687毫秒 循环插入消耗时间5212毫秒
-                log.info("消耗时间" + (System.currentTimeMillis() - start) + "毫秒");
                 //update-end-author:taoyan date:20190528 for:批量插入数据
-
+                
                 HashMap<Object, Object> hashMap = new HashMap<>();
                 Date a = new Date();
                 hashMap.put("caseId", id);
                 hashMap.put("createTime",a);
-
+                //补全流余额
+                List<BankStatement> Card = bankStatementService.selectCard(hashMap);
+                List<BankStatement> MaxDate = bankStatementService.selectMaxDate();
+                hashMap.put("MaxDate", MaxDate.get(0).getReserve1());
+                hashMap.put("MinDate", MaxDate.get(0).getTransactionDate());
+                Dqrq pp = new Dqrq();
+                for (int i = 0; i < Card.size(); i++) {
+                	hashMap.put("queryCardNumber",Card.get(i).getQueryCardNumber());
+                	List<Dqrq> bqrqlist =  dqrqService.selectbqrq(hashMap);
+                	double d = 0;
+                	for (int j = 0; j < bqrqlist.size(); j++) {
+                		
+                		if(bqrqlist.get(j).getNum() == 0) {
+                			bqrqlist.get(j).setMaxamount(d);
+                		}else {
+                			d = bqrqlist.get(j).getMinbalance();
+                		}
+					}
+                	dqrqService.saveBatch(bqrqlist);
+                	System.out.println("------卡号："+bqrqlist.get(0).getQueryCardNumber());
+				}
+                //汇总最大金额
                 int i = bankStatementService.insertMaximumBalance(hashMap);
-
                 System.out.println(i + ">>>>>>>");
-
-
+                
+                log.info("消耗时间" + (System.currentTimeMillis() - start) + "毫秒");
                 return Result.ok("文件导入成功！数据行数：" + list.size());
             } catch (Exception e) {
                 log.error(e.getMessage(), e);

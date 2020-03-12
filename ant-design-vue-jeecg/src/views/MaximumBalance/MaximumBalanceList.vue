@@ -136,7 +136,7 @@
         description: '最大余额表管理页面',
         caseName:this.$route.query.id.caseName,
         id:this.$route.query.id.id,
-        visitFields:['最大余额','最大金额'],
+        visitFields:['最大金额'],
         type:"1",
         visitInfo:[],
         // 表头
@@ -149,12 +149,7 @@
 		   {
             title: '最大金额',
             align:"center",
-            dataIndex: 'maxMoney'
-           },
-		   {
-            title: '最大余额',
-            align:"center",
-            dataIndex: 'maxBalance'
+            dataIndex: 'reserve2'
            },
           {
             title: '操作',
