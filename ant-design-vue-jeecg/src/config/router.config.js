@@ -359,14 +359,6 @@ export const constantRouterMap = [
       }
     ]
   },
-  // {
-  //   path: '/',
-  //   name: 'ckfx',
-  //   component: TabLayout,
-  //   meta: { title: '查控分析' },
-  //   redirect: '/MaximumBalance/MaximumBalanceList',
-  //   children: []
-  // },
   {
     path: '/404',
     component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404')
