@@ -227,18 +227,6 @@ export const JeecgListMixin = {
         })
       }
     },
-    importExcel: function(a) {
-      if (this.selectedRowKeys.length == 1) {
-        this.disabled = false
-        if (a == 1) {
-          importExcel(1)
-          a = a + 1
-        }
-      } else {
-        this.disabled = true
-        this.$message.warning('请选择一个案件!')
-      }
-    },
     handleDelete: function(id) {
       if (!this.url.delete) {
         this.$message.error('请设置url.delete属性!')
@@ -353,7 +341,7 @@ export const JeecgListMixin = {
     /* 导入 */
     handleImportExcel(info) {
       // alert(JSON.stringify(info))
-      if (info.file.status !== 'uploading') {
+      if (info.file.status !== ' ') {
         console.log(info.file, info.fileList)
       }
       if (info.file.status === 'done') {

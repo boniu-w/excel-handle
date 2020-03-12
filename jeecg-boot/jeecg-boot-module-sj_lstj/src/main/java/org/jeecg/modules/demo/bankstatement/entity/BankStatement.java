@@ -33,7 +33,6 @@ public class BankStatement {
     @ApiModelProperty(value = "id")
 	private java.lang.String id;
 	/**案件id*/
-	@Excel(name = "案件id", width = 15)
     @ApiModelProperty(value = "案件id")
 	private java.lang.String caseId;
 	/**交易日期*/
@@ -43,8 +42,8 @@ public class BankStatement {
     @ApiModelProperty(value = "交易日期")
 	private java.util.Date transactionDate;
 	/**交易时间*/
-	@Excel(name = "交易时间", width = 15, format = "HH:mm:ss")
-	@JsonFormat(timezone = "GMT+8",pattern = "HH:mm:ss")
+	@Excel(name = "交易时间", width = 15, format = "hh:mm:ss")
+	@JsonFormat(timezone = "GMT+8",pattern = "hh:mm:ss")
     @ApiModelProperty(value = "交易时间")
 	private java.util.Date transactionTime;
 	/**查询卡号*/
