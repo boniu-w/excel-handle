@@ -195,7 +195,7 @@
       },
       ckls(){
         this.$router.push({path:'/bankStatement/BankStatementList',query:{id:this.$route.query.id}}); 
-      }
+      },
     }
   }
 </script>

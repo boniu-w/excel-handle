@@ -1,12 +1,12 @@
 <template>
-  <div :style="{ padding: '0 0 32px 32px' }">
+  <div :style="{ padding: '0 0 32px 32px' }" @click="pp" >
     <h4 :style="{ marginBottom: '20px' }">{{ title }}</h4>
     <v-chart :force-fit="true" :height="height" :data="data" :scale="scale">
       <v-tooltip/>
       <v-axis/>
       <v-legend/>
-      <v-line position="type*y" color="x"/>
-      <v-point position="type*y" color="x" :size="4" :v-style="style" :shape="'circle'"/>
+      <v-line position="type*y" color="x" />
+      <!-- <v-point position="type*y" color="x" :size="4" :v-style="style" :shape="'circle'"/> -->
     </v-chart>
   </div>
 </template>
@@ -49,8 +49,8 @@
       },
       height: {
         type: Number,
-        default: 254
-      }
+        default: 300
+      },
     },
     data() {
       return {
@@ -82,6 +82,11 @@
           }
         })
         return rows
+      }
+    },
+    methods:{
+      pp(){
+        alert(11111)
       }
     }
   }
