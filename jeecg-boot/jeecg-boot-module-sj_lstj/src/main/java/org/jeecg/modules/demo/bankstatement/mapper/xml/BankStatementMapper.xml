@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
@@ -9,22 +8,23 @@
     <!--插入到最大金额表-->
     <insert id="insertMaximumBalance" parameterType="HashMap">
         INSERT INTO maximum_balance
-        SELECT
-            UUID( ) AS 'id',
-            b.transaction_date AS 'date',
-            MAX( b.transaction_amount ) AS 'max_money',
-            MAX( b.account_balance ) AS 'max_balance',
-            #{caseId} AS 'case_id',
-            '' AS 'Reserve1',
-            a.MaxAmount AS 'Reserve2',
-            #{createTime} AS 'create_time'
+          SELECT
+						UUID( ) AS 'id',
+            a.date AS 'date',
+						b.max_money,
+						b.max_balance,
+						#{caseId} AS 'case_id',
+						'' AS 'Reserve1',
+						a.MinBalance AS 'Reserve2',
+						#{createTime} AS 'create_time'
         FROM
-            bank_statement b right join (select sum(d.MaxAmount) as 'MaxAmount',date from bqrq d where d.case_id = #{caseId} GROUP BY d.date) a on b.transaction_date = a.date
-            
-        WHERE
-            b.case_id = #{caseId}
+            (select sum(d.MinBalance) as 'MinBalance',date from bqrq d where d.case_id = #{caseId} GROUP BY d.date) a left join (
+						select b.transaction_date AS 'date',
+            MAX( b.transaction_amount ) AS 'max_money',
+            MAX( b.account_balance ) AS 'max_balance' from bank_statement b where b.case_id = #{caseId} group by b.transaction_date 
+						) b  on b.date = a.date
         GROUP BY
-            b.transaction_date
+            a.date
     </insert>
     
     <resultMap type="org.jeecg.modules.demo.bankstatement.entity.BankStatement" id="userMap">
@@ -38,33 +38,4 @@
     	select MAX(b.transaction_date) as 'Reserve1',MIN(b.transaction_date) as 'transaction_date' from bank_statement b  
     </select>
 
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="org.jeecg.modules.demo.bankstatement.mapper.BankStatementMapper">
-
-
-    <!--插入到最大金额表-->
-    <insert id="insertMaximumBalance" parameterType="HashMap">
-        INSERT INTO maximum_balance
-        SELECT
-            UUID( ) AS 'id',
-            b.transaction_date AS 'date',
-            MAX( b.account_balance ) AS 'max_money',
-            MAX( b.transaction_amount ) AS 'max_balance',
-            #{caseId} AS 'case_id',
-            '' AS 'Reserve1',
-            sum(b.transaction_amount) AS 'Reserve2',
-            #{createTime} AS 'create_time'
-        FROM
-            bank_statement b
-        WHERE
-            b.case_id = #{caseId}
-        GROUP BY
-            b.transaction_date
-    </insert>
-
-
->>>>>>> master
 </mapper>

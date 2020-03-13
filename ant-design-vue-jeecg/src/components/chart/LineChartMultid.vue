@@ -1,14 +1,14 @@
 <template>
-  <div :style="{ padding: '0 0 32px 32px' }" @click="pp" >
-    <h4 :style="{ marginBottom: '20px' }">{{ title }}</h4>
+<!-- <div :style="{ padding: '0 0 32px 32px' }" @click="pp" >
+    <h4 :style="{ marginBottom: '20px' }">{{ title }}</h4> -->
     <v-chart :force-fit="true" :height="height" :data="data" :scale="scale">
-      <v-tooltip/>
+    <v-tooltip/>
       <v-axis/>
       <v-legend/>
-      <v-line position="type*y" color="x" />
+      <v-line position="type*y" color="x" :onClick="this.pp" />
       <!-- <v-point position="type*y" color="x" :size="4" :v-style="style" :shape="'circle'"/> -->
     </v-chart>
-  </div>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -19,7 +19,7 @@
     props: {
       title: {
         type: String,
-        default: ''
+        default: '最后余额(总和)：'
       },
       dataSource: {
         type: Array,
@@ -65,6 +65,10 @@
     computed: {
       data() {
         const dv = new DataSet.View().source(this.dataSource)
+         var a = dv.rows.slice(0);  //或者arr.concat()
+         a.pop();
+         dv.rows = a;
+         alert(dv.rows.length)
         dv.transform({
           type: 'fold',
           fields: this.fields,
@@ -86,7 +90,15 @@
     },
     methods:{
       pp(){
-        alert(11111)
+        const dv = new DataSet.View().source(this.dataSource)
+        var num = dv.rows.length-1
+        if(dv.rows[num].type != undefined){
+          var datetime = dv.rows[num].type[0]+","+dv.rows[num].type[1];
+          this.$router.push({path:'/bankStatement/BankStatementList',query:{id:dv.rows[num].最后余额,datetime:datetime}}); 
+        }else {
+          
+          this.$router.push({path:'/bankStatement/BankStatementList',query:{id:dv.rows[num].最后余额}}); 
+        }
       }
     }
   }

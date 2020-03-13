@@ -70,6 +70,9 @@ export const JeecgListMixin = {
         this.ipagination.current = 1
       }
       var params = this.getQueryParams() //查询条件
+      if(this.$route.query.datetime != undefined){
+        params.reserve1 = this.$route.query.datetime
+      }
       if (this.datetime != null) {
         params.reserve1 = this.datetime[0] + ',' + this.datetime[1]
       }
@@ -99,6 +102,9 @@ export const JeecgListMixin = {
         this.ipagination.current = 1
       }
       var params = this.getQueryParams() //查询条件
+      if(this.$route.query.datetime != undefined){
+        params.reserve1 = this.$route.query.datetime
+      }
       if (this.datetime != null) {
         params.reserve1 = this.datetime[0] + ',' + this.datetime[1]
       }
@@ -109,6 +115,8 @@ export const JeecgListMixin = {
         params.maxBalance = null
         params.maxMoney = null
         params.reserve1 = null
+        this.queryParam.reserve1 = null
+        this.datetime = null
       }
       params.caseId = this.$route.query.id.id
       this.loading = true
@@ -125,12 +133,35 @@ export const JeecgListMixin = {
         //折线图传值
         if (a == 1 || a == 2) {
           var Line = []
-          for (var i = 0; i < this.dataSource.length; i++) {
-            var pp = {
-              最大金额: this.dataSource[i].reserve2,
-              type: this.dataSource[i].date
+              console.log(this.dataSource)
+          if(this.dataSource.length != 0){
+            for (var i = 0; i <= this.dataSource.length; i++) {
+              if(i != this.dataSource.length){
+                var pp = 0;
+                if(this.dataSource[i].maxMoney == undefined){
+                  var pp = {
+                    最后余额: this.dataSource[i].reserve2,
+                    最大金额: 0,
+                    type: this.dataSource[i].date
+                  }
+                }else{
+                  var pp = {
+                    最后余额: this.dataSource[i].reserve2,
+                    最大金额: this.dataSource[i].maxMoney,
+                    type: this.dataSource[i].date
+                  }
+                }
+                
+              } else {
+                  var pp = {
+                    最后余额: this.$route.query.id,
+                    type: this.datetime
+                  }
+              }
+              Line[i] = pp
             }
-            Line[i] = pp
+          // alert(JSON.stringify(Line[2]))
+            // alert(JSON.stringify(Line[this.dataSource.length]) )
           }
           this.visitInfo = Line;
         }

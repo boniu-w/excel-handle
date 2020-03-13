@@ -136,7 +136,7 @@
         description: '最大余额表管理页面',
         caseName:this.$route.query.id.caseName,
         id:this.$route.query.id.id,
-        visitFields:['最大金额'],
+        visitFields:['最后余额','最大金额'],
         type:"1",
         visitInfo:[],
         // 表头
@@ -147,7 +147,7 @@
             dataIndex: 'date'
            },
 		   {
-            title: '最大金额',
+            title: '最后余额',
             align:"center",
             dataIndex: 'reserve2'
            },
@@ -195,7 +195,7 @@
       },
       ckls(){
         this.$router.push({path:'/bankStatement/BankStatementList',query:{id:this.$route.query.id}}); 
-      },
+      }
     }
   }
 </script>
