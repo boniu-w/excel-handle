@@ -1,5 +1,10 @@
 package org.jeecg.modules.demo.casetable.service.impl;
 
+import java.util.HashMap;
+
+import javax.annotation.Resource;
+
+import org.jeecg.modules.demo.bankstatement.mapper.BankStatementMapper;
 import org.jeecg.modules.demo.casetable.entity.CaseTable;
 import org.jeecg.modules.demo.casetable.mapper.CaseTableMapper;
 import org.jeecg.modules.demo.casetable.service.ICaseTableService;
@@ -15,5 +20,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
  */
 @Service
 public class CaseTableServiceImpl extends ServiceImpl<CaseTableMapper, CaseTable> implements ICaseTableService {
+
+	 @Resource
+	 CaseTableMapper casetableMapper;
+	
+	@Override
+	public void upCase(HashMap hashMap) {
+		// TODO Auto-generated method stub
+		casetableMapper.upCase(hashMap);
+	}
 
 }

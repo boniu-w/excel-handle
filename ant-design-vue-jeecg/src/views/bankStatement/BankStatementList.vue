@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <template>
   <a-card :title="this.caseName">
     <a-button
@@ -148,7 +147,7 @@ export default {
       caseName: this.$route.query.id.caseName,
       id: this.$route.query.id.id,
       open2: false,
-      datetime: null,
+      datetime: '',
       type: '2',
       time: null,
       upload: null,
@@ -248,7 +247,7 @@ export default {
       return dateString
     },
     onChange1(time, timeString) {
-      alert(timeString)
+      // alert(timeString)
       this.time = timeString
     },
     FanHui() {

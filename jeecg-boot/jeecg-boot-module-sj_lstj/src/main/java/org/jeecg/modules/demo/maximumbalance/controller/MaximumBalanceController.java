@@ -1,5 +1,6 @@
 package org.jeecg.modules.demo.maximumbalance.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.jeecg.modules.demo.casetable.entity.CaseTable;
 import org.jeecg.modules.demo.maximumbalance.entity.MaximumBalance;
 import org.jeecg.modules.demo.maximumbalance.service.IMaximumBalanceService;
 import java.util.Date;
+import java.util.HashMap;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -74,17 +77,38 @@ public class MaximumBalanceController extends JeecgController<MaximumBalance, IM
 			queryWrapper.orderByAsc("date");
 			queryWrapper.between("date", split[0], split[1]);
 			Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
-			page.setSize(100000);
 			pageList = maximumBalanceService.page(page, queryWrapper);
 		}else {
 			QueryWrapper<MaximumBalance> queryWrapper = QueryGenerator.initQueryWrapper(maximumBalance, req.getParameterMap());
 			queryWrapper.orderByAsc("date");
 			Page<MaximumBalance> page = new Page<MaximumBalance>(pageNo, pageSize);
-			page.setSize(100000);
 			pageList = maximumBalanceService.page(page, queryWrapper);
 		}
 		return Result.ok(pageList);
 	}
+	
+	
+	  /**
+	   *根据id查询
+	   *
+	   * @param request
+	   * @param maximumBalance
+	   */
+	@GetMapping(value = "/list1")
+	  public List<MaximumBalance> list1(String CaseId, String date) {
+		HashMap<String,String> m =  new HashMap<>();
+		m.put("CaseId", CaseId);
+		if(date == "" ||date == null) {
+			return maximumBalanceService.list2(m);
+			
+		}else {
+			String[] split = date.split(",");
+			m.put("date1", split[0]);
+			m.put("date2", split[1]);
+			return maximumBalanceService.list1(m);
+		}
+		
+	  }
 	
 	/**
 	 * 添加

@@ -215,7 +215,7 @@
          })
       },
       pp(){
-        alert(JSON.stringify(this.visitInfo[2]));
+        // alert(JSON.stringify(this.visitInfo[2]));
       }
     }
   }

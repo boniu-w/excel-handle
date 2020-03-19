@@ -62,4 +62,8 @@ public class Dqrq {
 	@Excel(name = "流水条数", width = 15)
     @ApiModelProperty(value = "流水条数")
 	private java.lang.Integer num;
+	/**最后余额*/
+	@Excel(name = "最后余额", width = 15)
+    @ApiModelProperty(value = "最后余额")
+	private java.lang.Double MaxBalance;
 }

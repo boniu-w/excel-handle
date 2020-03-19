@@ -17,4 +17,5 @@ public interface IBankStatementService extends IService<BankStatement> {
     int insertMaximumBalance(HashMap hashMap);
     List<BankStatement> selectCard(HashMap hashMap);
     List<BankStatement> selectMaxDate();
+    List<BankStatement> selectMaxBalance(HashMap hashMap);
 }

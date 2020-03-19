@@ -16,11 +16,12 @@
 						#{caseId} AS 'case_id',
 						'' AS 'Reserve1',
 						a.MinBalance AS 'Reserve2',
-						#{createTime} AS 'create_time'
+						#{createTime} AS 'create_time',
+						a.MaxBalance AS 'Reserve3'
         FROM
-            (select sum(d.MinBalance) as 'MinBalance',date from bqrq d where d.case_id = #{caseId} GROUP BY d.date) a left join (
+            (select sum(d.MinBalance) as 'MinBalance',sum(d.max_balance) as 'MaxBalance',date from bqrq d where d.case_id = #{caseId} GROUP BY d.date) a left join (
 						select b.transaction_date AS 'date',
-            MAX( b.transaction_amount ) AS 'max_money',
+            sum( b.transaction_amount ) AS 'max_money',
             MAX( b.account_balance ) AS 'max_balance' from bank_statement b where b.case_id = #{caseId} group by b.transaction_date 
 						) b  on b.date = a.date
         GROUP BY
@@ -36,6 +37,10 @@
     
     <select id="selectMaxDate" parameterType="HashMap" resultMap="userMap">
     	select MAX(b.transaction_date) as 'Reserve1',MIN(b.transaction_date) as 'transaction_date' from bank_statement b  
+    </select>
+    
+    <select id="selectMaxBalance" parameterType="HashMap" resultMap="userMap">
+    	select MAX(b.account_balance) as 'account_balance' from bank_statement b where b.case_id = #{caseId} and b.transaction_date = #{dqsj} and b.query_card_number = #{queryCardNumber}
     </select>
 
 </mapper>

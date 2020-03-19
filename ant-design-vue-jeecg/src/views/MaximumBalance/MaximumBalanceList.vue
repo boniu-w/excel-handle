@@ -136,8 +136,9 @@
         description: '最大余额表管理页面',
         caseName:this.$route.query.id.caseName,
         id:this.$route.query.id.id,
-        visitFields:['最后余额','最大金额'],
+        visitFields:['最后余额','累计金额','最大余额'],
         type:"1",
+        datetime:'',
         visitInfo:[],
         // 表头
         columns: [
@@ -146,11 +147,21 @@
             align:"center",
             dataIndex: 'date'
            },
+        {
+             title: '累计金额',
+             align:"center",
+             dataIndex: 'maxMoney'
+            },
 		   {
-            title: '最后余额',
+            title: '最大余额',
             align:"center",
             dataIndex: 'reserve2'
            },
+		   {
+		    title: '最后余额',
+		    align:"center",
+		    dataIndex: 'reserve3'
+		   },
           {
             title: '操作',
             dataIndex: 'action',
@@ -160,6 +171,7 @@
         ],
 		url: {
           list: "/maximumbalance/maximumBalance/list",
+          list1: "/maximumbalance/maximumBalance/list1",
           delete: "/maximumbalance/maximumBalance/delete",
           deleteBatch: "/maximumbalance/maximumBalance/deleteBatch",
           exportXlsUrl: "maximumbalance/maximumBalance/exportXls",

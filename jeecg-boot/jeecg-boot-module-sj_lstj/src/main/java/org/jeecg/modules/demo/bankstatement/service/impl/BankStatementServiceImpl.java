@@ -40,4 +40,10 @@ public class BankStatementServiceImpl extends ServiceImpl<BankStatementMapper, B
 		// TODO Auto-generated method stub
 		return bankStatementMapper.selectMaxDate();
 	}
+
+	@Override
+	public List<BankStatement> selectMaxBalance(HashMap hashMap) {
+		// TODO Auto-generated method stub
+		return bankStatementMapper.selectMaxBalance(hashMap);
+	}
 }

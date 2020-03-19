@@ -1,5 +1,6 @@
 <template>
   <a-card :bordered="false">
+    <a-spin :spinning="spinning">
     <!-- 查询区域 -->
     <div class="table-page-search-wrapper" style="margin-top: 20px;">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
@@ -79,6 +80,7 @@
       <a-button type="primary" icon="download" @click="handleExportXls3('银行流水模板')" style="height: 40px; "
         >银行流水模板</a-button
       >
+      <a-button type="primary" @click="deleteCase" style="height: 40px;background-color: red; border-color: red; ">清空流水</a-button>
       <a-button
         style="background-color: #EE9900;border-color: #EE9900;margin-left: 40px;width: 15%;height: 40px;"
         @click="handleAdd"
@@ -99,12 +101,12 @@
       >
         <a-button type="primary" icon="import" style="height: 40px; ">导入案件</a-button>
       </a-upload>
-      <a-dropdown v-if="selectedRowKeys.length > 0">
+      <!-- <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="batchDel"><a-icon type="delete" />删除</a-menu-item>
         </a-menu>
         <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down"/></a-button>
-      </a-dropdown>
+      </a-dropdown> -->
     </div>
 
     <!-- table区域-begin -->
@@ -151,27 +153,31 @@
 
     <!-- 表单区域 -->
     <caseTable-modal ref="modalForm" @ok="modalFormOk"></caseTable-modal>
+    </a-spin>
   </a-card>
 </template>
 
 <script>
 import CaseTableModal from './modules/CaseTableModal'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+import { deleteAction } from '@/api/manage'
 
 export default {
   name: 'CaseTableList',
   mixins: [JeecgListMixin],
   components: {
-    CaseTableModal
+    CaseTableModal,
+    deleteAction
   },
   data() {
     return {
       description: '案件表管理页面',
-      datetime: null,
+      datetime: '',
       caseName: '1',
       disabled: false,
       id: null,
       upload: null,
+      spinning: false,
       // 表头
       columns: [
         // {
@@ -228,7 +234,8 @@ export default {
         deleteBatch: '/casetable/caseTable/deleteBatch',
         exportXlsUrl: 'casetable/caseTable/exportXls',
         exportXlsUrl1: 'bankstatement/bankStatement/exportXls1',
-        importExcelUrl: 'bankstatement/bankStatement/importExcel'
+        importExcelUrl: 'bankstatement/bankStatement/importExcel',
+        deleteCase: '/casetable/caseTable/deleteCase',
       }
     }
   },
@@ -250,68 +257,63 @@ export default {
     handleChange(value) {
       this.queryParam.caseTypeId = `${value}`
     },
-    importExcel: function(a) {
-      if (this.selectedRowKeys.length == 1) {
-        this.disabled = false
-
-        var ids = ''
-        for (var a = 0; a < this.selectedRowKeys.length; a++) {
-          ids += this.selectedRowKeys[a]
+    importExcel: function() {
+        if (this.selectedRowKeys.length == 1) {
+          for(var i = 0 ;i < this.dataSource.length; i++){
+            if(this.dataSource[i].id == this.selectedRowKeys){
+              if(this.dataSource[i].reserve1 == 1){
+                this.disabled = true
+                this.$message.warning('该案件已经导入流水!')
+              }else{
+                this.disabled = false
+                var ids = ''
+                for (var a = 0; a < this.selectedRowKeys.length; a++) {
+                  ids += this.selectedRowKeys[a]
+                }
+                this.queryParam.id = ids
+                // getAction(this.url.list, this.queryParam).then(res => {
+                //   this.spinning = false
+                //   console.log(res)
+                //   this.mydata = res.result.records[0]
+                // })
+              }
+            }
+          }
+        } else {
+          this.disabled = true
+          this.$message.warning('请选择一个案件!')
         }
-        // this.queryParam.id = ids
-        // getAction(this.url.list, this.queryParam).then(res => {
-        //   console.log(res)
-        //   this.mydata = res.result.records[0]
-        // })
+    },
+    deleteCase(){
+      if (this.selectedRowKeys.length == 1) {
+        for(var i = 0 ;i < this.dataSource.length; i++){
+          if(this.dataSource[i].id == this.selectedRowKeys){
+            if(this.dataSource[i].reserve1 == 0){
+              this.$message.warning('该案件还未上传银行流水!')
+            }else{
+              this.disabled = false
+              var ids = ''
+              for (var a = 0; a < this.selectedRowKeys.length; a++) {
+                ids += this.selectedRowKeys[a]
+              }
+              // alert(ids)
+              var params = this.getQueryParams() //查询条件
+              params.id = ids
+              deleteAction(this.url.deleteCase, params).then()
+              this.$message.warning('案件流水清理完成！')
+              this.searchQuery()
+            }
+          }
+        }
       } else {
         this.disabled = true
         this.$message.warning('请选择一个案件!')
       }
     },
-    handleImportExcel(info) {
-      // alert(JSON.stringify(info))
-      if (info.file.status !== ' ') {
-        console.log(info.file, info.fileList)
-      }
-      if (info.file.status === 'done') {
-        if (info.file.response.success) {
-          // this.$message.success(`${info.file.name} 文件上传成功`);
-          if (info.file.response.code === 201) {
-            let {
-              message,
-              result: { msg, fileUrl, fileName }
-            } = info.file.response
-            let href = window._CONFIG['domianURL'] + fileUrl
-            this.$warning({
-              title: message,
-              content: (
-                <div>
-                  <span>{msg}</span>
-                  <br />
-                  <span>
-                    具体详情请{' '}
-                    <a href={href} target="_blank" download={fileName}>
-                      点击下载
-                    </a>{' '}
-                  </span>
-                </div>
-              )
-            })
-          } else {
-            this.$message.success(info.file.response.message || `${info.file.name} 文件上传成功`)
-          }
-          // this.loadData()
-        } else {
-          this.$message.error(`${info.file.name} ${info.file.response.message}.`)
-        }
-      } else if (info.file.status === 'error') {
-        this.$message.error(`文件上传失败: ${info.file.msg} `)
-      }
-    },
-
     beforeUpload() {
       this.upload = { upload: this.selectedRowKeys[0] }
-    }
+    },
+    
   }
 }
 </script>

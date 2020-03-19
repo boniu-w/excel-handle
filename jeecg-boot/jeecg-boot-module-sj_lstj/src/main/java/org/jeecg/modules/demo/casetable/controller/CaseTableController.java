@@ -15,9 +15,18 @@ import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.util.oConvertUtils;
+import org.jeecg.modules.demo.bankstatement.entity.BankStatement;
+import org.jeecg.modules.demo.bankstatement.service.IBankStatementService;
+import org.jeecg.modules.demo.bqrq.entity.Dqrq;
+import org.jeecg.modules.demo.bqrq.service.IDqrqService;
 import org.jeecg.modules.demo.casetable.entity.CaseTable;
 import org.jeecg.modules.demo.casetable.service.ICaseTableService;
+import org.jeecg.modules.demo.maximumbalance.entity.MaximumBalance;
+import org.jeecg.modules.demo.maximumbalance.service.IMaximumBalanceService;
+
 import java.util.Date;
+import java.util.HashMap;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -49,6 +58,12 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/casetable/caseTable")
 public class CaseTableController extends JeecgController<CaseTable, ICaseTableService> {
+	@Autowired
+    private IBankStatementService bankStatementService;
+	@Autowired
+	private IMaximumBalanceService maximumBalanceService;
+	@Autowired
+	private IDqrqService dqrqService;
 	@Autowired
 	private ICaseTableService caseTableService;
 	
@@ -126,7 +141,8 @@ public class CaseTableController extends JeecgController<CaseTable, ICaseTableSe
 	@AutoLog(value = "案件表-通过id删除")
 	@ApiOperation(value="案件表-通过id删除", notes="案件表-通过id删除")
 	@DeleteMapping(value = "/delete")
-	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
+	public Result<?> delete(HttpServletRequest request,@RequestParam(name="id",required=true) String id) {
+		deleteCase(request,id);
 		caseTableService.removeById(id);
 		return Result.ok("删除成功!");
 	}
@@ -180,6 +196,35 @@ public class CaseTableController extends JeecgController<CaseTable, ICaseTableSe
   @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
   public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
       return super.importExcel(request, response, CaseTable.class);
+  }
+  
+  /**
+   * 通过案件id删除 
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @DeleteMapping(value = "/deleteCase")
+  public void deleteCase(HttpServletRequest request,@RequestParam(name="id",required=true)String id) {
+	  BankStatement bankStatement = new BankStatement();
+	  bankStatement.setCaseId(id);
+	  QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, request.getParameterMap());
+	  bankStatementService.remove(queryWrapper);
+	  
+	  MaximumBalance maximumBalance = new MaximumBalance();
+	  maximumBalance.setCaseId(id);
+	  QueryWrapper<MaximumBalance> queryWrapper1 = QueryGenerator.initQueryWrapper(maximumBalance, request.getParameterMap());
+	  maximumBalanceService.remove(queryWrapper1);
+	  
+	  Dqrq dqrq = new Dqrq();
+	  dqrq.setCaseId(id);
+	  QueryWrapper<Dqrq> queryWrapper2 = QueryGenerator.initQueryWrapper(dqrq, request.getParameterMap());
+	  dqrqService.remove(queryWrapper2);
+	  HashMap<Object,Object> hashMap = new HashMap<>();
+	  hashMap.put("caseId", id);
+	  hashMap.put("type", 0);
+	  caseTableService.upCase(hashMap);
   }
 
 }

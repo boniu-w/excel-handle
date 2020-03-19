@@ -20,7 +20,7 @@
         <a-form-item
           :labelCol="labelCol"
           :wrapperCol="wrapperCol"
-          label="最大金额">
+          label="累计金额">
           <a-input-number v-decorator="[ 'maxMoney', {}]" />
         </a-form-item>
         <a-form-item

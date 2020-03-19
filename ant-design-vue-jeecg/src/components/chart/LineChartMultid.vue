@@ -19,7 +19,7 @@
     props: {
       title: {
         type: String,
-        default: '最后余额(总和)：'
+        default: '数据分析图(总和)：'
       },
       dataSource: {
         type: Array,
@@ -68,7 +68,7 @@
          var a = dv.rows.slice(0);  //或者arr.concat()
          a.pop();
          dv.rows = a;
-         alert(dv.rows.length)
+         console.log(dv.rows.length)
         dv.transform({
           type: 'fold',
           fields: this.fields,
@@ -92,12 +92,12 @@
       pp(){
         const dv = new DataSet.View().source(this.dataSource)
         var num = dv.rows.length-1
-        if(dv.rows[num].type != undefined){
+        if(dv.rows[num].type[0] != undefined){
           var datetime = dv.rows[num].type[0]+","+dv.rows[num].type[1];
-          this.$router.push({path:'/bankStatement/BankStatementList',query:{id:dv.rows[num].最后余额,datetime:datetime}}); 
+          this.$router.push({path:'/bankStatement/BankStatementList',query:{id:dv.rows[num].最大余额,datetime:datetime}}); 
         }else {
           
-          this.$router.push({path:'/bankStatement/BankStatementList',query:{id:dv.rows[num].最后余额}}); 
+          this.$router.push({path:'/bankStatement/BankStatementList',query:{id:dv.rows[num].最大余额}}); 
         }
       }
     }

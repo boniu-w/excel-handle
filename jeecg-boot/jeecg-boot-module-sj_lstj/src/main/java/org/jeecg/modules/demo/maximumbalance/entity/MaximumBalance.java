@@ -64,4 +64,8 @@ public class MaximumBalance {
     @DateTimeFormat(pattern="yyyy-MM-dd hh:mm:ss")
     @ApiModelProperty(value = "日期")
 	private java.util.Date create_time;
+	/**Reserve3*/
+	@Excel(name = "Reserve3", width = 15)
+    @ApiModelProperty(value = "Reserve3")
+	private java.lang.Double reserve3;
 }

@@ -18,6 +18,7 @@ export const JeecgListMixin = {
       queryParam: {},
       /* 数据源 */
       dataSource: [],
+      dataSource1: [],
       /* 分页参数 */
       ipagination: {
         current: 1,
@@ -73,7 +74,7 @@ export const JeecgListMixin = {
       if(this.$route.query.datetime != undefined){
         params.reserve1 = this.$route.query.datetime
       }
-      if (this.datetime != null) {
+      if (this.datetime != '') {
         params.reserve1 = this.datetime[0] + ',' + this.datetime[1]
       }
       if (this.id != undefined) {
@@ -83,8 +84,8 @@ export const JeecgListMixin = {
       getAction(this.url.list, params).then(res => {
         console.log('8888888888888888888888888')
         if (res.success) {
-          this.dataSource = res.result.records
-          this.ipagination.total = res.result.total
+            this.dataSource = res.result.records
+            this.ipagination.total = res.result.total
         }
         if (res.code === 510) {
           this.$message.warning(res.message)
@@ -105,7 +106,7 @@ export const JeecgListMixin = {
       if(this.$route.query.datetime != undefined){
         params.reserve1 = this.$route.query.datetime
       }
-      if (this.datetime != null) {
+      if (this.datetime != '') {
         params.reserve1 = this.datetime[0] + ',' + this.datetime[1]
       }
       if (a == 3) {
@@ -116,55 +117,64 @@ export const JeecgListMixin = {
         params.maxMoney = null
         params.reserve1 = null
         this.queryParam.reserve1 = null
-        this.datetime = null
+        this.datetime = ''
       }
       params.caseId = this.$route.query.id.id
       this.loading = true
       // alert(JSON.stringify(params))
       getAction(this.url.list, params).then(res => {
-        // if (res.success) {
-        this.dataSource = res.result.records
-        this.ipagination.total = res.result.total
-        // }
+        if (res.success) {
+          this.dataSource = res.result.records
+          this.ipagination.total = res.result.total
+        if(this.description == '最大余额表管理页面'){
+          if(this.datetime != ''){
+          var params1 = {"CaseId":this.id,"date":this.datetime[0] + ',' + this.datetime[1]};
+          }else{
+            var params1 = {"CaseId":this.id};
+          }
+          getAction(this.url.list1,params1).then(res => {
+            this.dataSource1 = res
+            //折线图传值
+            if (a == 1 || a == 2) {
+              var Line = []
+              if(this.dataSource1.length != 0){
+                for (var i = 0; i <= this.dataSource1.length; i++) {
+                  if(i != this.dataSource1.length){
+                    var pp = 0;
+                    if(this.dataSource1[i].maxMoney == undefined){
+                      var pp = {
+                        最大余额: this.dataSource1[i].reserve2,
+                        累计金额: 0,
+                        最后余额: this.dataSource1[i].reserve3,
+                        type: this.dataSource1[i].date
+                      }
+                    }else{
+                      var pp = {
+                        最大余额: this.dataSource1[i].reserve2,
+                        累计金额: this.dataSource1[i].maxMoney,
+                        最后余额: this.dataSource1[i].reserve3,
+                        type: this.dataSource1[i].date
+                      }
+                    }
+                    
+                  } else {
+                      var pp = {
+                        最大余额: this.$route.query.id,
+                        type: this.datetime
+                      }
+                  }
+                  Line[i] = pp
+                }
+              }
+              this.visitInfo = Line;
+            }
+          })
+        }
+        }
         if (res.code === 510) {
           this.$message.warning(res.message)
         }
         this.loading = false
-        //折线图传值
-        if (a == 1 || a == 2) {
-          var Line = []
-              console.log(this.dataSource)
-          if(this.dataSource.length != 0){
-            for (var i = 0; i <= this.dataSource.length; i++) {
-              if(i != this.dataSource.length){
-                var pp = 0;
-                if(this.dataSource[i].maxMoney == undefined){
-                  var pp = {
-                    最后余额: this.dataSource[i].reserve2,
-                    最大金额: 0,
-                    type: this.dataSource[i].date
-                  }
-                }else{
-                  var pp = {
-                    最后余额: this.dataSource[i].reserve2,
-                    最大金额: this.dataSource[i].maxMoney,
-                    type: this.dataSource[i].date
-                  }
-                }
-                
-              } else {
-                  var pp = {
-                    最后余额: this.$route.query.id,
-                    type: this.datetime
-                  }
-              }
-              Line[i] = pp
-            }
-          // alert(JSON.stringify(Line[2]))
-            // alert(JSON.stringify(Line[this.dataSource.length]) )
-          }
-          this.visitInfo = Line;
-        }
       })
     },
     initDictConfig() {
@@ -399,6 +409,7 @@ export const JeecgListMixin = {
               )
             })
           } else {
+            this.searchQuery()
             this.$message.success(info.file.response.message || `${info.file.name} 文件上传成功`)
           }
           this.loadData()

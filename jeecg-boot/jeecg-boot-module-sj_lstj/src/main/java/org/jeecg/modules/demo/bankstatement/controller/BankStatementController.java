@@ -17,6 +17,7 @@ import org.jeecg.modules.demo.bankstatement.service.IBankStatementService;
 import org.jeecg.modules.demo.bqrq.controller.DqrqController;
 import org.jeecg.modules.demo.bqrq.entity.Dqrq;
 import org.jeecg.modules.demo.bqrq.service.IDqrqService;
+import org.jeecg.modules.demo.casetable.service.ICaseTableService;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -55,6 +56,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
     private DqrqController  dqrq;
     @Autowired
 	private IDqrqService dqrqService;
+    @Autowired
+	private ICaseTableService caseTableService;
 
     /**
      * 分页列表查询
@@ -77,13 +80,13 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
             String[] split = bankStatement.getReserve1().split(",");
             bankStatement.setReserve1(null);
             QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
-            queryWrapper.orderByAsc("Reserve2");
+            queryWrapper.orderByAsc("transaction_date");
             queryWrapper.between("transaction_date", split[0], split[1]);
             Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
             pageList = bankStatementService.page(page, queryWrapper);
         } else {
             QueryWrapper<BankStatement> queryWrapper = QueryGenerator.initQueryWrapper(bankStatement, req.getParameterMap());
-            queryWrapper.orderByAsc("Reserve2");
+            queryWrapper.orderByAsc("transaction_date");
             Page<BankStatement> page = new Page<BankStatement>(pageNo, pageSize);
             pageList = bankStatementService.page(page, queryWrapper);
         }
@@ -184,10 +187,9 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
 
 
     public Result<?> importExcel1(HttpServletRequest request, HttpServletResponse response, Class<BankStatement> clazz) {
-
+    	
         String id = request.getParameter("upload");
         System.out.println(id+"----------------------");
-
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
         for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
@@ -214,6 +216,8 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
                 Date a = new Date();
                 hashMap.put("caseId", id);
                 hashMap.put("createTime",a);
+                hashMap.put("type", 1);
+                caseTableService.upCase(hashMap);
                 
                 //查询几张卡
                 List<BankStatement> Card = bankStatementService.selectCard(hashMap);
@@ -231,8 +235,13 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
                 		
                 		if(bqrqlist.get(j).getNum() == 0) {
                 			bqrqlist.get(j).setMinbalance(d);
+                			bqrqlist.get(j).setMaxBalance(d);
                 		}else {
+                			hashMap.put("dqsj",bqrqlist.get(j).getDate());
+                			List<BankStatement> MaxBalance = bankStatementService.selectMaxBalance(hashMap);
                 			d = bqrqlist.get(j).getMinbalance();
+                			bqrqlist.get(j).setMaxBalance(bqrqlist.get(j).getMinbalance());
+                			bqrqlist.get(j).setMinbalance(MaxBalance.get(0).getAccountBalance());
                 		}
 					}
                 	dqrqService.saveBatch(bqrqlist);
@@ -268,7 +277,6 @@ public class BankStatementController extends JeecgController<BankStatement, IBan
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         Result<?> result = importExcel1(request, response, BankStatement.class);
-
         return result;
     }
 

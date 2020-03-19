@@ -1,5 +1,7 @@
 package org.jeecg.modules.demo.casetable.service;
 
+import java.util.HashMap;
+
 import org.jeecg.modules.demo.casetable.entity.CaseTable;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -10,5 +12,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @Version: V1.0
  */
 public interface ICaseTableService extends IService<CaseTable> {
+	void upCase(HashMap hashMap);
 
 }
