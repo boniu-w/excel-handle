@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应dao-->
+<mapper namespace="org.jeecg.modules.app.mapper.BankFlowMapper">
+
+    <select id="examimeBankFlowByCondition" parameterType="org.jeecg.modules.app.entity.TableData"
+            resultType="org.jeecg.modules.app.entity.BankFlow">
+
+        SELECT
+        *
+        FROM
+        `bank_flow`
+        <where>
+            card_entity = #{cardEntity}
+            <if test="startTime !='' and startTime != null ">
+                AND date(transaction_date) BETWEEN #{startTime} and #{endTime}
+            </if>
+            <if test="endMoney !='' and endMoney != null ">
+                AND transaction_amount &gt; #{endMoney}
+            </if>
+            <if test="startMoney !='' and startMoney != null ">
+                AND transaction_amount &lt; #{startMoney}
+            </if>
+            <if test="counterParty !='' and counterParty != null ">
+                AND counter_party = #{counterParty}
+            </if>
+
+        </where>
+
+
+    </select>
+
+
+</mapper>

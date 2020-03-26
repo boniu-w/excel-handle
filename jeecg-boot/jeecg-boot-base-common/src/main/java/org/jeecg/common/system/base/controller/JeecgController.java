@@ -26,6 +26,7 @@ import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.entity.ImportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class JeecgController<T, S extends IService<T>> {
+
     @Autowired
     S service;
 
@@ -76,9 +78,9 @@ public class JeecgController<T, S extends IService<T>> {
         mv.addObject(NormalExcelConstants.DATA_LIST, exportList);
         return mv;
     }
-    
-    
-    
+
+
+
 
     /**
      * 导出excel

@@ -17,7 +17,7 @@
 	<modules>
 		<module>jeecg-boot-base-common</module>
 		<module>jeecg-boot-module-system</module>
-    	<module>jeecg-boot-module-sj_lstj</module>
+        <module>jeecg-boot-module-sj_lstj</module>
   </modules>
 	
 	<distributionManagement>
@@ -90,11 +90,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-	    <!-- <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency> -->
+
+		<!-- <dependency>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-devtools</artifactId>
+               <optional>true</optional> &lt;!&ndash; 表示依赖不会传递 &ndash;&gt;
+           </dependency>-->
 		
 		<!-- commons -->
 		<dependency>
@@ -386,6 +387,15 @@
                     </nonFilteredFileExtensions>
                 </configuration>
             </plugin>
+
+			<!--<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<fork>true</fork> &lt;!&ndash; 如果没有该配置，devtools不会生效 &ndash;&gt;
+				</configuration>
+			</plugin>-->
+
 		</plugins>
 		<resources>
 			<resource>

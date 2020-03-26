@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应dao-->
+<mapper namespace="org.jeecg.modules.app.mapper.WordbookMapper">
+
+
+    <select id="examineWordbookAll" resultType="org.jeecg.modules.app.entity.Wordbook">
+        SELECT * FROM `wordbook`
+
+    </select>
+
+    <select id="examineMatchingToWordbook" resultType="org.jeecg.modules.app.entity.MatchingToWordbook">
+
+        SELECT * FROM `matching_to_wordbook`
+
+
+    </select>
+
+    <select id="examineFiledNameFromMatchingToWordbook" resultType="String">
+
+        SELECT field_name
+        FROM matching_to_wordbook
+    </select>
+
+    <select id="examineWordbookFieldNameByType" resultType="String">
+
+        SELECT field_name
+        FROM wordbook
+        WHERE type = #{type}
+    </select>
+
+    <select id="examineWordbookFieldCodeByType" resultType="String">
+        select field_code
+        from wordbook
+        where type = #{type}
+    </select>
+
+
+    <insert id="insertBankFlow" parameterType="java.util.Map">
+
+        INSERT INTO bank_flow
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="introduction_id != null">
+                introduction_id,
+            </if>
+            <if test="transaction_subject != null">
+                transaction_subject,
+            </if>
+            <if test="account_subject != null">
+                account_subject,
+            </if>
+            <if test="card_entity != null">
+                card_entity,
+            </if>
+            <if test="recovery_mark != null">
+                recovery_mark,
+            </if>
+            <if test="transaction_date != null">
+                transaction_date,
+            </if>
+            <if test="counter_party != null">
+                counter_party,
+            </if>
+            <if test="account_counterparty != null">
+                account_counterparty,
+            </if>
+            <if test="card_counterparty != null">
+                card_counterparty,
+            </if>
+            <if test="transaction_amount != null">
+                transaction_amount,
+            </if>
+            <if test="abstract != null">
+                abstract_content,
+            </if>
+            <if test="balance_transaction != null">
+                balance_transaction,
+            </if>
+            <if test="transaction_bank != null">
+                transaction_bank,
+            </if>
+            <if test="counterparty_bank != null">
+                counterparty_bank,
+            </if>
+            <if test="place_transaction != null">
+                place_transaction,
+            </if>
+            <if test="trading_place != null">
+                trading_place,
+            </if>
+            <if test="transaction_number != null">
+                transaction_number,
+            </if>
+            <if test="mac != null">
+                mac,
+            </if>
+            <if test="ip != null">
+                ip,
+            </if>
+            <if test="currency != null">
+                currency,
+            </if>
+            <if test="temarks != null">
+                temarks,
+            </if>
+            <if test="trading_no != null">
+                trading_no,
+            </if>
+            <if test="teller_number != null">
+                teller_number,
+            </if>
+            <if test=" institution_party != null">
+                institution_party,
+            </if>
+            <if test=" delete_identifier != null">
+                delete_identifier,
+            </if>
+
+            <if test=" customer_code != null">
+                customer_code,
+            </if>
+            <if test=" log_number != null">
+                log_number,
+            </if>
+
+            <if test=" apsh_place != null">
+                apsh_place,
+            </if>
+            <if test=" matcher_code != null">
+                matcher_code,
+            </if>
+            <if test=" matcher_balance != null">
+                matcher_balance,
+            </if>
+
+
+        </trim>
+
+
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="introduction_id != null">
+                #{introduction_id , jdbcType=VARCHAR },
+            </if>
+            <if test=" transaction_subject!= null">
+                #{transaction_subject , jdbcType=VARCHAR },
+            </if>
+            <if test="account_subject != null">
+                #{account_subject, jdbcType=VARCHAR },
+            </if>
+            <if test="card_entity != null">
+                #{card_entity , jdbcType=VARCHAR },
+            </if>
+            <if test="recovery_mark != null">
+                #{recovery_mark , jdbcType= VARCHAR},
+            </if>
+            <if test="transaction_date != null">
+
+                #{transaction_date},
+            </if>
+            <if test="counter_party != null">
+                #{counter_party , jdbcType= VARCHAR},
+            </if>
+            <if test="account_counterparty != null">
+                #{account_counterparty , jdbcType=VARCHAR },
+            </if>
+            <if test="card_counterparty != null">
+                #{card_counterparty , jdbcType=VARCHAR },
+            </if>
+            <if test="transaction_amount != null">
+                #{transaction_amount, jdbcType=DOUBLE},
+            </if>
+            <if test="abstract != null">
+                #{abstract , jdbcType=CLOB },
+            </if>
+            <if test="balance_transaction != null">
+                #{balance_transaction, jdbcType=DOUBLE},
+            </if>
+            <if test="transaction_bank != null">
+                #{transaction_bank , jdbcType=VARCHAR },
+            </if>
+            <if test="counterparty_bank != null">
+                #{ counterparty_bank, jdbcType=VARCHAR },
+            </if>
+            <if test="place_transaction != null">
+                #{place_transaction , jdbcType=VARCHAR },
+            </if>
+            <if test=" trading_place!= null">
+                #{trading_place , jdbcType= VARCHAR},
+            </if>
+            <if test=" transaction_number!= null">
+                #{ transaction_number, jdbcType=VARCHAR },
+            </if>
+            <if test="mac != null">
+                #{ mac, jdbcType=VARCHAR },
+            </if>
+            <if test="ip != null">
+                #{ ip, jdbcType=VARCHAR },
+            </if>
+            <if test="currency != null">
+                #{currency , jdbcType=VARCHAR },
+            </if>
+            <if test="temarks != null">
+                #{ temarks, jdbcType= CLOB},
+            </if>
+            <if test="trading_no != null">
+                #{trading_no , jdbcType= VARCHAR},
+            </if>
+            <if test="teller_number != null">
+                #{teller_number , jdbcType=VARCHAR },
+            </if>
+            <if test="institution_party != null">
+                #{institution_party , jdbcType=VARCHAR },
+            </if>
+            <if test="delete_identifier != null">
+                #{delete_identifier , jdbcType=DOUBLE },
+            </if>
+
+            <if test="customer_code != null">
+                #{customer_code , jdbcType=VARCHAR },
+            </if>
+            <if test="log_number != null">
+                #{log_number , jdbcType=VARCHAR },
+            </if>
+            <if test="apsh_place != null">
+                #{apsh_place , jdbcType=VARCHAR },
+            </if>
+            <if test="matcher_code != null">
+                #{matcher_code , jdbcType=VARCHAR },
+            </if>
+            <if test="matcher_balance != null">
+                #{matcher_balance , jdbcType=VARCHAR }
+            </if>
+
+        </trim>
+
+
+    </insert>
+
+</mapper>

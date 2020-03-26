@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应dao-->
+<mapper namespace="org.jeecg.modules.app.mapper.FileUploadMapper">
+    <select id="examineFileName" resultType="String" parameterType="String">
+        SELECT file_name FROM file_upload where file_name=#{fileName};
+
+    </select>
+
+    <insert id="insertIntoFileUpload" parameterType="org.jeecg.modules.app.entity.FileUpload">
+        INSERT INTO file_upload ( id, file_name, update_time )
+        VALUES
+	    ( #{id}, #{fileName}, #{updateTime} );
+    </insert>
+
+</mapper>

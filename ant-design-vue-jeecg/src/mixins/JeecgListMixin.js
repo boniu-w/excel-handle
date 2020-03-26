@@ -66,26 +66,30 @@ export const JeecgListMixin = {
         this.$message.error('请设置url.list属性!')
         return
       }
+
       //加载数据 若传入参数1则加载第一页的内容
       if (arg === 1) {
         this.ipagination.current = 1
       }
       var params = this.getQueryParams() //查询条件
-      if(this.$route.query.datetime != undefined){
+      if (this.$route.query.datetime != undefined) {
         params.reserve1 = this.$route.query.datetime
       }
+      console.log('this.datetime:' + this.datetime)
       if (this.datetime != '') {
         params.reserve1 = this.datetime[0] + ',' + this.datetime[1]
       }
+      console.log('this.id:' + this.id)
       if (this.id != undefined) {
         params.caseId = this.$route.query.id.id
       }
       this.loading = true
+      console.log('this.url.list:' + this.url.list)
       getAction(this.url.list, params).then(res => {
         console.log('8888888888888888888888888')
         if (res.success) {
-            this.dataSource = res.result.records
-            this.ipagination.total = res.result.total
+          this.dataSource = res.result.records
+          this.ipagination.total = res.result.total
         }
         if (res.code === 510) {
           this.$message.warning(res.message)
@@ -103,7 +107,7 @@ export const JeecgListMixin = {
         this.ipagination.current = 1
       }
       var params = this.getQueryParams() //查询条件
-      if(this.$route.query.datetime != undefined){
+      if (this.$route.query.datetime != undefined) {
         params.reserve1 = this.$route.query.datetime
       }
       if (this.datetime != '') {
@@ -126,50 +130,49 @@ export const JeecgListMixin = {
         if (res.success) {
           this.dataSource = res.result.records
           this.ipagination.total = res.result.total
-        if(this.description == '最大余额表管理页面'){
-          if(this.datetime != ''){
-          var params1 = {"CaseId":this.id,"date":this.datetime[0] + ',' + this.datetime[1]};
-          }else{
-            var params1 = {"CaseId":this.id};
-          }
-          getAction(this.url.list1,params1).then(res => {
-            this.dataSource1 = res
-            //折线图传值
-            if (a == 1 || a == 2) {
-              var Line = []
-              if(this.dataSource1.length != 0){
-                for (var i = 0; i <= this.dataSource1.length; i++) {
-                  if(i != this.dataSource1.length){
-                    var pp = 0;
-                    if(this.dataSource1[i].maxMoney == undefined){
-                      var pp = {
-                        最大余额: this.dataSource1[i].reserve2,
-                        累计金额: 0,
-                        最后余额: this.dataSource1[i].reserve3,
-                        type: this.dataSource1[i].date
+          if (this.description == '最大余额表管理页面') {
+            if (this.datetime != '') {
+              var params1 = { CaseId: this.id, date: this.datetime[0] + ',' + this.datetime[1] }
+            } else {
+              var params1 = { CaseId: this.id }
+            }
+            getAction(this.url.list1, params1).then(res => {
+              this.dataSource1 = res
+              //折线图传值
+              if (a == 1 || a == 2) {
+                var Line = []
+                if (this.dataSource1.length != 0) {
+                  for (var i = 0; i <= this.dataSource1.length; i++) {
+                    if (i != this.dataSource1.length) {
+                      var pp = 0
+                      if (this.dataSource1[i].maxMoney == undefined) {
+                        var pp = {
+                          最大余额: this.dataSource1[i].reserve2,
+                          累计金额: 0,
+                          最后余额: this.dataSource1[i].reserve3,
+                          type: this.dataSource1[i].date
+                        }
+                      } else {
+                        var pp = {
+                          最大余额: this.dataSource1[i].reserve2,
+                          累计金额: this.dataSource1[i].maxMoney,
+                          最后余额: this.dataSource1[i].reserve3,
+                          type: this.dataSource1[i].date
+                        }
                       }
-                    }else{
-                      var pp = {
-                        最大余额: this.dataSource1[i].reserve2,
-                        累计金额: this.dataSource1[i].maxMoney,
-                        最后余额: this.dataSource1[i].reserve3,
-                        type: this.dataSource1[i].date
-                      }
-                    }
-                    
-                  } else {
+                    } else {
                       var pp = {
                         最大余额: this.$route.query.id,
                         type: this.datetime
                       }
+                    }
+                    Line[i] = pp
                   }
-                  Line[i] = pp
                 }
+                this.visitInfo = Line
               }
-              this.visitInfo = Line;
-            }
-          })
-        }
+            })
+          }
         }
         if (res.code === 510) {
           this.$message.warning(res.message)

@@ -100,6 +100,7 @@ public class SysRoleController {
 		IPage<SysRole> pageList = sysRoleService.page(page, queryWrapper);
 		result.setSuccess(true);
 		result.setResult(pageList);
+		System.out.println("result"+result);
 		return result;
 	}
 	

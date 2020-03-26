@@ -22,7 +22,7 @@ module.exports = {
       config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
     }
   },
-  chainWebpack: (config) => {
+  chainWebpack: config => {
     config.resolve.alias
       .set('@$', resolve('src'))
       .set('@api', resolve('src/api'))
@@ -40,9 +40,9 @@ module.exports = {
           /* less 变量覆盖，用于自定义 ant design 主题 */
           'primary-color': '#1890FF',
           'link-color': '#1890FF',
-          'border-radius-base': '4px',
+          'border-radius-base': '4px'
         },
-        javascriptEnabled: true,
+        javascriptEnabled: true
       }
     }
   },
@@ -50,7 +50,7 @@ module.exports = {
   devServer: {
     port: 17177,
     proxy: {
-     /* '/api': {
+      /* '/api': {
         target: 'https://mock.ihx.me/mock/5baf3052f7da7e07e04a5116/antd-pro', //mock API接口系统
         ws: false,
         changeOrigin: true,
@@ -59,11 +59,11 @@ module.exports = {
         }
       },*/
       '/jeecg-boot': {
-        target: 'http://10.10.10.202:8888', //请求本地 需要jeecg-boot后台项目
-        // target: 'http://localhost:8888', //请求本地 需要jeecg-boot后台项目
+        // target: 'http://10.10.10.202:8888', //请求本地 需要jeecg-boot后台项目
+        target: 'http://localhost:8888', //请求本地 需要jeecg-boot后台项目
         ws: false,
         changeOrigin: true
-      },
+      }
     }
   },
 
