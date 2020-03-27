@@ -6,6 +6,7 @@ import org.jeecg.modules.app.service.FileUploadService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author wg
@@ -29,5 +30,17 @@ public class FileUploadServiceImpl implements FileUploadService {
     public int insertIntoFileUpload(FileUpload fileUpload) {
         int i = fileUploadMapper.insertIntoFileUpload(fileUpload);
         return i;
+    }
+
+    @Override
+    public FileUpload examineFileUpload(String titleName) {
+        FileUpload fileUpload = fileUploadMapper.examineFileUpload(titleName);
+        return fileUpload;
+    }
+
+    @Override
+    public List<FileUpload> examineAllFileInfo() {
+        List<FileUpload> allFileInfoList = fileUploadMapper.examineAllFileInfo();
+        return allFileInfoList;
     }
 }

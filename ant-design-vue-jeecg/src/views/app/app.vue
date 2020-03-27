@@ -6,7 +6,7 @@
         <!-- :headers="headers" -->
         <a-upload
           name="file"
-          action="/jeecg-boot/app/appController/getFileInfo"
+          action="/jeecg-boot/app/appController/getInfo"
           :headers="headers"
           @change="handleUploadChange"
         >
@@ -15,6 +15,22 @@
       </div>
       <p>筛选条件：</p>
       <div>
+        <a-row>
+          <a-col>
+            <a-card>
+              <a-radio-group style="width:100%;" @change="onRadioChange">
+                <a-row type="flex" justify="start" style="width:100%;">
+                  <a-col span="7" :sm="24" :md="12" :lg="8" v-for="(item, i) in fileList" :key="i">
+                    <a-radio :value="item.fileName">{{ item.fileName }}</a-radio>
+                  </a-col>
+                  <a-col v-if="fileList.length > 6">
+                    <a-button size="small"> <a-icon type="caret-down" />显示更多 </a-button>
+                  </a-col>
+                </a-row>
+              </a-radio-group>
+            </a-card>
+          </a-col>
+        </a-row>
         <a-row type="flex" justify="end" style="margin-bottom:10px;">
           <a-col :span="2">
             <a-button @click="handleAdd">
@@ -150,7 +166,7 @@
     <a-card>
       <a-row type="flex" justify="end">
         <a-col>
-          <a-button>导出</a-button>
+          <a-button @click="handleExportXls('导出文件')">导出</a-button>
         </a-col>
       </a-row>
       <a-table
@@ -159,10 +175,14 @@
         bordered
         :columns="columns"
         :dataSource="myDataSource"
+        :pagination="ipagination"
+        :loading="loading"
+        @change="handleTableChange"
+        :rowSelection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
         :scroll="{ x: 2000 }"
         style="font-size:5px;"
-        :showHeader="myDataSource.length > 0"
       ></a-table>
+      <!-- :showHeader="myDataSource.length > 0" -->
     </a-card>
   </div>
 </template>
@@ -171,8 +191,10 @@ import { postAction, getAction } from '@/api/manage.js'
 import Vue from 'vue'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import moment from 'moment'
+import { JeecgListMixin } from '@/mixins/JeecgListMixin'
 let id = 1
 export default {
+  mixins: [JeecgListMixin],
   data() {
     return {
       headers: { 'X-Access-Token': Vue.ls.get(ACCESS_TOKEN) },
@@ -180,6 +202,7 @@ export default {
       myArr: [0],
       file: null,
       myDataSource: [],
+      fileList: [],
       columns: [
         {
           title: '#',
@@ -191,26 +214,27 @@ export default {
           },
 
           fixed: 'left'
-        },
-        {
-          title: '交易主体',
-          align: 'center',
-          dataIndex: 'transaction_date'
-        },
-        {
-          title: '交易主体账号',
-          align: 'center',
-          dataIndex: 'counter_party'
-        },
-        {
-          title: '交易主体卡号',
-          align: 'center',
-          dataIndex: 'card_entity'
         }
-      ]
+      ],
+      params: {},
+      url: {
+        getFileInfoUploaded: '/app/appController/getFileInfoUploaded'
+      }
     }
   },
+  created() {
+    this.load()
+  },
   methods: {
+    loadData() {},
+    load() {
+      postAction(this.url.getFileInfoUploaded).then(res => {
+        console.log(res, '初始数据')
+        if (res) {
+          this.fileList = res
+        }
+      })
+    },
     beforeUpload(file, fileList) {
       return true
     },
@@ -242,6 +266,7 @@ export default {
       }
     },
     handleAnalysis() {
+      const that = this
       this.form.validateFields((err, values) => {
         if (!err) {
           const { cardEntity, mark, transactionDate, startMoney, endMoney, counterParty } = values
@@ -257,56 +282,33 @@ export default {
               counterParty: counterParty[item] == '' ? null : counterParty[item]
             }
           })
-
           let formData = new FormData()
           formData.append('data', JSON.stringify(data))
-
-          postAction('app/appController/getTableInfo', formData).then(res => {
-            console.log(res)
-          })
-          let title = {
-            transaction_date: '入账日期',
-            counter_party: '对手户名'
-          }
-
-          this.columns.forEach((item, colIndex) => {
-            Object.keys(title).forEach(titleItem => {
-              if (item.dataIndex === titleItem) {
-                this.columns[colIndex].title = title[titleItem]
+          formData.append('fileName', that.params.fileName)
+          postAction('app/appController/resolve', formData).then(res => {
+            let titleMap = res.titleMap
+            console.log(titleMap, 'titleMap')
+            let titleArr = Object.keys(titleMap).map((item, i) => {
+              if (item) {
+                return {
+                  title: titleMap[item],
+                  align: 'center',
+                  dataIndex: item
+                }
               }
             })
+            this.columns = [this.columns[0], ...titleArr]
+
+            this.myDataSource = res.bankFlowList
+            console.log(res, this.columns)
           })
-
-          let res = [
-            {
-              account_subject: 6228480028048672670,
-              card_entity: 20180102,
-              counter_party: 184526037,
-              日志号: 184526037,
-              传票号: 'EP010000',
-              客户代码: 1612506680220158,
-              客户名称: '张立芹',
-              交易金额: -101.9,
-              交易后余额: 236.19,
-              交易渠道: 'EPAY',
-              摘要: '财付通',
-              商户名称: '',
-              交易地点: '',
-              APSH地点线索: '029999',
-              交易对手账号: 41007801941001021,
-              交易对手客户代码: '',
-              交易对手户名: '财付通支付科技有限公司客户备付金',
-              对手交易后余额: '0',
-              交易行号: '  029999',
-              交易行名称: '天津市分行资金清算中心'
-            }
-          ] // let columns = Object.keys(res[0]).map(item => { //   return { //     title: item, //     align: "center", //     dataIndex: item //   }; // }); // this.columns = [this.columns[0], ...columns];
-
-          this.myDataSource = res
-
           window.console.log(this.myDataSource)
         }
       })
+    },
+    onRadioChange(e) {
+      window.console.log(e.target.value)
+      this.params.fileName = e.target.value
     }
   }
 }

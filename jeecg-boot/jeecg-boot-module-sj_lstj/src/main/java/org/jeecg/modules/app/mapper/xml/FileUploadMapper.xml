@@ -11,9 +11,19 @@
     </select>
 
     <insert id="insertIntoFileUpload" parameterType="org.jeecg.modules.app.entity.FileUpload">
-        INSERT INTO file_upload ( id, file_name, update_time )
+        INSERT INTO file_upload ( id, file_name, update_time, file_title )
         VALUES
-	    ( #{id}, #{fileName}, #{updateTime} );
+	    ( #{id}, #{fileName}, #{updateTime}, #{fileTitle} );
     </insert>
+
+    <select id="examineFileUpload" resultType="org.jeecg.modules.app.entity.FileUpload" parameterType="String">
+
+        select * from file_upload where file_name=#{fileName};
+    </select>
+
+    <select id="examineAllFileInfo" resultType="org.jeecg.modules.app.entity.FileUpload">
+        select * from file_upload;
+
+    </select>
 
 </mapper>

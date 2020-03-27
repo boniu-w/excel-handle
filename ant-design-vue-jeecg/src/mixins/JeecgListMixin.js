@@ -89,6 +89,7 @@ export const JeecgListMixin = {
         console.log('8888888888888888888888888')
         if (res.success) {
           this.dataSource = res.result.records
+          console.log(this.dataSource)
           this.ipagination.total = res.result.total
         }
         if (res.code === 510) {
@@ -302,6 +303,7 @@ export const JeecgListMixin = {
         this.isorter.column = sorter.field
         this.isorter.order = 'ascend' == sorter.order ? 'asc' : 'desc'
       }
+      console.log(pagination, '分页')
       this.ipagination = pagination
       this.loadData()
     },
