@@ -1,10 +1,10 @@
 package org.jeecg.modules.app.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jeecg.modules.app.entity.BankFlow;
 import org.jeecg.modules.app.entity.TableData;
 import org.jeecg.modules.app.mapper.BankFlowMapper;
 import org.jeecg.modules.app.service.BankFlowService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,7 +17,8 @@ import java.util.List;
  * @Copyright
  */
 @Service
-public class BankFlowServiceImpl implements BankFlowService {
+public class BankFlowServiceImpl extends ServiceImpl<BankFlowMapper,BankFlow> implements BankFlowService{
+
 
     @Resource
     BankFlowMapper bankFlowMapper;

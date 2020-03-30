@@ -335,6 +335,7 @@ export const JeecgListMixin = {
       }
       console.log('导出参数', param)
       downFile(this.url.exportXlsUrl, param).then(data => {
+        console.log(data, 'data export')
         if (!data) {
           this.$message.warning('文件下载失败')
           return

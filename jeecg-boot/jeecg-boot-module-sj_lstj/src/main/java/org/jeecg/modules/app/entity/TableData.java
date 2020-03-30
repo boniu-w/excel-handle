@@ -15,8 +15,8 @@ public class TableData {
     private String cardEntity;
     private String startTime;
     private String endTime;
-    private Integer startMoney;
-    private Integer endMoney;
+    private Double startMoney;
+    private Double endMoney;
     private String counterParty;
     private String mark;
 }

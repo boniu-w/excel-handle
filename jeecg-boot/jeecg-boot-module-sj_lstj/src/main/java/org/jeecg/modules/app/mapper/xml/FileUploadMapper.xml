@@ -22,7 +22,7 @@
     </select>
 
     <select id="examineAllFileInfo" resultType="org.jeecg.modules.app.entity.FileUpload">
-        select * from file_upload;
+        select * from file_upload order by create_time desc;
 
     </select>
 

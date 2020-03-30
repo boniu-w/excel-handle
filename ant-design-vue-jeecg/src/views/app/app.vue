@@ -9,6 +9,7 @@
           action="/jeecg-boot/app/appController/getInfo"
           :headers="headers"
           @change="handleUploadChange"
+          :multiple="true"
         >
           <a-button>上传</a-button>
         </a-upload>
@@ -17,14 +18,14 @@
       <div>
         <a-row>
           <a-col>
-            <a-card>
+            <a-card v-resize="resize" id="card">
               <a-radio-group style="width:100%;" @change="onRadioChange">
                 <a-row type="flex" justify="start" style="width:100%;">
-                  <a-col span="7" :sm="24" :md="12" :lg="8" v-for="(item, i) in fileList" :key="i">
+                  <a-col span="7" :sm="24" :md="12" :lg="8" v-for="(item, i) in fileListName" :key="i">
                     <a-radio :value="item.fileName">{{ item.fileName }}</a-radio>
                   </a-col>
-                  <a-col v-if="fileList.length > 6">
-                    <a-button size="small"> <a-icon type="caret-down" />显示更多 </a-button>
+                  <a-col v-if="showButton">
+                    <a-button @click="handleShow" size="small"> <a-icon type="caret-down" />显示更多 </a-button>
                   </a-col>
                 </a-row>
               </a-radio-group>
@@ -182,7 +183,6 @@
         :scroll="{ x: 2000 }"
         style="font-size:5px;"
       ></a-table>
-      <!-- :showHeader="myDataSource.length > 0" -->
     </a-card>
   </div>
 </template>
@@ -203,6 +203,7 @@ export default {
       file: null,
       myDataSource: [],
       fileList: [],
+      fileListName: [],
       columns: [
         {
           title: '#',
@@ -216,22 +217,58 @@ export default {
           fixed: 'left'
         }
       ],
+      showButton: false,
+      loading: false,
       params: {},
       url: {
-        getFileInfoUploaded: '/app/appController/getFileInfoUploaded'
+        getFileInfoUploaded: '/app/appController/getFileInfoUploaded',
+        exportXlsUrl: '/app/appController/exportXls'
       }
     }
   },
   created() {
     this.load()
   },
+  directives: {
+    resize: {
+      bind(el, binding) {
+        let width = '',
+          height = ''
+        function isReize() {
+          const style = document.defaultView.getComputedStyle(el)
+          if (width !== style.width || height !== style.height) {
+            binding.value()
+          }
+          width = style.width
+          height = style.height
+        }
+        el.__vueSetInterval__ = setInterval(isReize, 300)
+      },
+      unbind(el) {
+        clearInterval(el.__vueSetInterval__)
+      }
+    }
+  },
   methods: {
     loadData() {},
+    resize() {
+      let card = document.getElementById('card')
+      window.console.log(card.clientHeight)
+      if (card && card.clientHeight > 175) {
+        card.style.height = '175px'
+        card.style.overflow = 'scroll'
+      }
+    },
     load() {
       postAction(this.url.getFileInfoUploaded).then(res => {
         console.log(res, '初始数据')
         if (res) {
           this.fileList = res
+
+          if (this.fileList.length > 12) {
+            this.showButton = true
+          }
+          this.fileListName = this.fileList.slice(0, 12)
         }
       })
     },
@@ -261,12 +298,18 @@ export default {
       if (info.file.status === 'done') {
         console.log(info, 'info')
         this.$message.success(`${info.file.name} file uploaded successfully`)
+        this.load()
       } else if (info.file.status === 'error') {
         this.$message.error(`${info.file.name} file upload failed.`)
       }
     },
     handleAnalysis() {
+      if (!this.params.fileName) {
+        this.$message.warning('至少选择一个表')
+        return
+      }
       const that = this
+      this.loading = true
       this.form.validateFields((err, values) => {
         if (!err) {
           const { cardEntity, mark, transactionDate, startMoney, endMoney, counterParty } = values
@@ -300,6 +343,7 @@ export default {
             this.columns = [this.columns[0], ...titleArr]
 
             this.myDataSource = res.bankFlowList
+            this.loading = false
             console.log(res, this.columns)
           })
           window.console.log(this.myDataSource)
@@ -309,6 +353,10 @@ export default {
     onRadioChange(e) {
       window.console.log(e.target.value)
       this.params.fileName = e.target.value
+    },
+    handleShow() {
+      this.showButton = false
+      this.fileListName = this.fileList
     }
   }
 }

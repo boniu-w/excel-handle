@@ -19,16 +19,18 @@
                 AND date(transaction_date) BETWEEN #{startTime} and #{endTime}
             </if>
             <if test="endMoney !='' and endMoney != null ">
-                AND transaction_amount &gt; #{endMoney}
+                AND transaction_amount &gt; #{startMoney}
             </if>
             <if test="startMoney !='' and startMoney != null ">
-                AND transaction_amount &lt; #{startMoney}
+                AND transaction_amount &lt; #{endMoney}
             </if>
             <if test="counterParty !='' and counterParty != null ">
                 AND counter_party = #{counterParty}
             </if>
 
         </where>
+
+        order by transaction_date;
 
 
     </select>

@@ -2,12 +2,22 @@ package org.jeecg.modules.app.controller;
 
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
+import org.apache.poi.ss.formula.functions.T;
+import org.apache.shiro.SecurityUtils;
+import org.jeecg.common.system.base.controller.JeecgController;
+import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.common.system.vo.LoginUser;
+import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.app.entity.*;
 import org.jeecg.modules.app.service.BankFlowService;
 import org.jeecg.modules.app.service.FileUploadService;
 import org.jeecg.modules.app.service.WordbookInterface;
 import org.jeecg.modules.app.util.DatawashReadExcel;
+import org.jeecgframework.poi.excel.def.NormalExcelConstants;
+import org.jeecgframework.poi.excel.entity.ExportParams;
+import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,12 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -32,7 +44,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping(value = "/app/appController")
-public class AppController {
+public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
     @Autowired
     BankFlowService bankFlowService;
@@ -52,6 +64,8 @@ public class AppController {
     static String[] titles; // 汉字形式的标题
 
     static HashMap map = new HashMap();
+
+    ResponseData responseData = new ResponseData();
 
 
     /**
@@ -111,21 +125,15 @@ public class AppController {
                     String excelTitle = excelTitles[j];
                     String[] split = excelTitle.split("_");
 
-                    String a =split[1];
-                    String b= a.substring(0,1).toUpperCase();
-                    String c= a.substring(1);
-                    String d= b+c;
+                    String a = split[1];
+                    String b = a.substring(0, 1).toUpperCase();
+                    String c = a.substring(1);
+                    String d = b + c;
 
-                    String m= split[0]+d;
-
-                    //StringBuilder stringBuilder = new StringBuilder();
-                    //stringBuilder.append(split[0]);
-                    //stringBuilder.append(split[1]);
-                    //System.out.println("stringBuilder  "+stringBuilder);
+                    String m = split[0] + d;
 
                     map.put(m, titles[j]);
                 }
-
 
 
                 String fileTitle = JSON.toJSONString(map);
@@ -152,20 +160,23 @@ public class AppController {
     //@RequestMapping(value = "/getTableInfo")
     public List<TableData> getTableInfo(HttpServletRequest request) {
         String tableData = request.getParameter("data");
-        System.out.println(tableData + "---------");
+        System.out.println("tableData : " + tableData);
 
         List<TableData> tableDataList = JSON.parseArray(tableData, TableData.class);
 
-        Iterator<TableData> iterator = tableDataList.iterator();
-        while (iterator.hasNext()) {
-            TableData data = iterator.next();
-            if ("出".equals(data.getMark())) {
-                data.setStartMoney(-data.getStartMoney());
-                data.setEndMoney(-data.getEndMoney());
-            }
-        }
+        //Iterator<TableData> iterator = tableDataList.iterator();
+        //while (iterator.hasNext()) {
+        //    TableData data = iterator.next();
+        //    if ("出".equals(data.getMark())) {
+        //        data.setStartMoney(-data.getStartMoney());
+        //        data.setEndMoney(-data.getEndMoney());
+        //    }else {
+        //        data.setStartMoney(data.getStartMoney());
+        //        data.setEndMoney(data.getEndMoney());
+        //    }
+        //}
 
-        System.out.println(tableDataList);
+        System.out.println("tableDataList : " + tableDataList);
         return tableDataList;
     }
 
@@ -366,13 +377,9 @@ public class AppController {
                             String fieldCode = wordbookInterface.examineWordbookFieldCodeByType(j);
                             excelTitles[i] = fieldCode;
                             //System.out.println("/**********/   " + fieldCode);
-
-
                         }
                     }
                 }
-
-
             }
         }
 
@@ -389,13 +396,15 @@ public class AppController {
     @RequestMapping(value = "/resolve")
     @ResponseBody
     public ResponseData resolveExcelContent(HttpServletRequest request, HttpServletResponse response) {
-        ResponseData responseData = new ResponseData();
+        List<BankFlow> list = new ArrayList();
+
         List<TableData> tableDataList = getTableInfo(request);
+
+        System.out.println("resolve tableDataList.size() : " + tableDataList.size());
 
         String parameter = request.getParameter("fileName");
         System.out.println("parameter  " + parameter);
 
-        //List<BankFlow> list = new ArrayList();
 
         // 获取表格数据之后,作为查询条件,查询流水表
         Iterator<TableData> iterator = tableDataList.iterator();
@@ -406,7 +415,6 @@ public class AppController {
             List<BankFlow> list1 = bankFlowService.examimeBankFlowByCondition(data);
             System.out.println(">>>>>>>>>  " + list1.size());
 
-
             FileUpload fileUpload = fileUploadService.examineFileUpload(parameter);
 
             System.out.println("fileUpload  " + fileUpload);
@@ -416,15 +424,16 @@ public class AppController {
             Map map = (Map) JSON.parse(fileTitle);
 
             responseData.setTitleMap(map);
-            responseData.setBankFlowList(list1);
 
-            System.out.println("^^^^^^^^^^^^^^"+responseData);
+            for (int i = 0; i < list1.size(); i++) {
+                list.add(list1.get(i));
+            }
 
-            return responseData;
         }
-        //System.out.println(list.size());
+        responseData.setBankFlowList(list);
+        System.out.println("^^^^^^^^^^^^^^" + responseData.getBankFlowList().size());
+        return responseData;
 
-        return null;
     }
 
     /**
@@ -449,15 +458,28 @@ public class AppController {
 
 
     /**
-     * 导出excel
+     * app小程序的导出excel
      *
      * @param request
-     * @param bankFlow
+     * @author wg
      */
-    //@RequestMapping(value = "/exportXls")
-    //public ModelAndView exportXls(HttpServletRequest request, BankFlow bankFlow) {
-    //    return super.exportXls(request, bankFlow, BankFlow.class, "流水表");
-    //}
+    @RequestMapping(value = "/exportXls")
+    protected ModelAndView appExportXls(HttpServletRequest request, String title) {
+        title = "银行流水";
+        LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+
+        // Step.2 获取导出数据
+        List<BankFlow> pageList = responseData.getBankFlowList();
+        System.out.println(pageList.size());
+
+        // Step.3 AutoPoi 导出Excel
+        ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
+        mv.addObject(NormalExcelConstants.FILE_NAME, title); //此处设置的filename无效 ,前端会重更新设置一下
+        mv.addObject(NormalExcelConstants.CLASS, BankFlow.class);
+        mv.addObject(NormalExcelConstants.PARAMS, new ExportParams(title + "报表", "导出人:" + sysUser.getRealname(), title));
+        mv.addObject(NormalExcelConstants.DATA_LIST, pageList);
+        return mv;
+    }
 
 
 }
