@@ -46,7 +46,7 @@
                 <a-select
                   style="width:100%;"
                   v-decorator="[
-                    `mark[${item}]`,
+                    `recoveryMark[${item}]`,
                     {
                       validateTrigger: ['change', 'blur'],
                       rules: [
@@ -312,12 +312,12 @@ export default {
       this.loading = true
       this.form.validateFields((err, values) => {
         if (!err) {
-          const { cardEntity, mark, transactionDate, startMoney, endMoney, counterParty } = values
+          const { cardEntity, recoveryMark, transactionDate, startMoney, endMoney, counterParty } = values
           console.log(this.myArr, 'myArr')
           let data = this.myArr.map(item => {
             return {
               cardEntity: cardEntity[item],
-              mark: mark[item],
+              recoveryMark: recoveryMark[item],
               startTime: moment(transactionDate[item][0]).format('YYYY-MM-DD'),
               endTime: moment(transactionDate[item][1]).format('YYYY-MM-DD'),
               startMoney: startMoney[item],

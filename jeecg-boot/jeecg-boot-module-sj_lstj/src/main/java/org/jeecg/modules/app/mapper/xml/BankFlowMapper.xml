@@ -27,6 +27,9 @@
             <if test="counterParty !='' and counterParty != null ">
                 AND counter_party = #{counterParty}
             </if>
+            <if test="recoveryMark != '' and recoveryMark != null">
+                and recovery_mark = #{recoveryMark}
+            </if>
 
         </where>
 

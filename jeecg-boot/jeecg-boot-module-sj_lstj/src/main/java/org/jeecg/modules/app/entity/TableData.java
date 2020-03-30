@@ -18,5 +18,5 @@ public class TableData {
     private Double startMoney;
     private Double endMoney;
     private String counterParty;
-    private String mark;
+    private String recoveryMark;
 }
