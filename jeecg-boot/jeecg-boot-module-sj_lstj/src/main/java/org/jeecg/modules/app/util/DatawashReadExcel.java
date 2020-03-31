@@ -30,8 +30,10 @@ public class DatawashReadExcel {
     private Row row;
     private int sheetQuantities;
 
+    public DatawashReadExcel() {
+    }
 
-        public DatawashReadExcel(MultipartFile file) {
+    public DatawashReadExcel(MultipartFile file) {
         if (file == null) {
             return;
         }
@@ -128,12 +130,13 @@ public class DatawashReadExcel {
     }
 
 
+
     /**
      * 根据Cell类型设置数据
      *
      * @param cell
      */
-    private Object getCellFormatValue(Cell cell) {
+    public static Object getCellFormatValue(Cell cell) {
         Object cellvalue = "";
 
         DecimalFormat decimalFormat = new DecimalFormat();
@@ -185,6 +188,7 @@ public class DatawashReadExcel {
         }
         return cellvalue;
     }
+
 
     public int getSheetQuantities() {
         return sheetQuantities;

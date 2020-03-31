@@ -4,7 +4,10 @@ import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiOperation;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
@@ -20,6 +23,7 @@ import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,6 +34,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,7 +61,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     @Autowired
     FileUploadService fileUploadService;
 
-    static HashMap<Integer, ArrayList<String>> hashMap;
+    static HashMap<Integer, ArrayList<String>> hashMap;  // hashMap 是不会变的 他的结果是 字典映射表
 
     int index = 1;
 
@@ -163,18 +169,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         System.out.println("tableData : " + tableData);
 
         List<TableData> tableDataList = JSON.parseArray(tableData, TableData.class);
-
-        //Iterator<TableData> iterator = tableDataList.iterator();
-        //while (iterator.hasNext()) {
-        //    TableData data = iterator.next();
-        //    if ("出".equals(data.getMark())) {
-        //        data.setStartMoney(-data.getStartMoney());
-        //        data.setEndMoney(-data.getEndMoney());
-        //    }else {
-        //        data.setStartMoney(data.getStartMoney());
-        //        data.setEndMoney(data.getEndMoney());
-        //    }
-        //}
 
         System.out.println("tableDataList : " + tableDataList);
         return tableDataList;
@@ -337,8 +331,10 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     }
 
     /**
-     * 1. 解析excel 表头,形成表头数组
+     * 1. 解析源表表头,形成表头数组
      * 2. 转换表头, 转换成字典表里的标准表头
+     * <p>
+     * 转换后的表头 是 String[] excelTitles
      */
     @ApiOperation(value = "解析表头,如果表头中字段与数据库不匹配返回信息")
     public ResponseData resolveExcelTitle(MultipartFile file, int sheetIndex) {
@@ -479,6 +475,133 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         mv.addObject(NormalExcelConstants.PARAMS, new ExportParams(title + "报表", "导出人:" + sysUser.getRealname(), title));
         mv.addObject(NormalExcelConstants.DATA_LIST, pageList);
         return mv;
+    }
+
+
+    public Workbook initWorkbook(MultipartFile file) {
+        if (file == null) {
+            return null;
+        }
+        String filename = file.getOriginalFilename();
+        String ext = filename.substring(filename.lastIndexOf("."));
+
+        try {
+            InputStream is = file.getInputStream();
+            switch (ext) {
+                case ".xls":
+                    Workbook hssfWorkbook = new HSSFWorkbook(is);
+                    return hssfWorkbook;
+                case ".xlsx":
+                    Workbook xssfWorkbook = new XSSFWorkbook(is);
+                    return xssfWorkbook;
+                default:
+                    Workbook workbook = null;
+                    return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    @RequestMapping(value = "/testGetFileInfo")
+    public MultipartFile testGetFileInfo(HttpServletRequest request) {
+        System.out.println("sssssssssss");
+
+        List<MultipartFile> fileList = getFileInfo(request);
+        Iterator<MultipartFile> iterator = fileList.iterator();
+        while (iterator.hasNext()) {
+
+            MultipartFile file = iterator.next();
+            System.out.println("file : " + file);
+            return file;
+        }
+        return null;
+    }
+
+    /**
+     * 逐条解析excel表格的每一行的内容,去查询
+     * 2020/3/31
+     */
+    @RequestMapping(value = "/conditionExcelExamine")
+    public void conditionExcelExamine(HttpServletRequest request) {
+        List<MultipartFile> fileList = getFileInfo(request);
+        Iterator<MultipartFile> iterator = fileList.iterator();
+        while (iterator.hasNext()) {
+            MultipartFile file = iterator.next();
+            Workbook workbook = initWorkbook(file);
+            String[] titleArray = transformExcelTitle(file);
+
+            System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
+
+            Map<Integer, Map<String, Object>> contentMap = new HashMap<Integer, Map<String, Object>>();
+
+            Sheet sheet = workbook.getSheetAt(0);
+            // 得到总行数
+            int rowNum = sheet.getLastRowNum();
+
+            Row row = sheet.getRow(0);
+            // 总列数
+            int colNum = row.getPhysicalNumberOfCells();
+
+            // 正文内容应该从第二行开始,第一行为表头的标题
+            for (int i = 1; i <= rowNum; i++) {
+                row = sheet.getRow(i);
+                int j = 0;
+                HashMap<String, Object> rowMap = new HashMap<String, Object>();
+                while (j < colNum) {
+                    Object obj = DatawashReadExcel.getCellFormatValue(row.getCell(j));
+                    rowMap.put(titleArray[j], obj);
+                    j++;
+                }
+
+                System.out.println("rowMap : " + rowMap);
+                System.out.println("rowMap.get('transaction_date') : " + rowMap.get("transaction_date"));
+
+            }
+
+        }
+
+
+        return;
+    }
+
+
+    /**
+     * 获取表头数组,转换表头数组,由文字 转换成 fieldCode;
+     * 2020/3/31
+     */
+    public String[] transformExcelTitle(MultipartFile file) {
+        DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
+
+        String[] titles = readExcelUtil.readExcelTitle(0);
+
+        List<String> fieldNameList = wordbookInterface.examineFiledNameFromMatchingToWordbook();
+
+        for (int i = 0; i < titles.length; i++) {
+            boolean contains = fieldNameList.indexOf(titles[i]) >= 0;
+            if (!contains) {
+                System.out.println("在excel表中,字段 ---" + titles[i] + " --- 在数据库表中不存在,请添加或修改");
+                responseData.setConditionExcelMessage("在excel表中,字段 ' " + titles[i] + " ' 在数据库表中不存在,请添加或修改");
+            } else {
+                for (int j = 1; j < hashMap.size() + 1; j++) {
+                    ArrayList<String> strings = hashMap.get(j);
+                    Iterator<String> iterator = strings.iterator();
+                    while (iterator.hasNext()) {
+                        String next = iterator.next();
+                        if (next.contains(titles[i])) {
+                            String fieldCode = wordbookInterface.examineWordbookFieldCodeByType(j);
+                            titles[i] = fieldCode;
+                        }
+                    }
+                }
+            }
+        }
+
+        return titles;
+
     }
 
 

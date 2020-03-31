@@ -32,136 +32,46 @@
             </a-card>
           </a-col>
         </a-row>
-        <a-row type="flex" justify="end" style="margin-bottom:10px;">
-          <a-col :span="2">
-            <a-button @click="handleAdd">
-              <a-icon style="font-size:15px; margin-right:5px;" type="plus-circle" />新增条件
-            </a-button>
-          </a-col>
-        </a-row>
+        <p>上传条件文件：</p>
+        <a-upload
+          name="file"
+          action="/jeecg-boot/app/appController/testGetFileInfo"
+          @change="handleConditionsChange"
+          :headers="headers"
+          :multiple="true"
+          :openFileDialogOnClick="openFileDialogOnClick"
+        >
+          <a-button :style="{ margin: '10px 0' }" @click="handleConditionsClick">上传</a-button>
+        </a-upload>
         <a-form :form="form">
-          <a-row type="flex" justify="space-around" v-for="item of myArr" :key="item">
-            <a-col span="5" :sm="24" :md="12" :lg="4">
-              <a-form-item label="进出标志" :labelCol="{ span: 7 }" :wrapperCol="{ span: 15 }">
-                <a-select
-                  style="width:100%;"
-                  v-decorator="[
-                    `recoveryMark[${item}]`,
-                    {
-                      validateTrigger: ['change', 'blur'],
-                      rules: [
-                        {
-                          required: true,
-                          whitespace: true,
-                          message: '请选择进出标志'
-                        }
-                      ]
-                    }
-                  ]"
-                >
-                  <a-select-option value="进">进</a-select-option>
-                  <a-select-option value="出">出</a-select-option>
-                </a-select>
+          <a-row type="flex" justify="start">
+            <a-col :span="2">
+              <a-form-item label="交易金额" :labelCol="{ span: 12 }" :wrapperCol="{ span: 12 }">
+                <a-input></a-input>
               </a-form-item>
             </a-col>
-            <a-col span="5" :sm="24" :md="12" :lg="4">
-              <a-form-item label="交易卡号" :labelCol="{ span: 7 }" :wrapperCol="{ span: 15 }">
-                <a-input
-                  v-decorator="[
-                    `cardEntity[${item}]`,
-                    {
-                      validateTrigger: ['change', 'blur'],
-                      rules: [
-                        {
-                          required: true,
-                          whitespace: true,
-                          message: '交易卡号不能为空'
-                        }
-                      ]
-                    }
-                  ]"
-                ></a-input>
+            <a-col :span="6">
+              <a-form-item label="对手户名" :labelCol="{ span: 7 }" :wrapperCol="{ span: 13 }">
+                <a-input></a-input>
               </a-form-item>
             </a-col>
-            <a-col span="5" :sm="24" :md="12" :lg="6">
-              <a-form-item label="交易日期" :labelCol="{ span: 7 }" :wrapperCol="{ span: 15 }">
-                <a-range-picker
-                  v-decorator="[
-                    `transactionDate[${item}]`,
-                    {
-                      rules: [
-                        {
-                          required: true,
-                          message: '交易日期不能为空'
-                        }
-                      ]
-                    }
-                  ]"
-                />
-              </a-form-item>
-            </a-col>
-            <a-col span="5" :sm="24" :md="12" :lg="4">
-              <a-row>
-                <a-col span="13">
-                  <a-form-item label="交易金额" :labelCol="{ span: 14 }" :wrapperCol="{ span: 10 }">
-                    <a-input
-                      v-decorator="[
-                        `startMoney[${item}]`,
-                        {
-                          validateTrigger: ['change', 'blur'],
-                          rules: [
-                            {
-                              required: true,
-                              whitespace: true,
-                              message: '初始金额不能为空'
-                            }
-                          ]
-                        }
-                      ]"
-                      :style="{ width: '50px' }"
-                    ></a-input>
-                  </a-form-item>
-                </a-col>
-                <a-col span="3">
-                  <div style="border:1px solid #000;width:23px;margin-top:17px;display:inline-block;"></div>
-                </a-col>
-                <a-col span="5">
-                  <a-form-item>
-                    <a-input
-                      v-decorator="[
-                        `endMoney[${item}]`,
-                        {
-                          validateTrigger: ['change', 'blur'],
-                          rules: [
-                            {
-                              required: true,
-                              whitespace: true,
-                              message: '结束金额不能为空'
-                            }
-                          ]
-                        }
-                      ]"
-                      :style="{ width: '50px' }"
-                    ></a-input>
-                  </a-form-item>
-                </a-col>
-              </a-row>
-            </a-col>
-            <a-col span="5" :sm="24" :md="12" :lg="4">
-              <a-form-item label="对手户名" :labelCol="{ span: 7 }" :wrapperCol="{ span: 15 }">
-                <a-input v-decorator="[`counterParty[${item}]`]"></a-input>
-              </a-form-item>
-            </a-col>
-            <a-col span="2" :md="12" :lg="2">
-              <a-icon style="margin:7px 0 0 15px;font-size:25px" type="minus-circle" @click="handleRemove(item)" />
-            </a-col>
-          </a-row>
-          <a-row type="flex" justify="end">
             <a-col :span="2">
               <a-button @click="handleAnalysis" type="primary">分析</a-button>
             </a-col>
           </a-row>
         </a-form>
+
+        <a-table
+          rowKey="id"
+          size="small"
+          bordered
+          :columns="columns"
+          :dataSource="myConditionsDataSource"
+          :loading="loading"
+          :scroll="{ x: 2000, y: 240 }"
+          style="font-size:5px;"
+          :showHeader="myConditionsDataSource.length > 0"
+        ></a-table>
       </div>
     </a-card>
     <a-card>
@@ -219,6 +129,8 @@ export default {
       ],
       showButton: false,
       loading: false,
+      myConditionsDataSource: [],
+      openFileDialogOnClick: false,
       params: {},
       url: {
         getFileInfoUploaded: '/app/appController/getFileInfoUploaded',
@@ -312,16 +224,10 @@ export default {
       this.loading = true
       this.form.validateFields((err, values) => {
         if (!err) {
-          const { cardEntity, recoveryMark, transactionDate, startMoney, endMoney, counterParty } = values
+          const { counterParty } = values
           console.log(this.myArr, 'myArr')
           let data = this.myArr.map(item => {
             return {
-              cardEntity: cardEntity[item],
-              recoveryMark: recoveryMark[item],
-              startTime: moment(transactionDate[item][0]).format('YYYY-MM-DD'),
-              endTime: moment(transactionDate[item][1]).format('YYYY-MM-DD'),
-              startMoney: startMoney[item],
-              endMoney: endMoney[item],
               counterParty: counterParty[item] == '' ? null : counterParty[item]
             }
           })
@@ -357,6 +263,27 @@ export default {
     handleShow() {
       this.showButton = false
       this.fileListName = this.fileList
+    },
+    handleConditionsChange(info) {
+      if (info.file.status !== 'uploading') {
+      }
+
+      if (info.file.status === 'done') {
+        window.console.log(info.file, info.fileList)
+        this.$message.success(`${info.file.name} file uploaded successfully`)
+      } else if (info.file.status === 'error') {
+        this.$message.error(`${info.file.name} file upload failed.`)
+      }
+    },
+    handleConditionsClick() {
+      window.console.log(1)
+      if (!this.params.fileName) {
+        this.$message.warning('请选择一个表')
+        this.openFileDialogOnClick = false
+      } else {
+        this.openFileDialogOnClick = true
+      }
+      return
     }
   }
 }

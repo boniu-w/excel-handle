@@ -21,6 +21,7 @@ public class ResponseData {
     private Map titleMap;
     private List<BankFlow> bankFlowList;
     private String fileName;
+    private String conditionExcelMessage;
 
 
 }
