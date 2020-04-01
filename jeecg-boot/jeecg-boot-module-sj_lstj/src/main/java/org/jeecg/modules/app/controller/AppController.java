@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -243,7 +244,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 
                 //  获取源表的数据, 以更改后的 表头名作为键
-                //  这就是 要的数据,把他insert数据库 bank_flow 即可
                 DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
                 Map<Integer, Map<String, Object>> contentMapMap = readExcelUtil.readExcelContent(excelTitles, sheetIndex);
 
@@ -255,29 +255,42 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                     Map<String, Object> value = contentMap.getValue();
 
-                    // 对日期转换
                     Object transaction_date = value.get("transaction_date");
-                    //System.out.println(transaction_date.getClass() + "................");
 
-                    if ("".equals(transaction_date)) {
-                        value.put("transaction_date", transaction_date);
-                    } else if (transaction_date instanceof String || transaction_date instanceof Integer) {
-                        Date parse = simpleDateFormat.parse((String) transaction_date);
-                        value.put("transaction_date", parse);
-                    } else if (transaction_date.getClass().isInstance(Date.class) || transaction_date instanceof Date) {
-                        long time = ((Date) transaction_date).getTime();
-                        Timestamp timestamp = new Timestamp(time);
-                        value.put("transaction_date", timestamp);
-                    }
+                    Date date = simpleDateFormat.parse(transaction_date.toString());
+                    long dateTime = date.getTime();
+                    value.put("transaction_date", new Timestamp(dateTime));
+
+                    //if ("".equals(transaction_date)) {
+                    //    value.put("transaction_date", transaction_date);
+                    //} else if (transaction_date instanceof String || transaction_date instanceof Integer) {
+                    //    Date parse = simpleDateFormat.parse((String) transaction_date);
+                    //    value.put("transaction_date", parse);
+                    //} else if (transaction_date.getClass().isInstance(Date.class) || transaction_date instanceof Date) {
+                    //    long time = ((Date) transaction_date).getTime();
+                    //    Timestamp timestamp = new Timestamp(time);
+                    //    value.put("transaction_date", timestamp);
+                    //}
 
                     String uuid = UUID.randomUUID().toString().replace("-", "");
                     value.put("id", uuid);
 
-                    //System.out.println("------" + contentMap);
+
+                    Set<Map.Entry<String, Object>> entries = value.entrySet();
+                    Iterator<Map.Entry<String, Object>> entryIterator = entries.iterator();
+                    while (entryIterator.hasNext()) {
+                        Map.Entry<String, Object> next = entryIterator.next();
+                        System.out.println(next.getKey() + "--" + next.getValue());
+                    }
+
+                    System.out.println("value.size() : " + value.size());
+                    System.out.println("contentMap : " + contentMap);
+
 
                     // 调用insert方法 加入数据库
 
-                    wordbookInterface.insertBankFlow((HashMap) value);
+
+                    wordbookInterface.insertBankFlow(value);
                     count++;
                 }
                 System.out.println("--------" + contentMapMap);
@@ -465,15 +478,15 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 
         // Step.2 获取导出数据
-        List<BankFlow> pageList = responseData.getBankFlowList();
-        System.out.println(pageList.size());
+        Set<BankFlow> bankFlowSet = responseData.getBankFlowSet();
+        System.out.println(bankFlowSet.size());
 
         // Step.3 AutoPoi 导出Excel
         ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
         mv.addObject(NormalExcelConstants.FILE_NAME, title); //此处设置的filename无效 ,前端会重更新设置一下
         mv.addObject(NormalExcelConstants.CLASS, BankFlow.class);
         mv.addObject(NormalExcelConstants.PARAMS, new ExportParams(title + "报表", "导出人:" + sysUser.getRealname(), title));
-        mv.addObject(NormalExcelConstants.DATA_LIST, pageList);
+        mv.addObject(NormalExcelConstants.DATA_LIST, bankFlowSet);
         return mv;
     }
 
@@ -521,12 +534,31 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         return null;
     }
 
+
     /**
      * 逐条解析excel表格的每一行的内容,去查询
-     * 2020/3/31
+     *
+     * @author: wg
+     * @time: 2020/3/31 14:19
      */
     @RequestMapping(value = "/conditionExcelExamine")
-    public void conditionExcelExamine(HttpServletRequest request) {
+    @ResponseBody
+    public HashSet<BankFlow> conditionExcelExamine(HttpServletRequest request,HttpServletResponse response) {
+        String percentage = request.getParameter("percentage");
+        String dateScope = request.getParameter("dateScope");
+        String counterParty = request.getParameter("counterParty");
+
+        if ("undefined".equals(counterParty)) {
+            counterParty = "";
+        }
+
+        List<BankFlow> list = new ArrayList<>();
+
+
+        System.out.println(percentage);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+
         List<MultipartFile> fileList = getFileInfo(request);
         Iterator<MultipartFile> iterator = fileList.iterator();
         while (iterator.hasNext()) {
@@ -539,11 +571,9 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             Map<Integer, Map<String, Object>> contentMap = new HashMap<Integer, Map<String, Object>>();
 
             Sheet sheet = workbook.getSheetAt(0);
-            // 得到总行数
             int rowNum = sheet.getLastRowNum();
 
             Row row = sheet.getRow(0);
-            // 总列数
             int colNum = row.getPhysicalNumberOfCells();
 
             // 正文内容应该从第二行开始,第一行为表头的标题
@@ -560,12 +590,51 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 System.out.println("rowMap : " + rowMap);
                 System.out.println("rowMap.get('transaction_date') : " + rowMap.get("transaction_date"));
 
+                try {
+                    /* 开始 查询分析 */
+                    TableData tableData = new TableData();
+                    Object transaction_amount = rowMap.get("transaction_amount");
+                    float transactionMoney = Float.parseFloat(transaction_amount.toString());
+                    tableData.setStartMoney(transactionMoney * (1 - Float.parseFloat(percentage) / 100));
+                    tableData.setEndMoney(transactionMoney * (1 + Float.parseFloat(percentage) / 100));
+
+                    Object recovery_mark = rowMap.get("recovery_mark");
+                    if ("进".equals(recovery_mark.toString())) {
+                        tableData.setRecoveryMark("出");
+                    }
+                    if ("出".equals(recovery_mark.toString())) {
+                        tableData.setRecoveryMark("进");
+                    }
+
+
+                    Object transactionDate = rowMap.get("transaction_date");
+
+                    Date date = simpleDateFormat.parse(transactionDate.toString());
+                    long time = date.getTime();
+                    int i1 = (24 * 60 * 60 * 1000) * Integer.parseInt(dateScope);
+                    long start = time - i1;
+                    long end = time + i1;
+
+                    tableData.setStartTime(simpleDateFormat.format(new Date(start)));
+                    tableData.setEndTime(simpleDateFormat.format(new Date(end)));
+                    tableData.setCounterParty(counterParty);
+                    tableData.setCardEntity(rowMap.get("card_entity").toString());
+
+                    System.out.println("tableData : " + tableData);
+
+                    List<BankFlow> bankFlowList = bankFlowService.examimeBankFlowByCondition(tableData);
+                    System.out.println("bankFlowList.size() : " + bankFlowList.size());
+
+                    list.addAll(bankFlowList);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
             }
-
         }
-
-
-        return;
+        HashSet<BankFlow> set = new HashSet<>(list);
+        responseData.setBankFlowSet(set);
+        return set;
     }
 
 
@@ -574,6 +643,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * 2020/3/31
      */
     public String[] transformExcelTitle(MultipartFile file) {
+        oneToMany();
         DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
 
         String[] titles = readExcelUtil.readExcelTitle(0);
@@ -584,7 +654,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             boolean contains = fieldNameList.indexOf(titles[i]) >= 0;
             if (!contains) {
                 System.out.println("在excel表中,字段 ---" + titles[i] + " --- 在数据库表中不存在,请添加或修改");
-                responseData.setConditionExcelMessage("在excel表中,字段 ' " + titles[i] + " ' 在数据库表中不存在,请添加或修改");
+                //responseData.setConditionExcelMessage("在excel表中,字段 ' " + titles[i] + " ' 在数据库表中不存在,请添加或修改");
             } else {
                 for (int j = 1; j < hashMap.size() + 1; j++) {
                     ArrayList<String> strings = hashMap.get(j);

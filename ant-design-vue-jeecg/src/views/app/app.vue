@@ -35,24 +35,54 @@
         <p>上传条件文件：</p>
         <a-upload
           name="file"
-          action="/jeecg-boot/app/appController/testGetFileInfo"
           @change="handleConditionsChange"
           :headers="headers"
           :multiple="true"
+          :remove="handleRemove"
+          :fileList="conditionsFileList"
+          :beforeUpload="beforeUpload"
           :openFileDialogOnClick="openFileDialogOnClick"
         >
           <a-button :style="{ margin: '10px 0' }" @click="handleConditionsClick">上传</a-button>
         </a-upload>
         <a-form :form="form">
           <a-row type="flex" justify="start">
-            <a-col :span="2">
-              <a-form-item label="交易金额" :labelCol="{ span: 12 }" :wrapperCol="{ span: 12 }">
-                <a-input></a-input>
+            <a-col :span="5">
+              <a-row type="flex" justify="start">
+                <a-col :span="23">
+                  <a-form-item label="交易金额百分比" :labelCol="{ span: 10 }" :wrapperCol="{ span: 14 }">
+                    <a-input-number
+                      :style="{ width: '100%' }"
+                      v-decorator="['percentage', { rules: [{ required: true, message: '请输入交易金额百分比!' }] }]"
+                      placeholder="0~100"
+                      :min="0"
+                      :max="100"
+                    ></a-input-number>
+                  </a-form-item>
+                </a-col>
+                <a-col :span="1">
+                  <span :style="{ display: 'block', marginTop: '9px', fontWeight: 'blod' }">%</span>
+                </a-col>
+              </a-row>
+            </a-col>
+            <a-col :span="7">
+              <a-form-item
+                label="交易日期范围"
+                :labelCol="{ span: 10 }"
+                :wrapperCol="{ span: 14 }"
+                :style="{ marginLeft: '20px' }"
+              >
+                <a-input-number
+                  :style="{ width: '70%' }"
+                  v-decorator="['dateScope', { rules: [{ required: true, message: '请输入交易日期范围!' }] }]"
+                  placeholder="请输入多少天之内"
+                  :min="0"
+                ></a-input-number>
               </a-form-item>
             </a-col>
             <a-col :span="6">
               <a-form-item label="对手户名" :labelCol="{ span: 7 }" :wrapperCol="{ span: 13 }">
-                <a-input></a-input>
+                <a-input v-decorator="['counterParty', {}]" placeholder="请输入对手户名"></a-input>
               </a-form-item>
             </a-col>
             <a-col :span="2">
@@ -61,7 +91,7 @@
           </a-row>
         </a-form>
 
-        <a-table
+        <!-- <a-table
           rowKey="id"
           size="small"
           bordered
@@ -71,7 +101,7 @@
           :scroll="{ x: 2000, y: 240 }"
           style="font-size:5px;"
           :showHeader="myConditionsDataSource.length > 0"
-        ></a-table>
+        ></a-table> -->
       </div>
     </a-card>
     <a-card>
@@ -114,6 +144,8 @@ export default {
       myDataSource: [],
       fileList: [],
       fileListName: [],
+      conditionsFileList: [],
+      resData: [],
       columns: [
         {
           title: '#',
@@ -129,7 +161,7 @@ export default {
       ],
       showButton: false,
       loading: false,
-      myConditionsDataSource: [],
+      // myConditionsDataSource: [],
       openFileDialogOnClick: false,
       params: {},
       url: {
@@ -173,19 +205,51 @@ export default {
     },
     load() {
       postAction(this.url.getFileInfoUploaded).then(res => {
-        console.log(res, '初始数据')
         if (res) {
           this.fileList = res
-
+          this.resData = res.map(item => {
+            return {
+              createTime: item.createTime,
+              fileLocation: item.fileLocation,
+              fileName: item.fileName,
+              fileSize: item.fileSize,
+              fileTitle: JSON.parse(item.fileTitle),
+              id: item.id,
+              updateTime: item.updateTime
+            }
+          })
+          let titleMap = this.resData[0].fileTitle
+          // 获取数据表头
+          this.getTableTitle(titleMap)
           if (this.fileList.length > 12) {
             this.showButton = true
           }
           this.fileListName = this.fileList.slice(0, 12)
         }
+        console.log(res, '初始数据')
       })
     },
-    beforeUpload(file, fileList) {
-      return true
+    getTableTitle(titleMap) {
+      let titleArr = Object.keys(titleMap).map((item, i) => {
+        if (item) {
+          return {
+            title: titleMap[item],
+            align: 'center',
+            dataIndex: item
+          }
+        }
+      })
+      this.columns = [this.columns[0], ...titleArr]
+    },
+    beforeUpload(file) {
+      this.conditionsFileList = [...this.conditionsFileList, file]
+      return false
+    },
+    handleRemove(file) {
+      const index = this.conditionsFileList.indexOf(file)
+      const newFileList = this.conditionsFileList.slice()
+      newFileList.splice(index, 1)
+      this.conditionsFileList = newFileList
     },
     handleAdd() {
       if (this.myArr.length === 0) {
@@ -193,15 +257,6 @@ export default {
       } else {
         this.myArr = this.myArr.concat(id++)
       }
-    },
-    handleRemove(key) {
-      if (this.myArr.length == 1) {
-        this.$message.warning('至少保留一条索引')
-        return
-      }
-      this.myArr = this.myArr.filter(item => {
-        return item !== key
-      })
     },
     handleUploadChange(info) {
       if (info.file.status !== 'uploading') {
@@ -220,35 +275,34 @@ export default {
         this.$message.warning('至少选择一个表')
         return
       }
+      if (!this.conditionsFileList.length) {
+        this.$message.warning('请上传一个条件表')
+        return
+      }
       const that = this
       this.loading = true
       this.form.validateFields((err, values) => {
         if (!err) {
-          const { counterParty } = values
-          console.log(this.myArr, 'myArr')
-          let data = this.myArr.map(item => {
-            return {
-              counterParty: counterParty[item] == '' ? null : counterParty[item]
-            }
-          })
+          console.log(values)
+          // const { percentage, dateScope, counterParty } = values
+          // console.log(this.myArr, 'myArr')
+          // let data = this.myArr.map(item => {
+          //   return {
+          //     counterParty: counterParty[item] == '' ? null : counterParty[item]
+          //   }
+          // })
           let formData = new FormData()
-          formData.append('data', JSON.stringify(data))
+          formData.append('percentage', values.percentage)
+          formData.append('dateScope', values.dateScope)
+          formData.append('counterParty', values.counterParty ? '' : '')
           formData.append('fileName', that.params.fileName)
-          postAction('app/appController/resolve', formData).then(res => {
-            let titleMap = res.titleMap
-            console.log(titleMap, 'titleMap')
-            let titleArr = Object.keys(titleMap).map((item, i) => {
-              if (item) {
-                return {
-                  title: titleMap[item],
-                  align: 'center',
-                  dataIndex: item
-                }
-              }
-            })
-            this.columns = [this.columns[0], ...titleArr]
+          this.conditionsFileList.forEach(file => {
+            formData.append('files[]', file)
+          })
+          postAction('app/appController/conditionExcelExamine', formData).then(res => {
+            this.conditionsFileList = []
 
-            this.myDataSource = res.bankFlowList
+            this.myDataSource = res
             this.loading = false
             console.log(res, this.columns)
           })
@@ -258,7 +312,13 @@ export default {
     },
     onRadioChange(e) {
       window.console.log(e.target.value)
+      this.myDataSource = []
+      this.conditionsFileList = []
       this.params.fileName = e.target.value
+      if (this.resData) {
+        let titleMap = this.resData.filter(item => item.fileName == this.params.fileName)[0].fileTitle
+        this.getTableTitle(titleMap)
+      }
     },
     handleShow() {
       this.showButton = false

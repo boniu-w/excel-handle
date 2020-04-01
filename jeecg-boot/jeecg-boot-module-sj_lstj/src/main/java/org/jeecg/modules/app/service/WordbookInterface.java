@@ -7,6 +7,7 @@ import org.jeecg.modules.app.entity.Wordbook;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wg
@@ -17,7 +18,7 @@ import java.util.List;
 public interface WordbookInterface {
     List<Wordbook> examineWordbookAll();
     List<MatchingToWordbook> examineMatchingToWordbook();
-    int insertBankFlow(HashMap hashMap);
+    int insertBankFlow(Map map);
     String examineWordbookFieldNameByType(Integer type);
     String examineWordbookFieldCodeByType(Integer type);
     List<String> examineFiledNameFromMatchingToWordbook();

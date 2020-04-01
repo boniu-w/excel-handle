@@ -3,6 +3,8 @@ package org.jeecg.modules.app.entity;
 import lombok.Data;
 import org.jeecgframework.poi.excel.annotation.Excel;
 
+import java.util.Objects;
+
 
 @Data
 public class BankFlow {
@@ -40,13 +42,13 @@ public class BankFlow {
     private String cardCounterparty;
 
     @Excel(name = "交易金额", width = 15)
-    private double transactionAmount;
+    private float transactionAmount;
 
     @Excel(name = "摘要")
     private String abstract_content;
 
     @Excel(name = "交易后余额")
-    private double balanceTransaction;
+    private float balanceTransaction;
 
     @Excel(name = "交易主体归属行")
     private String transactionBank;
@@ -84,7 +86,7 @@ public class BankFlow {
     @Excel(name = "对方机构号")
     private String institutionParty;
 
-    private double deleteIdentifier;
+    private Integer deleteIdentifier;
 
     @Excel(name = "客户代码")
     private String customerCode;
@@ -102,4 +104,47 @@ public class BankFlow {
     private String matcherBalance;
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BankFlow bankFlow = (BankFlow) o;
+        return Float.compare(bankFlow.transactionAmount, transactionAmount) == 0 &&
+          Float.compare(bankFlow.balanceTransaction, balanceTransaction) == 0 &&
+          Objects.equals(id, bankFlow.id) &&
+          Objects.equals(caseId, bankFlow.caseId) &&
+          Objects.equals(introductionId, bankFlow.introductionId) &&
+          Objects.equals(transactionSubject, bankFlow.transactionSubject) &&
+          Objects.equals(accountSubject, bankFlow.accountSubject) &&
+          Objects.equals(cardEntity, bankFlow.cardEntity) &&
+          Objects.equals(recoveryMark, bankFlow.recoveryMark) &&
+          Objects.equals(transactionDate, bankFlow.transactionDate) &&
+          Objects.equals(counterParty, bankFlow.counterParty) &&
+          Objects.equals(accountCounterparty, bankFlow.accountCounterparty) &&
+          Objects.equals(cardCounterparty, bankFlow.cardCounterparty) &&
+          Objects.equals(abstract_content, bankFlow.abstract_content) &&
+          Objects.equals(transactionBank, bankFlow.transactionBank) &&
+          Objects.equals(counterpartyBank, bankFlow.counterpartyBank) &&
+          Objects.equals(placeTransaction, bankFlow.placeTransaction) &&
+          Objects.equals(tradingPlace, bankFlow.tradingPlace) &&
+          Objects.equals(transactionNumber, bankFlow.transactionNumber) &&
+          Objects.equals(mac, bankFlow.mac) &&
+          Objects.equals(ip, bankFlow.ip) &&
+          Objects.equals(currency, bankFlow.currency) &&
+          Objects.equals(temarks, bankFlow.temarks) &&
+          Objects.equals(tradingNo, bankFlow.tradingNo) &&
+          Objects.equals(tellerNumber, bankFlow.tellerNumber) &&
+          Objects.equals(institutionParty, bankFlow.institutionParty) &&
+          Objects.equals(deleteIdentifier, bankFlow.deleteIdentifier) &&
+          Objects.equals(customerCode, bankFlow.customerCode) &&
+          Objects.equals(logNumber, bankFlow.logNumber) &&
+          Objects.equals(apshPlace, bankFlow.apshPlace) &&
+          Objects.equals(matcherCode, bankFlow.matcherCode) &&
+          Objects.equals(matcherBalance, bankFlow.matcherBalance);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, caseId, introductionId, transactionSubject, accountSubject, cardEntity, recoveryMark, transactionDate, counterParty, accountCounterparty, cardCounterparty, transactionAmount, abstract_content, balanceTransaction, transactionBank, counterpartyBank, placeTransaction, tradingPlace, transactionNumber, mac, ip, currency, temarks, tradingNo, tellerNumber, institutionParty, deleteIdentifier, customerCode, logNumber, apshPlace, matcherCode, matcherBalance);
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author wg
@@ -22,6 +23,7 @@ public class ResponseData {
     private List<BankFlow> bankFlowList;
     private String fileName;
     private String conditionExcelMessage;
+    private Set<BankFlow> bankFlowSet;
 
 
 }

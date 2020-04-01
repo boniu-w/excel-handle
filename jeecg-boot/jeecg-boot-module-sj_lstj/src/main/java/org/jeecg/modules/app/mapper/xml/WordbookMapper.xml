@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!--对应dao-->
 <mapper namespace="org.jeecg.modules.app.mapper.WordbookMapper">
@@ -43,99 +43,101 @@
 
         INSERT INTO bank_flow
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
+            <if test="id != '' and id != null">
                 id,
             </if>
-            <if test="introduction_id != null">
+            <if test="case_id != '' and case_id != null">
+                case_id,
+            </if>
+            <if test="introduction_id != '' and introduction_id != null">
                 introduction_id,
             </if>
-            <if test="transaction_subject != null">
+            <if test="transaction_subject != '' and transaction_subject != null">
                 transaction_subject,
             </if>
-            <if test="account_subject != null">
+            <if test="account_subject != '' and account_subject != null">
                 account_subject,
             </if>
-            <if test="card_entity != null">
+            <if test="card_entity != '' and card_entity != null">
                 card_entity,
             </if>
-            <if test="recovery_mark != null">
+            <if test="recovery_mark != '' and recovery_mark != null">
                 recovery_mark,
             </if>
             <if test="transaction_date != null">
                 transaction_date,
             </if>
-            <if test="counter_party != null">
+            <if test="counter_party != '' and counter_party != null">
                 counter_party,
             </if>
-            <if test="account_counterparty != null">
+            <if test="account_counterparty != '' and account_counterparty != null">
                 account_counterparty,
             </if>
-            <if test="card_counterparty != null">
+            <if test="card_counterparty != '' and card_counterparty != null">
                 card_counterparty,
             </if>
-            <if test="transaction_amount != null">
+            <if test="transaction_amount != '' and transaction_amount != null">
                 transaction_amount,
             </if>
-            <if test="abstract != null">
+            <if test="abstract_content != '' and abstract_content != null">
                 abstract_content,
             </if>
-            <if test="balance_transaction != null">
+            <if test="balance_transaction != '' and balance_transaction != null">
                 balance_transaction,
             </if>
-            <if test="transaction_bank != null">
+            <if test="transaction_bank != '' and transaction_bank != null">
                 transaction_bank,
             </if>
-            <if test="counterparty_bank != null">
+            <if test="counterparty_bank != '' and counterparty_bank != null">
                 counterparty_bank,
             </if>
-            <if test="place_transaction != null">
+            <if test="place_transaction != '' and place_transaction != null">
                 place_transaction,
             </if>
-            <if test="trading_place != null">
+            <if test="trading_place != '' and trading_place != null">
                 trading_place,
             </if>
-            <if test="transaction_number != null">
+            <if test="transaction_number != '' and transaction_number != null">
                 transaction_number,
             </if>
-            <if test="mac != null">
+            <if test="mac != '' and mac != null">
                 mac,
             </if>
-            <if test="ip != null">
+            <if test="ip != '' and ip != null">
                 ip,
             </if>
-            <if test="currency != null">
+            <if test="currency != '' and currency != null">
                 currency,
             </if>
-            <if test="temarks != null">
+            <if test="temarks != '' and temarks != null">
                 temarks,
             </if>
-            <if test="trading_no != null">
+            <if test="trading_no != '' and trading_no != null">
                 trading_no,
             </if>
-            <if test="teller_number != null">
+            <if test="teller_number != '' and teller_number != null">
                 teller_number,
             </if>
-            <if test=" institution_party != null">
+            <if test=" institution_party != '' and institution_party != null">
                 institution_party,
             </if>
-            <if test=" delete_identifier != null">
+            <if test=" delete_identifier != '' and delete_identifier != null">
                 delete_identifier,
             </if>
 
-            <if test=" customer_code != null">
+            <if test=" customer_code != '' and customer_code != null">
                 customer_code,
             </if>
-            <if test=" log_number != null">
+            <if test=" log_number != '' and log_number != null">
                 log_number,
             </if>
-
-            <if test=" apsh_place != null">
+            <if test=" apsh_place != '' and apsh_place != null">
                 apsh_place,
             </if>
-            <if test=" matcher_code != null">
+            <if test=" matcher_code != '' and matcher_code != null">
                 matcher_code,
             </if>
-            <if test=" matcher_balance != null">
+            <if test=" matcher_balance != '' and matcher_balance != null">
                 matcher_balance,
             </if>
 
@@ -144,100 +146,101 @@
 
 
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=VARCHAR},
+            <if test="id != '' and id != null">
+                #{id},
             </if>
-            <if test="introduction_id != null">
-                #{introduction_id , jdbcType=VARCHAR },
+            <if test="case_id != '' and case_id != null">
+                #{case_id},
             </if>
-            <if test=" transaction_subject!= null">
-                #{transaction_subject , jdbcType=VARCHAR },
+            <if test="introduction_id != '' and introduction_id != null">
+                #{introduction_id},
             </if>
-            <if test="account_subject != null">
-                #{account_subject, jdbcType=VARCHAR },
+            <if test=" transaction_subject != '' and transaction_subject != null">
+                #{transaction_subject},
             </if>
-            <if test="card_entity != null">
-                #{card_entity , jdbcType=VARCHAR },
+            <if test="account_subject != '' and account_subject != null">
+                #{account_subject},
             </if>
-            <if test="recovery_mark != null">
-                #{recovery_mark , jdbcType= VARCHAR},
+            <if test="card_entity != '' and card_entity != null">
+                #{card_entity},
+            </if>
+            <if test="recovery_mark != '' and recovery_mark != null">
+                #{recovery_mark},
             </if>
             <if test="transaction_date != null">
-
                 #{transaction_date},
             </if>
-            <if test="counter_party != null">
-                #{counter_party , jdbcType= VARCHAR},
+            <if test="counter_party != '' and counter_party != null">
+                #{counter_party},
             </if>
-            <if test="account_counterparty != null">
-                #{account_counterparty , jdbcType=VARCHAR },
+            <if test="account_counterparty != '' and account_counterparty != null">
+                #{account_counterparty},
             </if>
-            <if test="card_counterparty != null">
-                #{card_counterparty , jdbcType=VARCHAR },
+            <if test="card_counterparty != '' and card_counterparty != null">
+                #{card_counterparty},
             </if>
             <if test="transaction_amount != null">
-                #{transaction_amount, jdbcType=DOUBLE},
+                #{transaction_amount},
             </if>
-            <if test="abstract != null">
-                #{abstract , jdbcType=CLOB },
+            <if test="abstract_content != '' and abstract_content != null">
+                #{abstract_content},
             </if>
             <if test="balance_transaction != null">
-                #{balance_transaction, jdbcType=DOUBLE},
+                #{balance_transaction},
             </if>
-            <if test="transaction_bank != null">
-                #{transaction_bank , jdbcType=VARCHAR },
+            <if test="transaction_bank != '' and transaction_bank != null">
+                #{transaction_bank},
             </if>
-            <if test="counterparty_bank != null">
-                #{ counterparty_bank, jdbcType=VARCHAR },
+            <if test="counterparty_bank != '' and counterparty_bank != null">
+                #{ counterparty_bank},
             </if>
-            <if test="place_transaction != null">
-                #{place_transaction , jdbcType=VARCHAR },
+            <if test="place_transaction != '' and place_transaction != null">
+                #{place_transaction},
             </if>
-            <if test=" trading_place!= null">
-                #{trading_place , jdbcType= VARCHAR},
+            <if test=" trading_place != '' and trading_place != null">
+                #{trading_place},
             </if>
-            <if test=" transaction_number!= null">
-                #{ transaction_number, jdbcType=VARCHAR },
+            <if test=" transaction_number != '' and transaction_number != null">
+                #{transaction_number},
             </if>
-            <if test="mac != null">
-                #{ mac, jdbcType=VARCHAR },
+            <if test="mac != '' and mac != null">
+                #{mac},
             </if>
-            <if test="ip != null">
-                #{ ip, jdbcType=VARCHAR },
+            <if test="ip != '' and ip != null">
+                #{ip},
             </if>
-            <if test="currency != null">
-                #{currency , jdbcType=VARCHAR },
+            <if test="currency != '' and currency != null">
+                #{currency},
             </if>
-            <if test="temarks != null">
-                #{ temarks, jdbcType= CLOB},
+            <if test="temarks != '' and temarks != null">
+                #{temarks},
             </if>
-            <if test="trading_no != null">
-                #{trading_no , jdbcType= VARCHAR},
+            <if test="trading_no != '' and trading_no != null">
+                #{trading_no},
             </if>
-            <if test="teller_number != null">
-                #{teller_number , jdbcType=VARCHAR },
+            <if test="teller_number != '' and teller_number != null">
+                #{teller_number},
             </if>
-            <if test="institution_party != null">
-                #{institution_party , jdbcType=VARCHAR },
+            <if test="institution_party != '' and institution_party != null">
+                #{institution_party},
             </if>
-            <if test="delete_identifier != null">
-                #{delete_identifier , jdbcType=DOUBLE },
+            <if test="delete_identifier != '' and delete_identifier != null">
+                #{delete_identifier},
             </if>
-
-            <if test="customer_code != null">
-                #{customer_code , jdbcType=VARCHAR },
+            <if test="customer_code != '' and customer_code != null">
+                #{customer_code},
             </if>
-            <if test="log_number != null">
-                #{log_number , jdbcType=VARCHAR },
+            <if test="log_number != '' and log_number != null">
+                #{log_number},
             </if>
-            <if test="apsh_place != null">
-                #{apsh_place , jdbcType=VARCHAR },
+            <if test="apsh_place != '' and apsh_place != null">
+                #{apsh_place},
             </if>
-            <if test="matcher_code != null">
-                #{matcher_code , jdbcType=VARCHAR },
+            <if test="matcher_code != '' and matcher_code != null">
+                #{matcher_code},
             </if>
-            <if test="matcher_balance != null">
-                #{matcher_balance , jdbcType=VARCHAR }
+            <if test="matcher_balance != '' and matcher_balance != null">
+                #{matcher_balance}
             </if>
 
         </trim>

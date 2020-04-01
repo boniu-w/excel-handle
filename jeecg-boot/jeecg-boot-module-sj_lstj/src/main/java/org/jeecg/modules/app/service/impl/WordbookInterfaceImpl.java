@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wg
@@ -37,8 +38,8 @@ public class WordbookInterfaceImpl implements WordbookInterface {
     }
 
     @Override
-    public int insertBankFlow(HashMap hashMap) {
-        wordbookMapper.insertBankFlow(hashMap);
+    public int insertBankFlow(Map map) {
+        wordbookMapper.insertBankFlow(map);
         return 0;
     }
 
