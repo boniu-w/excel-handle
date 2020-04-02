@@ -37,7 +37,7 @@
           name="file"
           @change="handleConditionsChange"
           :headers="headers"
-          :multiple="true"
+          :multiple="false"
           :remove="handleRemove"
           :fileList="conditionsFileList"
           :beforeUpload="beforeUpload"

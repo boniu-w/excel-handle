@@ -16,12 +16,14 @@ import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.app.entity.*;
 import org.jeecg.modules.app.service.BankFlowService;
 import org.jeecg.modules.app.service.FileUploadService;
+import org.jeecg.modules.app.service.TypeToFieldNameService;
 import org.jeecg.modules.app.service.WordbookInterface;
 import org.jeecg.modules.app.util.DatawashReadExcel;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,11 +38,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -61,6 +66,9 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
     @Autowired
     FileUploadService fileUploadService;
+
+    @Autowired
+    TypeToFieldNameService typeToFieldNameService;
 
     static HashMap<Integer, ArrayList<String>> hashMap;  // hashMap 是不会变的 他的结果是 字典映射表
 
@@ -94,7 +102,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             MultipartFile file = multipartFileIterator.next();
             // 判断文件 是否在数据库中已经存在,如果已经存在,则不再添加到数据库
             String name = file.getOriginalFilename();
-            System.out.println("file name: " + name);
+            //System.out.println("file name: " + name);
             String fileName = fileUploadService.examineFileName(name);
 
 
@@ -122,7 +130,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 int sheetQuantities = readExcel.getSheetQuantities();
 
                 ResponseData resData = insertExcelIntoDatabase(file, 0);
-                System.out.println(",,,,,,,getInfo,,,,,,,," + resData);
+                //System.out.println(",,,,,,,getInfo,,,,,,,," + resData);
                 resData.setFileName(fileName);
 
                 HashMap<Integer, ArrayList<String>> hash = oneToMany();
@@ -147,7 +155,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                 fileUpload.setFileTitle(fileTitle);
 
-                System.out.println("getInfo map:   " + map);
+                //System.out.println("getInfo map:   " + map);
                 int i = fileUploadService.insertIntoFileUpload(fileUpload);
 
                 return resData;
@@ -167,11 +175,11 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     //@RequestMapping(value = "/getTableInfo")
     public List<TableData> getTableInfo(HttpServletRequest request) {
         String tableData = request.getParameter("data");
-        System.out.println("tableData : " + tableData);
+        //System.out.println("tableData : " + tableData);
 
         List<TableData> tableDataList = JSON.parseArray(tableData, TableData.class);
 
-        System.out.println("tableDataList : " + tableDataList);
+        //System.out.println("tableDataList : " + tableDataList);
         return tableDataList;
     }
 
@@ -236,7 +244,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         int count = 0;
 
         ResponseData responseData = resolveExcelTitle(file, sheetIndex);
-        System.out.println("**********" + responseData);
+        //System.out.println("**********" + responseData);
         try {
             // 解析表头成功 , 执行插入操作
             if (StringUtils.isEmpty(responseData.getMessage())) {
@@ -280,11 +288,11 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     Iterator<Map.Entry<String, Object>> entryIterator = entries.iterator();
                     while (entryIterator.hasNext()) {
                         Map.Entry<String, Object> next = entryIterator.next();
-                        System.out.println(next.getKey() + "--" + next.getValue());
+                        //System.out.println(next.getKey() + "--" + next.getValue());
                     }
 
-                    System.out.println("value.size() : " + value.size());
-                    System.out.println("contentMap : " + contentMap);
+                    //System.out.println("value.size() : " + value.size());
+                    //System.out.println("contentMap : " + contentMap);
 
 
                     // 调用insert方法 加入数据库
@@ -293,7 +301,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     wordbookInterface.insertBankFlow(value);
                     count++;
                 }
-                System.out.println("--------" + contentMapMap);
+                //System.out.println("--------" + contentMapMap);
                 responseData.setCount(count);
                 return responseData;
             } else {
@@ -338,7 +346,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         }
 
-        System.out.println("hashMap:  " + hashMap);
+        //System.out.println("hashMap:  " + hashMap);
         return hashMap;
 
     }
@@ -359,15 +367,14 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         excelTitles = Arrays.copyOf(titles, titles.length);
 
-        System.out.println("******resolveExcelTitle****    " + responseData);
+        //System.out.println("******resolveExcelTitle****    " + responseData);
 
         List<String> fieldNameList = wordbookInterface.examineFiledNameFromMatchingToWordbook();
-        //System.out.println("=========  " + fieldNameList.toString());
 
         for (int i = 0; i < excelTitles.length; i++) {
             boolean contains = fieldNameList.indexOf(excelTitles[i]) >= 0;
             if (!contains) {
-                System.out.println("在excel表中,字段 ---" + excelTitles[i] + " --- 在数据库表中不存在,请添加或修改");
+                //System.out.println("在excel表中,字段 ---" + excelTitles[i] + " --- 在数据库表中不存在,请添加或修改");
                 responseData.setMessage("在excel表中,字段 ' " + excelTitles[i] + " ' 在数据库表中不存在,请添加或修改");
                 return responseData;
             } else {
@@ -380,19 +387,17 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                         // 如果数据库字段 与 excel标题字段 匹配
                         if (next.contains(excelTitles[i])) {
-                            //System.out.println(j + "  -----------  " + next);
                             // 再通过 j的值 (type 值) 查数据库 得到fieldname
                             // 再把 fidlename 赋给 excelTitles[i]
                             String fieldCode = wordbookInterface.examineWordbookFieldCodeByType(j);
                             excelTitles[i] = fieldCode;
-                            //System.out.println("/**********/   " + fieldCode);
                         }
                     }
                 }
             }
         }
 
-        System.out.println(">>>>>>>>>>>><<<<<" + responseData);
+        //System.out.println("responseData : " + responseData);
         return responseData;
     }
 
@@ -409,24 +414,24 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         List<TableData> tableDataList = getTableInfo(request);
 
-        System.out.println("resolve tableDataList.size() : " + tableDataList.size());
+        //System.out.println("resolve tableDataList.size() : " + tableDataList.size());
 
         String parameter = request.getParameter("fileName");
-        System.out.println("parameter  " + parameter);
+        //System.out.println("parameter  " + parameter);
 
 
         // 获取表格数据之后,作为查询条件,查询流水表
         Iterator<TableData> iterator = tableDataList.iterator();
         while (iterator.hasNext()) {
             TableData data = iterator.next();
-            System.out.println("<<<<<<<  " + data);
+            //System.out.println("<<<<<<<  " + data);
 
             List<BankFlow> list1 = bankFlowService.examimeBankFlowByCondition(data);
-            System.out.println(">>>>>>>>>  " + list1.size());
+            //System.out.println(">>>>>>>>>  " + list1.size());
 
             FileUpload fileUpload = fileUploadService.examineFileUpload(parameter);
 
-            System.out.println("fileUpload  " + fileUpload);
+            //System.out.println("fileUpload  " + fileUpload);
 
             String uuid = fileUpload.getId();
             String fileTitle = fileUpload.getFileTitle();
@@ -440,7 +445,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         }
         responseData.setBankFlowList(list);
-        System.out.println("^^^^^^^^^^^^^^" + responseData.getBankFlowList().size());
+        //System.out.println("^^^^^^^^^^^^^^" + responseData.getBankFlowList().size());
         return responseData;
 
     }
@@ -458,7 +463,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             FileUpload next = iterator.next();
             String fileTitle = next.getFileTitle();
             Map<String, String> parse = (Map) JSON.parse(fileTitle);
-            System.out.println("parse  " + parse);
+            //System.out.println("parse  " + parse);
 
         }
 
@@ -478,15 +483,14 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
 
         // Step.2 获取导出数据
-        Set<BankFlow> bankFlowSet = responseData.getBankFlowSet();
-        System.out.println(bankFlowSet.size());
+        List<BankFlow> bankFlowList = responseData.getBankFlowList();
 
         // Step.3 AutoPoi 导出Excel
         ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
         mv.addObject(NormalExcelConstants.FILE_NAME, title); //此处设置的filename无效 ,前端会重更新设置一下
         mv.addObject(NormalExcelConstants.CLASS, BankFlow.class);
         mv.addObject(NormalExcelConstants.PARAMS, new ExportParams(title + "报表", "导出人:" + sysUser.getRealname(), title));
-        mv.addObject(NormalExcelConstants.DATA_LIST, bankFlowSet);
+        mv.addObject(NormalExcelConstants.DATA_LIST, bankFlowList);
         return mv;
     }
 
@@ -519,22 +523,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     }
 
 
-    @RequestMapping(value = "/testGetFileInfo")
-    public MultipartFile testGetFileInfo(HttpServletRequest request) {
-        System.out.println("sssssssssss");
-
-        List<MultipartFile> fileList = getFileInfo(request);
-        Iterator<MultipartFile> iterator = fileList.iterator();
-        while (iterator.hasNext()) {
-
-            MultipartFile file = iterator.next();
-            System.out.println("file : " + file);
-            return file;
-        }
-        return null;
-    }
-
-
     /**
      * 逐条解析excel表格的每一行的内容,去查询
      *
@@ -543,7 +531,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      */
     @RequestMapping(value = "/conditionExcelExamine")
     @ResponseBody
-    public HashSet<BankFlow> conditionExcelExamine(HttpServletRequest request,HttpServletResponse response) {
+    public List<BankFlow> conditionExcelExamine(HttpServletRequest request, HttpServletResponse response) {
         String percentage = request.getParameter("percentage");
         String dateScope = request.getParameter("dateScope");
         String counterParty = request.getParameter("counterParty");
@@ -553,11 +541,10 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         }
 
         List<BankFlow> list = new ArrayList<>();
-
-
-        System.out.println(percentage);
+        List<BankFlow> collect = new ArrayList<>();
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+
 
         List<MultipartFile> fileList = getFileInfo(request);
         Iterator<MultipartFile> iterator = fileList.iterator();
@@ -566,31 +553,44 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             Workbook workbook = initWorkbook(file);
             String[] titleArray = transformExcelTitle(file);
 
-            System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
-
-            Map<Integer, Map<String, Object>> contentMap = new HashMap<Integer, Map<String, Object>>();
+            //System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
 
             Sheet sheet = workbook.getSheetAt(0);
             int rowNum = sheet.getLastRowNum();
 
-            Row row = sheet.getRow(0);
-            int colNum = row.getPhysicalNumberOfCells();
+            Row rowTitle = sheet.getRow(0);
+            int colNum = rowTitle.getPhysicalNumberOfCells();
 
-            // 正文内容应该从第二行开始,第一行为表头的标题
+            // 正文内容应该从第二行开始
             for (int i = 1; i <= rowNum; i++) {
-                row = sheet.getRow(i);
                 int j = 0;
+
+                Row rowContent = sheet.getRow(i);
                 HashMap<String, Object> rowMap = new HashMap<String, Object>();
+                HashMap<String, Object> bankFlowMap = new HashMap<String, Object>();
+
                 while (j < colNum) {
-                    Object obj = DatawashReadExcel.getCellFormatValue(row.getCell(j));
+                    Object obj = DatawashReadExcel.getCellFormatValue(rowContent.getCell(j));
                     rowMap.put(titleArray[j], obj);
+
+                    String[] s = titleArray[j].split("_");
+                    String s1 = s[0] + s[1].substring(0, 1).toUpperCase() + s[1].substring(1);
+                    bankFlowMap.put(s1, obj);
                     j++;
                 }
 
-                System.out.println("rowMap : " + rowMap);
-                System.out.println("rowMap.get('transaction_date') : " + rowMap.get("transaction_date"));
+                //System.out.println("bankFlowMap : " + bankFlowMap);
+                //System.out.println("rowMap : " + rowMap);
+
 
                 try {
+                    // bankFlowMap 转换 成BankFlow
+                    BankFlow bankFlow = JSON.parseObject(JSON.toJSONString(bankFlowMap), BankFlow.class);
+                    //System.out.println("bankFlow : " + bankFlow);
+
+                    list.add(bankFlow);
+
+
                     /* 开始 查询分析 */
                     TableData tableData = new TableData();
                     Object transaction_amount = rowMap.get("transaction_amount");
@@ -620,21 +620,28 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     tableData.setCounterParty(counterParty);
                     tableData.setCardEntity(rowMap.get("card_entity").toString());
 
-                    System.out.println("tableData : " + tableData);
+                    //System.out.println("tableData : " + tableData);
 
                     List<BankFlow> bankFlowList = bankFlowService.examimeBankFlowByCondition(tableData);
-                    System.out.println("bankFlowList.size() : " + bankFlowList.size());
+                    //System.out.println("bankFlowList.size() : " + bankFlowList.size());
 
                     list.addAll(bankFlowList);
+
+                    collect = Stream.of(bankFlowList, list)
+                      .flatMap(Collection::stream)
+                      .distinct()
+                      .collect(Collectors.toList());
+
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
             }
         }
-        HashSet<BankFlow> set = new HashSet<>(list);
-        responseData.setBankFlowSet(set);
-        return set;
+
+        //System.out.println("collect.size() : " + collect.size());
+        responseData.setBankFlowList(collect);
+        return collect;
     }
 
 
@@ -653,7 +660,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         for (int i = 0; i < titles.length; i++) {
             boolean contains = fieldNameList.indexOf(titles[i]) >= 0;
             if (!contains) {
-                System.out.println("在excel表中,字段 ---" + titles[i] + " --- 在数据库表中不存在,请添加或修改");
+                //System.out.println("在excel表中,字段 ---" + titles[i] + " --- 在数据库表中不存在,请添加或修改");
                 //responseData.setConditionExcelMessage("在excel表中,字段 ' " + titles[i] + " ' 在数据库表中不存在,请添加或修改");
             } else {
                 for (int j = 1; j < hashMap.size() + 1; j++) {
@@ -673,6 +680,39 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         return titles;
 
     }
+
+    /**
+     * Map转成实体对象
+     * @param map map实体对象包含属性
+     * @param clazz 实体对象类型
+     * @param  flag map的key是下划线(和数据库字段名称一致)命名则为true，key是驼峰命名则为false
+     * @return
+     */
+    //public static Object map2Object(Map<String, Object> map, Class<?> clazz, boolean flag) {
+    //    if (map == null) {
+    //        return null;
+    //    }
+    //    Object obj = null;
+    //    try {
+    //        obj = clazz.newInstance();
+    //
+    //        Field[] fields = obj.getClass().getDeclaredFields();
+    //        for (Field field : fields) {
+    //            int mod = field.getModifiers();
+    //            if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
+    //                continue;
+    //            }
+    //            field.setAccessible(true);
+    //            if (flag)
+    //                field.set(obj, map.get(HumpToUnderline(field.getName())));
+    //            else
+    //                field.set(obj, map.get((field.getName())));
+    //        }
+    //    } catch (Exception e) {
+    //        e.printStackTrace();
+    //    }
+    //    return obj;
+    //}
 
 
 }

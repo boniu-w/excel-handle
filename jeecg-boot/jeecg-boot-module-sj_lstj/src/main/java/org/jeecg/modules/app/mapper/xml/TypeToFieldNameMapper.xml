@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--对应dao-->
+<mapper namespace="org.jeecg.modules.app.mapper.TypeToFieldNameMapper">
+
+    <select id="examineAll" resultType="org.jeecg.modules.app.entity.TypeToFieldName">
+
+        SELECT
+			type,
+			field_name,
+			field_code,
+			GROUP_CONCAT(matching_field_name) as matching_name
+		FROM
+			(
+		SELECT
+			w.field_name,
+			w.field_code,
+			w.type,
+			m.field_name as matching_field_name
+		FROM
+			wordbook w
+			LEFT JOIN matching_to_wordbook m ON w.type = m.type
+			) t
+		GROUP BY
+			type,
+			field_name,
+			field_code
+    </select>
+
+
+</mapper>
