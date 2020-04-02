@@ -638,9 +638,9 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
             }
         }
-
         //System.out.println("collect.size() : " + collect.size());
         responseData.setBankFlowList(collect);
+        bankFlowService.clearBankFlow();
         return collect;
     }
 

@@ -28,4 +28,9 @@ public class BankFlowServiceImpl extends ServiceImpl<BankFlowMapper,BankFlow> im
         List<BankFlow> bankFlows = bankFlowMapper.examimeBankFlowByCondition(tableData);
         return bankFlows;
     }
+
+    @Override
+    public void clearBankFlow() {
+        bankFlowMapper.clearBankFlow();
+    }
 }

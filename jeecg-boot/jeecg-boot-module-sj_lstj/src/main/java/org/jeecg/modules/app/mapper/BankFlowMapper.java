@@ -17,5 +17,6 @@ import java.util.List;
 public interface BankFlowMapper extends BaseMapper<BankFlow> {
 
     List<BankFlow> examimeBankFlowByCondition(TableData tableData);
+    void clearBankFlow();
 
 }
