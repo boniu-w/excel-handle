@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: 9999
   tomcat: 
     max-swallow-size: -1
   servlet:

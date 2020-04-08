@@ -17,6 +17,6 @@ public class TableData {
     private String endTime;
     private Float startMoney;
     private Float endMoney;
-    private String counterParty;
+    private String counterParty; // 交易对手
     private String recoveryMark;
 }

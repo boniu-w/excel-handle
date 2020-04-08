@@ -58,7 +58,7 @@ import java.util.stream.Stream;
 @RequestMapping(value = "/app/appController")
 public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
-    @Autowired
+    @Autowired(required = true)
     BankFlowService bankFlowService;
 
     @Autowired
@@ -139,15 +139,15 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 for (int j = 0; j < titles.length; j++) {
                     String excelTitle = excelTitles[j];
                     String[] split = excelTitle.split("_");
+                    StringBuilder stringBuilder = new StringBuilder(split[0]);
 
-                    String a = split[1];
-                    String b = a.substring(0, 1).toUpperCase();
-                    String c = a.substring(1);
-                    String d = b + c;
+                    for (int i = 0; i < split.length - 1; i++) {
 
-                    String m = split[0] + d;
+                        stringBuilder.append(split[i + 1].substring(0, 1).toUpperCase() + split[i + 1].substring(1));
+                    }
 
-                    map.put(m, titles[j]);
+                    map.put(stringBuilder.toString(), titles[j]);
+
                 }
 
 
@@ -239,7 +239,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * 插入数据库之前, 验证 excel表的表头
      */
     public ResponseData insertExcelIntoDatabase(MultipartFile file, int sheetIndex) {
-        HashMap<Integer, ArrayList<String>> arrayListHashMap = oneToMany();
+        oneToMany();
 
         int count = 0;
 
@@ -374,7 +374,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         for (int i = 0; i < excelTitles.length; i++) {
             boolean contains = fieldNameList.indexOf(excelTitles[i]) >= 0;
             if (!contains) {
-                //System.out.println("在excel表中,字段 ---" + excelTitles[i] + " --- 在数据库表中不存在,请添加或修改");
+                System.out.println("在excel表中,字段 ---" + excelTitles[i] + " --- 在数据库表中不存在,请添加或修改");
                 responseData.setMessage("在excel表中,字段 ' " + excelTitles[i] + " ' 在数据库表中不存在,请添加或修改");
                 return responseData;
             } else {
@@ -545,7 +545,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 
-
         List<MultipartFile> fileList = getFileInfo(request);
         Iterator<MultipartFile> iterator = fileList.iterator();
         while (iterator.hasNext()) {
@@ -553,7 +552,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             Workbook workbook = initWorkbook(file);
             String[] titleArray = transformExcelTitle(file);
 
-            //System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
+            System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
 
             Sheet sheet = workbook.getSheetAt(0);
             int rowNum = sheet.getLastRowNum();
@@ -568,22 +567,28 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 Row rowContent = sheet.getRow(i);
                 HashMap<String, Object> rowMap = new HashMap<String, Object>();
                 HashMap<String, Object> bankFlowMap = new HashMap<String, Object>();
-
-                while (j < colNum) {
-                    Object obj = DatawashReadExcel.getCellFormatValue(rowContent.getCell(j));
-                    rowMap.put(titleArray[j], obj);
-
-                    String[] s = titleArray[j].split("_");
-                    String s1 = s[0] + s[1].substring(0, 1).toUpperCase() + s[1].substring(1);
-                    bankFlowMap.put(s1, obj);
-                    j++;
-                }
-
-                //System.out.println("bankFlowMap : " + bankFlowMap);
-                //System.out.println("rowMap : " + rowMap);
-
-
                 try {
+                    while (j < titleArray.length) {
+                        Object obj = DatawashReadExcel.getCellFormatValue(rowContent.getCell(j));
+                        rowMap.put(titleArray[j], obj);
+
+                        String[] s = titleArray[j].split("_");
+                        StringBuilder stringBuilder = new StringBuilder(s[0]);
+
+                        for (int k = 0; k < s.length - 1; k++) {
+                            stringBuilder.append(s[k + 1].substring(0, 1).toUpperCase() + s[k + 1].substring(1));
+                        }
+
+                        //System.out.println("stringBuilder: " + stringBuilder);
+                        bankFlowMap.put(stringBuilder.toString(), obj);
+
+                        j++;
+                    }
+
+                    //System.out.println("bankFlowMap : " + bankFlowMap);
+                    //System.out.println("rowMap : " + rowMap);
+
+
                     // bankFlowMap 转换 成BankFlow
                     BankFlow bankFlow = JSON.parseObject(JSON.toJSONString(bankFlowMap), BankFlow.class);
                     //System.out.println("bankFlow : " + bankFlow);
@@ -618,7 +623,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     tableData.setStartTime(simpleDateFormat.format(new Date(start)));
                     tableData.setEndTime(simpleDateFormat.format(new Date(end)));
                     tableData.setCounterParty(counterParty);
-                    tableData.setCardEntity(rowMap.get("card_entity").toString());
+                    //tableData.setCardEntity(rowMap.get("card_entity").toString());
 
                     //System.out.println("tableData : " + tableData);
 
@@ -634,6 +639,8 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                 } catch (ParseException e) {
                     e.printStackTrace();
+                } catch (NullPointerException nullPointer) {
+                    nullPointer.printStackTrace();
                 }
 
             }
@@ -651,9 +658,24 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      */
     public String[] transformExcelTitle(MultipartFile file) {
         oneToMany();
+
+        //System.out.println("hashMap: "+hashMap);
+
         DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
 
-        String[] titles = readExcelUtil.readExcelTitle(0);
+        String[] titleNames = readExcelUtil.readExcelTitle(0);
+
+        System.out.println("Arrays.toString(titleNames): " + Arrays.toString(titleNames));
+
+        ArrayList<String> arrayList = new ArrayList<>();
+        for (int i = 0; i < titleNames.length; i++) {
+            if (!StringUtils.isEmpty(titleNames[i])) {
+                arrayList.add(titleNames[i]);
+            }
+        }
+
+        String[] titles = arrayList.toArray(new String[arrayList.size()]);
+
 
         List<String> fieldNameList = wordbookInterface.examineFiledNameFromMatchingToWordbook();
 
@@ -682,37 +704,151 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     }
 
     /**
-     * Map转成实体对象
-     * @param map map实体对象包含属性
-     * @param clazz 实体对象类型
-     * @param  flag map的key是下划线(和数据库字段名称一致)命名则为true，key是驼峰命名则为false
-     * @return
+     * 转驼峰
+     *
+     * @author: wg
+     * @time: 2020/4/8 10:54
      */
-    //public static Object map2Object(Map<String, Object> map, Class<?> clazz, boolean flag) {
-    //    if (map == null) {
-    //        return null;
-    //    }
-    //    Object obj = null;
-    //    try {
-    //        obj = clazz.newInstance();
-    //
-    //        Field[] fields = obj.getClass().getDeclaredFields();
-    //        for (Field field : fields) {
-    //            int mod = field.getModifiers();
-    //            if (Modifier.isStatic(mod) || Modifier.isFinal(mod)) {
-    //                continue;
-    //            }
-    //            field.setAccessible(true);
-    //            if (flag)
-    //                field.set(obj, map.get(HumpToUnderline(field.getName())));
-    //            else
-    //                field.set(obj, map.get((field.getName())));
-    //        }
-    //    } catch (Exception e) {
-    //        e.printStackTrace();
-    //    }
-    //    return obj;
-    //}
+    public String getHumpString(String string) {
+
+        String[] s = string.split("_");
+        StringBuilder stringBuilder = new StringBuilder(s[0]);
+
+        for (int k = 0; k < s.length - 1; k++) {
+            stringBuilder.append(s[k + 1].substring(0, 1).toUpperCase() + s[k + 1].substring(1));
+        }
+
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 逐条解析excel表格的每一行的内容,去查询
+     * 另一个银行的日期格式
+     * @author: wg
+     * @time: 2020/3/31 14:19
+     */
+    @RequestMapping(value = "/conditionExcelExamineBankOfICBC")
+    @ResponseBody
+    public List<BankFlow> conditionExcelExamineBankOfICBC(HttpServletRequest request, HttpServletResponse response) {
+        String percentage = request.getParameter("percentage");
+        String dateScope = request.getParameter("dateScope");
+        String counterParty = request.getParameter("counterParty");
+
+        if ("undefined".equals(counterParty)) {
+            counterParty = "";
+        }
+
+        List<BankFlow> list = new ArrayList<>();
+        List<BankFlow> collect = new ArrayList<>();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd");
+
+
+        List<MultipartFile> fileList = getFileInfo(request);
+        Iterator<MultipartFile> iterator = fileList.iterator();
+        while (iterator.hasNext()) {
+            MultipartFile file = iterator.next();
+            Workbook workbook = initWorkbook(file);
+            String[] titleArray = transformExcelTitle(file);
+
+            System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
+
+            Sheet sheet = workbook.getSheetAt(0);
+            int rowNum = sheet.getLastRowNum();
+
+            Row rowTitle = sheet.getRow(0);
+            int colNum = rowTitle.getPhysicalNumberOfCells();
+
+            // 正文内容应该从第二行开始
+            for (int i = 1; i <= rowNum; i++) {
+                int j = 0;
+
+                Row rowContent = sheet.getRow(i);
+                HashMap<String, Object> rowMap = new HashMap<String, Object>();
+                HashMap<String, Object> bankFlowMap = new HashMap<String, Object>();
+                try {
+                    while (j < titleArray.length) {
+                        Object obj = DatawashReadExcel.getCellFormatValue(rowContent.getCell(j));
+                        rowMap.put(titleArray[j], obj);
+
+                        String[] s = titleArray[j].split("_");
+                        StringBuilder stringBuilder = new StringBuilder(s[0]);
+
+                        for (int k = 0; k < s.length - 1; k++) {
+                            stringBuilder.append(s[k + 1].substring(0, 1).toUpperCase() + s[k + 1].substring(1));
+                        }
+
+                        //System.out.println("stringBuilder: " + stringBuilder);
+                        bankFlowMap.put(stringBuilder.toString(), obj);
+
+                        j++;
+                    }
+
+                    //System.out.println("bankFlowMap : " + bankFlowMap);
+                    //System.out.println("rowMap : " + rowMap);
+
+
+                    // bankFlowMap 转换 成BankFlow
+                    BankFlow bankFlow = JSON.parseObject(JSON.toJSONString(bankFlowMap), BankFlow.class);
+                    //System.out.println("bankFlow : " + bankFlow);
+
+                    list.add(bankFlow);
+
+
+                    /* 开始 查询分析 */
+                    TableData tableData = new TableData();
+                    Object transaction_amount = rowMap.get("transaction_amount");
+                    float transactionMoney = Float.parseFloat(transaction_amount.toString());
+                    tableData.setStartMoney(transactionMoney * (1 - Float.parseFloat(percentage) / 100));
+                    tableData.setEndMoney(transactionMoney * (1 + Float.parseFloat(percentage) / 100));
+
+                    Object recovery_mark = rowMap.get("recovery_mark");
+                    if ("进".equals(recovery_mark.toString())) {
+                        tableData.setRecoveryMark("出");
+                    }
+                    if ("出".equals(recovery_mark.toString())) {
+                        tableData.setRecoveryMark("进");
+                    }
+
+
+                    Object transactionDate = rowMap.get("transaction_date");
+
+                    Date date = simpleDateFormat.parse(transactionDate.toString());
+                    long time = date.getTime();
+                    int i1 = (24 * 60 * 60 * 1000) * Integer.parseInt(dateScope);
+                    long start = time - i1;
+                    long end = time + i1;
+
+                    tableData.setStartTime(simpleDateFormat.format(new Date(start)));
+                    tableData.setEndTime(simpleDateFormat.format(new Date(end)));
+                    tableData.setCounterParty(counterParty);
+                    //tableData.setCardEntity(rowMap.get("card_entity").toString());
+
+                    //System.out.println("tableData : " + tableData);
+
+                    List<BankFlow> bankFlowList = bankFlowService.examimeBankFlowByCondition(tableData);
+                    //System.out.println("bankFlowList.size() : " + bankFlowList.size());
+
+                    list.addAll(bankFlowList);
+
+                    collect = Stream.of(bankFlowList, list)
+                      .flatMap(Collection::stream)
+                      .distinct()
+                      .collect(Collectors.toList());
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException nullPointer) {
+                    nullPointer.printStackTrace();
+                }
+
+            }
+        }
+        //System.out.println("collect.size() : " + collect.size());
+        responseData.setBankFlowList(collect);
+        bankFlowService.clearBankFlow();
+        return collect;
+    }
 
 
 }

@@ -26,4 +26,12 @@
 
     </select>
 
+    <delete id="clearFileUpload">
+        TRUNCATE file_upload
+    </delete>
+
+    <delete id="deleteOneByFileName">
+        delete from file_upload where file_name=#{fileName}
+    </delete>
+
 </mapper>

@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,10 +81,21 @@ public class DatawashReadExcel {
         // 标题总列数
         int colNum = row.getPhysicalNumberOfCells();
 
+        System.out.println("colNum: " + colNum);
+
         String[] title = new String[colNum];
-        for (int i = 0; i < colNum; i++) {
-            title[i] = row.getCell(i).getStringCellValue();
+
+        try {
+            for (int i = 0; i < colNum; i++) {
+                title[i] = row.getCell(i).getStringCellValue();
+                //System.out.println(Arrays.toString(title));
+
+            }
+        } catch (NullPointerException nullPointer) {
+            nullPointer.printStackTrace();
         }
+
+
         return title;
 
 
@@ -116,9 +128,6 @@ public class DatawashReadExcel {
             int j = 0;
             HashMap<String, Object> cellValue = new HashMap<String, Object>();
             while (j < colNum) {
-                Cell cell = row.getCell(j);
-                CellStyle cellStyle = cell.getCellStyle();
-
                 Object obj = getCellFormatValue(row.getCell(j));
                 cellValue.put(titleArray[j], obj);
                 j++;
@@ -128,7 +137,6 @@ public class DatawashReadExcel {
         }
         return contentMap;
     }
-
 
 
     /**
@@ -143,30 +151,22 @@ public class DatawashReadExcel {
 
 
         if (cell != null) {
-            // 判断当前Cell的Type
+
             switch (cell.getCellType()) {
-                // 如果当前Cell的Type为NUMERIC
                 case Cell.CELL_TYPE_NUMERIC: {
-                    // 判断当前的cell是否为Date
                     short s = cell.getCellStyle().getDataFormat();
                     if (ExcelDateUtil.isCellDateFormatted(cell)) {
                         Date date = cell.getDateCellValue();
                         cellvalue = date;
-                    } else { // 如果是纯数字
-                        // 取得当前Cell的数值
-                        //cellvalue = String.valueOf(cell.getNumericCellValue());
+                    } else {
                         cellvalue = decimalFormat.format(cell.getNumericCellValue()).replace(",", "");
                     }
                     break;
                 }
-                // 如果当前Cell的Type为STRING
+
                 case Cell.CELL_TYPE_STRING:
-                    // 取得当前的Cell字符串
-
                     cellvalue = cell.getRichStringCellValue().getString().replace(",", "");
-
                     break;
-
                 case Cell.CELL_TYPE_BOOLEAN:
                     cellvalue = String.valueOf(cell.getBooleanCellValue());
                     break;

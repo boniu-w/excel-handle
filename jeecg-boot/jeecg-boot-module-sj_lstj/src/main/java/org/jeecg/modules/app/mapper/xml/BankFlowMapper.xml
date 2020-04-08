@@ -14,9 +14,11 @@
         FROM
         `bank_flow`
         <where>
-            card_entity = #{cardEntity}
             <if test="startTime !='' and startTime != null and endTime != '' and endTime != null">
-                AND date(transaction_date) BETWEEN #{startTime} and #{endTime}
+                date(transaction_date) BETWEEN #{startTime} and #{endTime}
+            </if>
+            <if test="cardEntity !='' and cardEntity != null">
+                AND  card_entity = #{cardEntity}
             </if>
             <if test="endMoney !='' and endMoney != null ">
                 AND transaction_amount &gt; #{startMoney}
