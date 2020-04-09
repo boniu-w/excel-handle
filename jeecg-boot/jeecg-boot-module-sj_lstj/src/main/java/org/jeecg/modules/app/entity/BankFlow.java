@@ -103,6 +103,33 @@ public class BankFlow {
     @Excel(name = "对手交易后余额")
     private String matcherBalance;
 
+    @Excel(name = "交易主体证件号")
+    private String subjectCredentials;
+
+    @Excel(name = "交易对手证件号")
+    private String adversaryCredentials;
+
+    @Excel(name = "交易记录id")
+    private String trancationRecordsId;
+
+    @Excel(name = "报告机构")
+    private String reportOrganization;
+
+    @Excel(name = "涉外收支分类")
+    private String sheWaiFenLei;
+
+    @Excel(name = "代办人名称")
+    private String agentName;
+
+    @Excel(name = "代办人证件号")
+    private String agentCredentials;
+
+    @Excel(name = "凭证号码")
+    private String voucherNumber;
+
+    @Excel(name = "凭证类型")
+    private String voucherType;
+
 
     @Override
     public boolean equals(Object o) {

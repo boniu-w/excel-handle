@@ -187,27 +187,18 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     /**
      * 获取 前端 上传的文件信息
      */
-    //@PostMapping(value = "/getFileInfo")
     public List<MultipartFile> getFileInfo(HttpServletRequest request) {
-        // 将当前上下文初始化给commonsMultipartResolver,判断request是否为MultipartHttpServletRequest类型
         CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
         if (request instanceof MultipartHttpServletRequest) {
-            // 解析文件流，查看是否存在文件信息
-            // 将request强转为MultipartHttpServletRequest类型
             MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
 
-            // 创建一个迭代器，为接下来的迭代做准备
             Iterator<String> iterator = multipartHttpServletRequest.getFileNames();
 
-            // 检查form中是否有enctype="multipart/form-data"，并且判断Iterator是否还存在值 && iterator.hasNext()
             if (commonsMultipartResolver.isMultipart(request)) {
 
-                // 开始遍历文件
-                // 创建文件存储的一个集合,并初始化
                 // (这里使用Vector，而不使用ArrayLsit，是怕引起线程安全问题，因为后面会引用到相同的内存地址)
                 List<MultipartFile> fileVector = new Vector<>();
 
-                //对iterator进行遍历
                 while (iterator.hasNext()) {
                     // 将当前文件名一致的文件流放入同一个集合中
                     List<MultipartFile> fileRows = multipartHttpServletRequest.getFiles(iterator.next());
@@ -215,13 +206,10 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     //对文件做去重设置
                     //判断集合是否存在，并且是否大于0
                     if (fileRows != null && fileRows.size() != 0) {
-                        //对文件集合进行遍历
                         for (MultipartFile file : fileRows) {
-                            //判断文件是否存在
                             String name = file.getName();
 
                             if (file != null && !file.isEmpty()) {
-                                //添加文件
                                 fileVector.add(file);
                             }
                         }
@@ -246,12 +234,11 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         ResponseData responseData = resolveExcelTitle(file, sheetIndex);
         //System.out.println("**********" + responseData);
         try {
-            // 解析表头成功 , 执行插入操作
+
             if (StringUtils.isEmpty(responseData.getMessage())) {
                 // to_date(#{transaction_date},'yyyy-mm-dd hh24:mi:ss'),
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
-                //  获取源表的数据, 以更改后的 表头名作为键
                 DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
                 Map<Integer, Map<String, Object>> contentMapMap = readExcelUtil.readExcelContent(excelTitles, sheetIndex);
 
@@ -263,10 +250,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                     Map<String, Object> value = contentMap.getValue();
 
-                    Object transaction_date = value.get("transaction_date");
+                    //Object transaction_date = value.get("transaction_date");
+                    //Date date = simpleDateFormat.parse(transaction_date.toString());
 
-                    Date date = simpleDateFormat.parse(transaction_date.toString());
-                    long dateTime = date.getTime();
+                    Date transaction_date = (Date) value.get("transaction_date");
+                    long dateTime = transaction_date.getTime();
+
+                    //long dateTime = date.getTime();
                     value.put("transaction_date", new Timestamp(dateTime));
 
                     //if ("".equals(transaction_date)) {
@@ -543,12 +533,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         List<BankFlow> list = new ArrayList<>();
         List<BankFlow> collect = new ArrayList<>();
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
         List<MultipartFile> fileList = getFileInfo(request);
         Iterator<MultipartFile> iterator = fileList.iterator();
         while (iterator.hasNext()) {
             MultipartFile file = iterator.next();
+            String filename = file.getOriginalFilename();
             Workbook workbook = initWorkbook(file);
             String[] titleArray = transformExcelTitle(file);
 
@@ -613,15 +604,24 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
 
                     Object transactionDate = rowMap.get("transaction_date");
+                    long time = 0L;
+                    if (transactionDate instanceof String) {
 
-                    Date date = simpleDateFormat.parse(transactionDate.toString());
-                    long time = date.getTime();
+                        Date date = simpleDateFormat.parse(transactionDate.toString());
+                        time = date.getTime();
+
+                    }
+                    if (transactionDate instanceof Date) {
+                        time = ((Date) transactionDate).getTime();
+
+                    }
                     int i1 = (24 * 60 * 60 * 1000) * Integer.parseInt(dateScope);
                     long start = time - i1;
                     long end = time + i1;
-
                     tableData.setStartTime(simpleDateFormat.format(new Date(start)));
                     tableData.setEndTime(simpleDateFormat.format(new Date(end)));
+
+
                     tableData.setCounterParty(counterParty);
                     //tableData.setCardEntity(rowMap.get("card_entity").toString());
 
@@ -637,6 +637,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                       .distinct()
                       .collect(Collectors.toList());
 
+
                 } catch (ParseException e) {
                     e.printStackTrace();
                 } catch (NullPointerException nullPointer) {
@@ -644,10 +645,12 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 }
 
             }
+            fileUploadService.deleteOneByFileName(filename);
+            //System.out.println("collect.size() : " + collect.size());
+            bankFlowService.clearBankFlow();
         }
-        //System.out.println("collect.size() : " + collect.size());
         responseData.setBankFlowList(collect);
-        bankFlowService.clearBankFlow();
+
         return collect;
     }
 
@@ -724,6 +727,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     /**
      * 逐条解析excel表格的每一行的内容,去查询
      * 另一个银行的日期格式
+     *
      * @author: wg
      * @time: 2020/3/31 14:19
      */

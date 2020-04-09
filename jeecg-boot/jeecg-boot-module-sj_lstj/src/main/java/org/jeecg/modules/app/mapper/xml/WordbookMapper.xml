@@ -141,6 +141,42 @@
                 matcher_balance,
             </if>
 
+            <if test=" subject_credentials != '' and subject_credentials != null">
+                subject_credentials,
+            </if>
+
+            <if test=" adversary_credentials != '' and adversary_credentials != null">
+                adversary_credentials,
+            </if>
+
+            <if test=" trancation_records_id != '' and trancation_records_id != null">
+                trancation_records_id,
+            </if>
+
+            <if test=" report_organization != '' and report_organization != null">
+                report_organization,
+            </if>
+
+            <if test=" she_wai_fen_lei != '' and she_wai_fen_lei != null">
+                she_wai_fen_lei,
+            </if>
+
+            <if test=" agent_name != '' and agent_name != null">
+                agent_name,
+            </if>
+
+            <if test=" agent_credentials != '' and agent_credentials != null">
+                agent_credentials,
+            </if>
+
+            <if test=" voucher_number != '' and voucher_number != null">
+                voucher_number,
+            </if>
+
+            <if test=" voucher_type != '' and voucher_type != null">
+                voucher_type,
+            </if>
+
 
         </trim>
 
@@ -192,7 +228,7 @@
                 #{transaction_bank},
             </if>
             <if test="counterparty_bank != '' and counterparty_bank != null">
-                #{ counterparty_bank},
+                #{counterparty_bank},
             </if>
             <if test="place_transaction != '' and place_transaction != null">
                 #{place_transaction},
@@ -240,7 +276,31 @@
                 #{matcher_code},
             </if>
             <if test="matcher_balance != '' and matcher_balance != null">
-                #{matcher_balance}
+                #{matcher_balance},
+            </if>
+            <if test=" adversary_credentials != '' and adversary_credentials != null">
+                #{adversary_credentials},
+            </if>
+            <if test=" trancation_records_id != '' and trancation_records_id != null">
+                #{trancation_records_id},
+            </if>
+            <if test=" report_organization != '' and report_organization != null">
+                #{report_organization},
+            </if>
+            <if test=" she_wai_fen_lei != '' and she_wai_fen_lei != null">
+                #{she_wai_fen_lei},
+            </if>
+            <if test=" agent_name != '' and agent_name != null">
+                #{agent_name},
+            </if>
+            <if test=" agent_credentials != '' and agent_credentials != null">
+                #{agent_credentials},
+            </if>
+            <if test=" voucher_number != '' and voucher_number != null">
+                #{voucher_number},
+            </if>
+            <if test=" voucher_type != '' and voucher_type != null">
+                #{voucher_type},
             </if>
 
         </trim>

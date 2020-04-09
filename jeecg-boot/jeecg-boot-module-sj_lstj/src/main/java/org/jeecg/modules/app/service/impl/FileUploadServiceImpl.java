@@ -43,4 +43,11 @@ public class FileUploadServiceImpl implements FileUploadService {
         List<FileUpload> allFileInfoList = fileUploadMapper.examineAllFileInfo();
         return allFileInfoList;
     }
+
+    @Override
+    public void deleteOneByFileName(String filename) {
+        fileUploadMapper.deleteOneByFileName(filename);
+    }
+
+
 }

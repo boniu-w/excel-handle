@@ -16,4 +16,5 @@ public interface FileUploadService {
     int insertIntoFileUpload(FileUpload fileUpload);
     FileUpload examineFileUpload(String titleName);
     List<FileUpload> examineAllFileInfo();
+    void deleteOneByFileName(String filename);
 }
