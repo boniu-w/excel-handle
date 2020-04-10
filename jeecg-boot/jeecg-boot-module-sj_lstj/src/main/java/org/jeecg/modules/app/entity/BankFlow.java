@@ -130,6 +130,7 @@ public class BankFlow {
     @Excel(name = "凭证类型")
     private String voucherType;
 
+    private String excelName;
 
     @Override
     public boolean equals(Object o) {

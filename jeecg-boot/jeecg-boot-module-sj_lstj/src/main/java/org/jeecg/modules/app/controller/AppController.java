@@ -92,7 +92,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     @ResponseBody
     public ResponseData getFileInfo(HttpServletRequest request, HttpServletResponse response) {
         responseData = new ResponseData();
-        responseData.setFileMessage("");
         String message = "";
         List<MultipartFile> fileList = getFileInfo(request);
 
@@ -108,8 +107,8 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             if (!StringUtils.isEmpty(fileName)) {
                 message = " '" + name + "' 这个文件已经导入过数据库了,不需要重复导入";
                 responseData.setFileMessage(message);
-
                 responseData.setFileName(fileName);
+
                 System.out.println("responseData: " + responseData);
                 return responseData;
             } else {
@@ -123,14 +122,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 fileUpload.setFileName(name);
                 fileUpload.setUpdateTime(timestamp);
 
-
                 DatawashReadExcel readExcel = new DatawashReadExcel(file);
 
                 // 此处sheetQuantities 为读取的excel表的sheet数量,如果不需要可以修改为1;
                 int sheetQuantities = readExcel.getSheetQuantities();
 
                 responseData = insertExcelIntoDatabase(file, 0);
-                System.out.println("resData: " + responseData);
+                System.out.println("responseData: " + responseData);
 
                 if (!StringUtils.isEmpty(responseData.getMessage())) {
                     return responseData;
@@ -152,7 +150,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                 }
 
-
                 String fileTitle = JSON.toJSONString(map);
 
                 System.out.println("fileTitle: " + fileTitle);
@@ -161,7 +158,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 //System.out.println("getInfo map:   " + map);
                 if (responseData.getCount() > 0) {
 
-                    int i = fileUploadService.insertIntoFileUpload(fileUpload);
+                    fileUploadService.insertIntoFileUpload(fileUpload);
                 }
 
                 return responseData;
@@ -239,6 +236,8 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         int count = 0;
 
+        String fileName = file.getOriginalFilename();
+
         responseData = resolveExcelTitle(file, sheetIndex);
         //System.out.println("**********" + responseData);
         try {
@@ -273,14 +272,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                     String uuid = UUID.randomUUID().toString().replace("-", "");
                     value.put("id", uuid);
-
-
-                    Set<Map.Entry<String, Object>> entries = value.entrySet();
-                    Iterator<Map.Entry<String, Object>> entryIterator = entries.iterator();
-                    while (entryIterator.hasNext()) {
-                        Map.Entry<String, Object> next = entryIterator.next();
-                        //System.out.println(next.getKey() + "--" + next.getValue());
-                    }
+                    value.put("excel_name",fileName);
 
                     //System.out.println("value.size() : " + value.size());
                     //System.out.println("contentMap : " + contentMap);
@@ -290,7 +282,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     wordbookInterface.insertBankFlow(value);
                     count++;
                 }
-                //System.out.println("--------" + contentMapMap);
+                System.out.println("count: " + count);
                 responseData.setCount(count);
                 return responseData;
             } else {
@@ -734,4 +726,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
         return message;
     }
+
+
 }
