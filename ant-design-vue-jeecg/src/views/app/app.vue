@@ -1,7 +1,17 @@
 <template>
   <div>
     <a-card>
-      <p>测试：</p>
+      <a-alert v-if="message.length > 0" message="Warning" :description="message" type="warning" showIcon />
+      <a-row type="flex" justify="space-between">
+        <a-col :span="2">
+          <p>测试：</p>
+        </a-col>
+        <a-col :span="4">
+          <a-popconfirm title="是否清空数据库流水表" @confirm="confirm" @cancel="cancel" okText="是" cancelText="否">
+            <a-button type="danger">清空数据库流水表</a-button>
+          </a-popconfirm>
+        </a-col>
+      </a-row>
       <div>
         <!-- :headers="headers" -->
         <a-upload
@@ -9,7 +19,8 @@
           action="/jeecg-boot/app/appController/getInfo"
           :headers="headers"
           @change="handleUploadChange"
-          :multiple="true"
+          :multiple="false"
+          :fileList="fileList"
         >
           <a-button>上传</a-button>
         </a-upload>
@@ -90,18 +101,6 @@
             </a-col>
           </a-row>
         </a-form>
-
-        <!-- <a-table
-          rowKey="id"
-          size="small"
-          bordered
-          :columns="columns"
-          :dataSource="myConditionsDataSource"
-          :loading="loading"
-          :scroll="{ x: 2000, y: 240 }"
-          style="font-size:5px;"
-          :showHeader="myConditionsDataSource.length > 0"
-        ></a-table> -->
       </div>
     </a-card>
     <a-card>
@@ -111,7 +110,7 @@
         </a-col>
       </a-row>
       <a-table
-        rowKey="id"
+        rowkey="key"
         size="small"
         bordered
         :columns="columns"
@@ -141,6 +140,7 @@ export default {
       form: this.$form.createForm(this),
       myArr: [0],
       file: null,
+      message: '',
       myDataSource: [],
       fileList: [],
       fileListName: [],
@@ -155,7 +155,6 @@ export default {
           customRender: function(t, r, index) {
             return parseInt(index) + 1
           },
-
           fixed: 'left'
         }
       ],
@@ -205,8 +204,9 @@ export default {
     },
     load() {
       postAction(this.url.getFileInfoUploaded).then(res => {
-        if (res) {
-          this.fileList = res
+        console.log(res, 222)
+        if (res.length > 0) {
+          let fileList = res
           this.resData = res.map(item => {
             return {
               createTime: item.createTime,
@@ -221,15 +221,16 @@ export default {
           let titleMap = this.resData[0].fileTitle
           // 获取数据表头
           this.getTableTitle(titleMap)
-          if (this.fileList.length > 12) {
+          if (fileList.length > 12) {
             this.showButton = true
           }
-          this.fileListName = this.fileList.slice(0, 12)
+          this.fileListName = fileList.slice(0, 12)
         }
         console.log(res, '初始数据')
       })
     },
     getTableTitle(titleMap) {
+      console.log(titleMap, 111)
       let titleArr = Object.keys(titleMap).map((item, i) => {
         if (item) {
           return {
@@ -259,11 +260,24 @@ export default {
       }
     },
     handleUploadChange(info) {
+      this.fileList = [...info.fileList]
       if (info.file.status !== 'uploading') {
-        window.console.log(info.file, info.fileList, 222)
+        // window.console.log(info.file, info.fileList, 222)
       }
       if (info.file.status === 'done') {
-        console.log(info, 'info')
+        let altMessage = info.file.response
+        console.log(altMessage, 'info')
+
+        if (altMessage.message && altMessage.message.length > 0) {
+          this.message = altMessage.message
+          return
+        } else if (altMessage.fileMessage && altMessage.fileMessage.length > 0) {
+          this.message = altMessage.fileMessage
+          return
+        } else {
+          this.message = false
+        }
+
         this.$message.success(`${info.file.name} file uploaded successfully`)
         this.load()
       } else if (info.file.status === 'error') {
@@ -284,13 +298,6 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log(values)
-          // const { percentage, dateScope, counterParty } = values
-          // console.log(this.myArr, 'myArr')
-          // let data = this.myArr.map(item => {
-          //   return {
-          //     counterParty: counterParty[item] == '' ? null : counterParty[item]
-          //   }
-          // })
           let formData = new FormData()
           formData.append('percentage', values.percentage)
           formData.append('dateScope', values.dateScope)
@@ -344,6 +351,23 @@ export default {
         this.openFileDialogOnClick = true
       }
       return
+    },
+
+    confirm(e) {
+      getAction('/app/appController/clearDatabase').then(res => {
+        if (res) {
+          this.$message.success(res)
+          this.clear()
+        }
+      })
+    },
+    cancel(e) {
+      this.$message.error('清空异常')
+    },
+    clear() {
+      this.fileListName = []
+      this.fileList = []
+      this.form.resetFields()
     }
   }
 }

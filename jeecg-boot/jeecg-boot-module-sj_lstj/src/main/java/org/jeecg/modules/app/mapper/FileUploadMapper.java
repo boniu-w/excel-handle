@@ -19,4 +19,5 @@ public interface FileUploadMapper {
     FileUpload examineFileUpload(String titleName);
     List<FileUpload> examineAllFileInfo();
     void deleteOneByFileName(String filename);
+    void clearFileUpload();
 }

@@ -74,13 +74,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
     int index = 1;
 
-    static String[] excelTitles;
+    static String[] excelTitles;  // 353
 
     static String[] titles; // 汉字形式的标题
 
     static HashMap map = new HashMap();
 
-    ResponseData responseData = new ResponseData();
+    static ResponseData responseData;
 
 
     /**
@@ -91,8 +91,8 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     @PostMapping(value = "/getInfo")
     @ResponseBody
     public ResponseData getFileInfo(HttpServletRequest request, HttpServletResponse response) {
-
-        ResponseData responseData = new ResponseData();
+        responseData = new ResponseData();
+        responseData.setFileMessage("");
         String message = "";
         List<MultipartFile> fileList = getFileInfo(request);
 
@@ -105,13 +105,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             //System.out.println("file name: " + name);
             String fileName = fileUploadService.examineFileName(name);
 
-
             if (!StringUtils.isEmpty(fileName)) {
-                message = name + "--这个文件已经导入过数据库了,不需要重复导入";
+                message = " '" + name + "' 这个文件已经导入过数据库了,不需要重复导入";
                 responseData.setFileMessage(message);
 
                 responseData.setFileName(fileName);
-
+                System.out.println("responseData: " + responseData);
+                return responseData;
             } else {
 
                 String uuid = UUID.randomUUID().toString().replace("-", "");
@@ -129,12 +129,14 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 // 此处sheetQuantities 为读取的excel表的sheet数量,如果不需要可以修改为1;
                 int sheetQuantities = readExcel.getSheetQuantities();
 
-                ResponseData resData = insertExcelIntoDatabase(file, 0);
-                //System.out.println(",,,,,,,getInfo,,,,,,,," + resData);
-                resData.setFileName(fileName);
+                responseData = insertExcelIntoDatabase(file, 0);
+                System.out.println("resData: " + responseData);
 
-                HashMap<Integer, ArrayList<String>> hash = oneToMany();
+                if (!StringUtils.isEmpty(responseData.getMessage())) {
+                    return responseData;
+                }
 
+                responseData.setFileName(fileName);
 
                 for (int j = 0; j < titles.length; j++) {
                     String excelTitle = excelTitles[j];
@@ -153,17 +155,22 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                 String fileTitle = JSON.toJSONString(map);
 
+                System.out.println("fileTitle: " + fileTitle);
                 fileUpload.setFileTitle(fileTitle);
 
                 //System.out.println("getInfo map:   " + map);
-                int i = fileUploadService.insertIntoFileUpload(fileUpload);
+                if (responseData.getCount() > 0) {
 
-                return resData;
+                    int i = fileUploadService.insertIntoFileUpload(fileUpload);
+                }
+
+                return responseData;
 
             }
         }
 
-        return null;
+
+        return responseData;
     }
 
     /**
@@ -227,11 +234,12 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * 插入数据库之前, 验证 excel表的表头
      */
     public ResponseData insertExcelIntoDatabase(MultipartFile file, int sheetIndex) {
+        responseData.setMessage("");
         oneToMany();
 
         int count = 0;
 
-        ResponseData responseData = resolveExcelTitle(file, sheetIndex);
+        responseData = resolveExcelTitle(file, sheetIndex);
         //System.out.println("**********" + responseData);
         try {
 
@@ -250,25 +258,18 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                     Map<String, Object> value = contentMap.getValue();
 
-                    //Object transaction_date = value.get("transaction_date");
-                    //Date date = simpleDateFormat.parse(transaction_date.toString());
+                    Object transaction_date = value.get("transaction_date");
+                    long dateTime = 0L;
+                    if (transaction_date instanceof Date) {
+                        dateTime = ((Date) transaction_date).getTime();
+                    }
 
-                    Date transaction_date = (Date) value.get("transaction_date");
-                    long dateTime = transaction_date.getTime();
+                    if (transaction_date instanceof String) {
+                        dateTime = simpleDateFormat.parse(transaction_date.toString()).getTime();
 
-                    //long dateTime = date.getTime();
+                    }
+
                     value.put("transaction_date", new Timestamp(dateTime));
-
-                    //if ("".equals(transaction_date)) {
-                    //    value.put("transaction_date", transaction_date);
-                    //} else if (transaction_date instanceof String || transaction_date instanceof Integer) {
-                    //    Date parse = simpleDateFormat.parse((String) transaction_date);
-                    //    value.put("transaction_date", parse);
-                    //} else if (transaction_date.getClass().isInstance(Date.class) || transaction_date instanceof Date) {
-                    //    long time = ((Date) transaction_date).getTime();
-                    //    Timestamp timestamp = new Timestamp(time);
-                    //    value.put("transaction_date", timestamp);
-                    //}
 
                     String uuid = UUID.randomUUID().toString().replace("-", "");
                     value.put("id", uuid);
@@ -286,8 +287,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
 
                     // 调用insert方法 加入数据库
-
-
                     wordbookInterface.insertBankFlow(value);
                     count++;
                 }
@@ -295,7 +294,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 responseData.setCount(count);
                 return responseData;
             } else {
-                return null;
+                return responseData;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -312,10 +311,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      */
     public HashMap<Integer, ArrayList<String>> oneToMany() {
         hashMap = new HashMap<>();
-        // 以type 为键 fieldName 的集合 为值
-        // 存储数据库字段<type fieldName>
-
-        // 查询 标准表
+        // 以type 为键 fieldName 的集合 为值 , 存储数据库字段<type fieldName>
         List<Wordbook> wordbooks = wordbookInterface.examineWordbookAll();
 
         // 查询匹配表
@@ -349,41 +345,42 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      */
     @ApiOperation(value = "解析表头,如果表头中字段与数据库不匹配返回信息")
     public ResponseData resolveExcelTitle(MultipartFile file, int sheetIndex) {
-        ResponseData responseData = new ResponseData();
         DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
         // 这一步是为了 改变 表头的名字 ,把表头改成 数据库里的 fieldcode 如果数据库中没有匹配的字段 则
         titles = readExcelUtil.readExcelTitle(sheetIndex);
-        //responseData.setTitles(titles);
 
         excelTitles = Arrays.copyOf(titles, titles.length);
 
-        //System.out.println("******resolveExcelTitle****    " + responseData);
+        //System.out.println("responseData-resolveExcelTitle:  " + responseData);
 
         List<String> fieldNameList = wordbookInterface.examineFiledNameFromMatchingToWordbook();
 
         for (int i = 0; i < excelTitles.length; i++) {
             boolean contains = fieldNameList.indexOf(excelTitles[i]) >= 0;
             if (!contains) {
-                System.out.println("在excel表中,字段 ---" + excelTitles[i] + " --- 在数据库表中不存在,请添加或修改");
-                responseData.setMessage("在excel表中,字段 ' " + excelTitles[i] + " ' 在数据库表中不存在,请添加或修改");
+
+                //System.out.println("在excel表中,字段 ---" + excelTitles[i] + " --- 在数据库字典表中不存在,请修改或联系管理员");
+                responseData.setMessage("在excel表中,字段 ' " + excelTitles[i] + " ' 在数据库字典表中不存在,请修改或联系管理员");
                 return responseData;
             } else {
                 for (int j = 1; j < hashMap.size() + 1; j++) {
                     // 得到 type = j 时 对应的字段 列表
                     ArrayList<String> strings = hashMap.get(j);
+
                     Iterator<String> iterator = strings.iterator();
                     while (iterator.hasNext()) {
                         String next = iterator.next();
 
                         // 如果数据库字段 与 excel标题字段 匹配
                         if (next.contains(excelTitles[i])) {
-                            // 再通过 j的值 (type 值) 查数据库 得到fieldname
-                            // 再把 fidlename 赋给 excelTitles[i]
                             String fieldCode = wordbookInterface.examineWordbookFieldCodeByType(j);
                             excelTitles[i] = fieldCode;
                         }
+
+                        //System.out.println("Arrays.toString(excelTitles): "+Arrays.toString(excelTitles));
                     }
                 }
+
             }
         }
 
@@ -522,6 +519,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     @RequestMapping(value = "/conditionExcelExamine")
     @ResponseBody
     public List<BankFlow> conditionExcelExamine(HttpServletRequest request, HttpServletResponse response) {
+        responseData = new ResponseData();
         String percentage = request.getParameter("percentage");
         String dateScope = request.getParameter("dateScope");
         String counterParty = request.getParameter("counterParty");
@@ -645,15 +643,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 }
 
             }
-            fileUploadService.deleteOneByFileName(filename);
-            //System.out.println("collect.size() : " + collect.size());
-            bankFlowService.clearBankFlow();
+
+            System.out.println("collect.size() : " + collect.size());
         }
         responseData.setBankFlowList(collect);
 
         return collect;
     }
-
 
     /**
      * 获取表头数组,转换表头数组,由文字 转换成 fieldCode;
@@ -678,7 +674,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         }
 
         String[] titles = arrayList.toArray(new String[arrayList.size()]);
-
 
         List<String> fieldNameList = wordbookInterface.examineFiledNameFromMatchingToWordbook();
 
@@ -725,134 +720,18 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     }
 
     /**
-     * 逐条解析excel表格的每一行的内容,去查询
-     * 另一个银行的日期格式
-     *
      * @author: wg
-     * @time: 2020/3/31 14:19
+     * @time: 2020/4/9 16:06
      */
-    @RequestMapping(value = "/conditionExcelExamineBankOfICBC")
+    @RequestMapping(value = "/clearDatabase")
     @ResponseBody
-    public List<BankFlow> conditionExcelExamineBankOfICBC(HttpServletRequest request, HttpServletResponse response) {
-        String percentage = request.getParameter("percentage");
-        String dateScope = request.getParameter("dateScope");
-        String counterParty = request.getParameter("counterParty");
+    public String clearDatabase(HttpServletRequest request, HttpServletResponse response) {
 
-        if ("undefined".equals(counterParty)) {
-            counterParty = "";
-        }
-
-        List<BankFlow> list = new ArrayList<>();
-        List<BankFlow> collect = new ArrayList<>();
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd");
-
-
-        List<MultipartFile> fileList = getFileInfo(request);
-        Iterator<MultipartFile> iterator = fileList.iterator();
-        while (iterator.hasNext()) {
-            MultipartFile file = iterator.next();
-            Workbook workbook = initWorkbook(file);
-            String[] titleArray = transformExcelTitle(file);
-
-            System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
-
-            Sheet sheet = workbook.getSheetAt(0);
-            int rowNum = sheet.getLastRowNum();
-
-            Row rowTitle = sheet.getRow(0);
-            int colNum = rowTitle.getPhysicalNumberOfCells();
-
-            // 正文内容应该从第二行开始
-            for (int i = 1; i <= rowNum; i++) {
-                int j = 0;
-
-                Row rowContent = sheet.getRow(i);
-                HashMap<String, Object> rowMap = new HashMap<String, Object>();
-                HashMap<String, Object> bankFlowMap = new HashMap<String, Object>();
-                try {
-                    while (j < titleArray.length) {
-                        Object obj = DatawashReadExcel.getCellFormatValue(rowContent.getCell(j));
-                        rowMap.put(titleArray[j], obj);
-
-                        String[] s = titleArray[j].split("_");
-                        StringBuilder stringBuilder = new StringBuilder(s[0]);
-
-                        for (int k = 0; k < s.length - 1; k++) {
-                            stringBuilder.append(s[k + 1].substring(0, 1).toUpperCase() + s[k + 1].substring(1));
-                        }
-
-                        //System.out.println("stringBuilder: " + stringBuilder);
-                        bankFlowMap.put(stringBuilder.toString(), obj);
-
-                        j++;
-                    }
-
-                    //System.out.println("bankFlowMap : " + bankFlowMap);
-                    //System.out.println("rowMap : " + rowMap);
-
-
-                    // bankFlowMap 转换 成BankFlow
-                    BankFlow bankFlow = JSON.parseObject(JSON.toJSONString(bankFlowMap), BankFlow.class);
-                    //System.out.println("bankFlow : " + bankFlow);
-
-                    list.add(bankFlow);
-
-
-                    /* 开始 查询分析 */
-                    TableData tableData = new TableData();
-                    Object transaction_amount = rowMap.get("transaction_amount");
-                    float transactionMoney = Float.parseFloat(transaction_amount.toString());
-                    tableData.setStartMoney(transactionMoney * (1 - Float.parseFloat(percentage) / 100));
-                    tableData.setEndMoney(transactionMoney * (1 + Float.parseFloat(percentage) / 100));
-
-                    Object recovery_mark = rowMap.get("recovery_mark");
-                    if ("进".equals(recovery_mark.toString())) {
-                        tableData.setRecoveryMark("出");
-                    }
-                    if ("出".equals(recovery_mark.toString())) {
-                        tableData.setRecoveryMark("进");
-                    }
-
-
-                    Object transactionDate = rowMap.get("transaction_date");
-
-                    Date date = simpleDateFormat.parse(transactionDate.toString());
-                    long time = date.getTime();
-                    int i1 = (24 * 60 * 60 * 1000) * Integer.parseInt(dateScope);
-                    long start = time - i1;
-                    long end = time + i1;
-
-                    tableData.setStartTime(simpleDateFormat.format(new Date(start)));
-                    tableData.setEndTime(simpleDateFormat.format(new Date(end)));
-                    tableData.setCounterParty(counterParty);
-                    //tableData.setCardEntity(rowMap.get("card_entity").toString());
-
-                    //System.out.println("tableData : " + tableData);
-
-                    List<BankFlow> bankFlowList = bankFlowService.examimeBankFlowByCondition(tableData);
-                    //System.out.println("bankFlowList.size() : " + bankFlowList.size());
-
-                    list.addAll(bankFlowList);
-
-                    collect = Stream.of(bankFlowList, list)
-                      .flatMap(Collection::stream)
-                      .distinct()
-                      .collect(Collectors.toList());
-
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                } catch (NullPointerException nullPointer) {
-                    nullPointer.printStackTrace();
-                }
-
-            }
-        }
-        //System.out.println("collect.size() : " + collect.size());
-        responseData.setBankFlowList(collect);
         bankFlowService.clearBankFlow();
-        return collect;
+        fileUploadService.clearFileUpload();
+        String message = "删除成功";
+
+
+        return message;
     }
-
-
 }

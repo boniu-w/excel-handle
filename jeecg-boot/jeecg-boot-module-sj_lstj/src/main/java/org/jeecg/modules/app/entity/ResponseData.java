@@ -15,7 +15,7 @@ public class ResponseData {
 
     private String message;
     private String[] titles;
-    private Integer count;
+    private int count;
     private String fileMessage;
     private Map titleMap;
     private List<BankFlow> bankFlowList;

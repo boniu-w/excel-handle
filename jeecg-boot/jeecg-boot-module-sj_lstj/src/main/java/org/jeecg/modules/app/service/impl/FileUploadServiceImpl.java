@@ -49,5 +49,10 @@ public class FileUploadServiceImpl implements FileUploadService {
         fileUploadMapper.deleteOneByFileName(filename);
     }
 
+    @Override
+    public void clearFileUpload() {
+        fileUploadMapper.clearFileUpload();
+    }
+
 
 }
