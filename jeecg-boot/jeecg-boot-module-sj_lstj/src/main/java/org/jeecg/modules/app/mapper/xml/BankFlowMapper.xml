@@ -6,7 +6,7 @@
 <!--对应dao-->
 <mapper namespace="org.jeecg.modules.app.mapper.BankFlowMapper">
 
-    <select id="examimeBankFlowByCondition" parameterType="org.jeecg.modules.app.entity.TableData"
+    <select id="examimeBankFlowByCondition" parameterType="org.jeecg.modules.app.entity.ConditionData"
             resultType="org.jeecg.modules.app.entity.BankFlow">
 
         SELECT
@@ -21,10 +21,10 @@
                 AND  card_entity = #{cardEntity}
             </if>
             <if test="endMoney !='' and endMoney != null ">
-                AND transaction_amount &gt; #{startMoney}
+                AND transaction_amount &gt;= #{startMoney}
             </if>
             <if test="startMoney !='' and startMoney != null ">
-                AND transaction_amount &lt; #{endMoney}
+                AND transaction_amount &lt;= #{endMoney}
             </if>
             <if test="counterParty !='' and counterParty != null ">
                 AND counter_party = #{counterParty}

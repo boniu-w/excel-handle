@@ -45,7 +45,7 @@ public class BankFlow {
     private float transactionAmount;
 
     @Excel(name = "摘要")
-    private String abstract_content;
+    private String abstractContent;
 
     @Excel(name = "交易后余额")
     private float balanceTransaction;
@@ -132,6 +132,9 @@ public class BankFlow {
 
     private String excelName;
 
+    private String tick;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -150,7 +153,7 @@ public class BankFlow {
           Objects.equals(counterParty, bankFlow.counterParty) &&
           Objects.equals(accountCounterparty, bankFlow.accountCounterparty) &&
           Objects.equals(cardCounterparty, bankFlow.cardCounterparty) &&
-          Objects.equals(abstract_content, bankFlow.abstract_content) &&
+          Objects.equals(abstractContent, bankFlow.abstractContent) &&
           Objects.equals(transactionBank, bankFlow.transactionBank) &&
           Objects.equals(counterpartyBank, bankFlow.counterpartyBank) &&
           Objects.equals(placeTransaction, bankFlow.placeTransaction) &&
@@ -168,11 +171,21 @@ public class BankFlow {
           Objects.equals(logNumber, bankFlow.logNumber) &&
           Objects.equals(apshPlace, bankFlow.apshPlace) &&
           Objects.equals(matcherCode, bankFlow.matcherCode) &&
-          Objects.equals(matcherBalance, bankFlow.matcherBalance);
+          Objects.equals(matcherBalance, bankFlow.matcherBalance) &&
+          Objects.equals(subjectCredentials, bankFlow.subjectCredentials) &&
+          Objects.equals(adversaryCredentials, bankFlow.adversaryCredentials) &&
+          Objects.equals(trancationRecordsId, bankFlow.trancationRecordsId) &&
+          Objects.equals(reportOrganization, bankFlow.reportOrganization) &&
+          Objects.equals(sheWaiFenLei, bankFlow.sheWaiFenLei) &&
+          Objects.equals(agentName, bankFlow.agentName) &&
+          Objects.equals(agentCredentials, bankFlow.agentCredentials) &&
+          Objects.equals(voucherNumber, bankFlow.voucherNumber) &&
+          Objects.equals(voucherType, bankFlow.voucherType) &&
+          Objects.equals(excelName, bankFlow.excelName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, caseId, introductionId, transactionSubject, accountSubject, cardEntity, recoveryMark, transactionDate, counterParty, accountCounterparty, cardCounterparty, transactionAmount, abstract_content, balanceTransaction, transactionBank, counterpartyBank, placeTransaction, tradingPlace, transactionNumber, mac, ip, currency, temarks, tradingNo, tellerNumber, institutionParty, deleteIdentifier, customerCode, logNumber, apshPlace, matcherCode, matcherBalance);
+        return Objects.hash(id, caseId, introductionId, transactionSubject, accountSubject, cardEntity, recoveryMark, transactionDate, counterParty, accountCounterparty, cardCounterparty, transactionAmount, abstractContent, balanceTransaction, transactionBank, counterpartyBank, placeTransaction, tradingPlace, transactionNumber, mac, ip, currency, temarks, tradingNo, tellerNumber, institutionParty, deleteIdentifier, customerCode, logNumber, apshPlace, matcherCode, matcherBalance, subjectCredentials, adversaryCredentials, trancationRecordsId, reportOrganization, sheWaiFenLei, agentName, agentCredentials, voucherNumber, voucherType, excelName);
     }
 }

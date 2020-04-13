@@ -10,7 +10,7 @@ import lombok.Data;
  * @Copyright
  */
 @Data
-public class TableData {
+public class ConditionData {
 
     private String cardEntity;
     private String startTime;

@@ -2,7 +2,7 @@ package org.jeecg.modules.app.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.app.entity.BankFlow;
-import org.jeecg.modules.app.entity.TableData;
+import org.jeecg.modules.app.entity.ConditionData;
 
 import java.util.List;
 
@@ -14,6 +14,6 @@ import java.util.List;
  */
 public interface BankFlowService extends IService<BankFlow> {
 
-    List<BankFlow> examimeBankFlowByCondition(TableData tableData);
+    List<BankFlow> examimeBankFlowByCondition(ConditionData conditionData);
     void clearBankFlow();
 }

@@ -13,6 +13,6 @@ import java.util.List;
 @Data
 public class RequestBean {
 
-    private List<TableData> tableDataList;
+    private List<ConditionData> conditionDataList;
     private List<MultipartFile> fileList;
 }

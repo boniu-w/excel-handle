@@ -1,6 +1,7 @@
 package org.jeecg.modules.app.entity;
 
 import lombok.Data;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.List;
 import java.util.Map;
@@ -21,5 +22,7 @@ public class ResponseData {
     private List<BankFlow> bankFlowList;
     private String fileName;
     private String conditionExcelMessage;
+    private List<T> list;
+
 
 }

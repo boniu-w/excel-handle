@@ -3,7 +3,7 @@ package org.jeecg.modules.app.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.jeecg.modules.app.entity.BankFlow;
-import org.jeecg.modules.app.entity.TableData;
+import org.jeecg.modules.app.entity.ConditionData;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
 @Mapper
 public interface BankFlowMapper extends BaseMapper<BankFlow> {
 
-    List<BankFlow> examimeBankFlowByCondition(TableData tableData);
+    List<BankFlow> examimeBankFlowByCondition(ConditionData conditionData);
     void clearBankFlow();
 
 }

@@ -2,17 +2,15 @@ package org.jeecg.modules.app.controller;
 
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.system.base.controller.JeecgController;
-import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.vo.LoginUser;
-import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.app.entity.*;
 import org.jeecg.modules.app.service.BankFlowService;
 import org.jeecg.modules.app.service.FileUploadService;
@@ -23,9 +21,7 @@ import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,13 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
+import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -81,6 +75,9 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     static HashMap map = new HashMap();
 
     static ResponseData responseData;
+
+
+    HashMap<String, String> titleMap;
 
 
     /**
@@ -177,14 +174,14 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * @return
      */
     //@RequestMapping(value = "/getTableInfo")
-    public List<TableData> getTableInfo(HttpServletRequest request) {
+    public List<ConditionData> getTableInfo(HttpServletRequest request) {
         String tableData = request.getParameter("data");
         //System.out.println("tableData : " + tableData);
 
-        List<TableData> tableDataList = JSON.parseArray(tableData, TableData.class);
+        List<ConditionData> conditionDataList = JSON.parseArray(tableData, ConditionData.class);
 
-        //System.out.println("tableDataList : " + tableDataList);
-        return tableDataList;
+        //System.out.println("conditionDataList : " + conditionDataList);
+        return conditionDataList;
     }
 
 
@@ -272,7 +269,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
                     String uuid = UUID.randomUUID().toString().replace("-", "");
                     value.put("id", uuid);
-                    value.put("excel_name",fileName);
+                    value.put("excel_name", fileName);
 
                     //System.out.println("value.size() : " + value.size());
                     //System.out.println("contentMap : " + contentMap);
@@ -335,7 +332,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * <p>
      * 转换后的表头 是 String[] excelTitles
      */
-    @ApiOperation(value = "解析表头,如果表头中字段与数据库不匹配返回信息")
+    @ApiOperation(value = "解析流水表表头,如果表头中字段与数据库不匹配返回信息")
     public ResponseData resolveExcelTitle(MultipartFile file, int sheetIndex) {
         DatawashReadExcel readExcelUtil = new DatawashReadExcel(file);
         // 这一步是为了 改变 表头的名字 ,把表头改成 数据库里的 fieldcode 如果数据库中没有匹配的字段 则
@@ -369,7 +366,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                             excelTitles[i] = fieldCode;
                         }
 
-                        //System.out.println("Arrays.toString(excelTitles): "+Arrays.toString(excelTitles));
+                        System.out.println("Arrays.toString(excelTitles): " + Arrays.toString(excelTitles));
                     }
                 }
 
@@ -391,18 +388,18 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     public ResponseData resolveExcelContent(HttpServletRequest request, HttpServletResponse response) {
         List<BankFlow> list = new ArrayList();
 
-        List<TableData> tableDataList = getTableInfo(request);
+        List<ConditionData> conditionDataList = getTableInfo(request);
 
-        //System.out.println("resolve tableDataList.size() : " + tableDataList.size());
+        //System.out.println("resolve conditionDataList.size() : " + conditionDataList.size());
 
         String parameter = request.getParameter("fileName");
         //System.out.println("parameter  " + parameter);
 
 
         // 获取表格数据之后,作为查询条件,查询流水表
-        Iterator<TableData> iterator = tableDataList.iterator();
+        Iterator<ConditionData> iterator = conditionDataList.iterator();
         while (iterator.hasNext()) {
-            TableData data = iterator.next();
+            ConditionData data = iterator.next();
             //System.out.println("<<<<<<<  " + data);
 
             List<BankFlow> list1 = bankFlowService.examimeBankFlowByCondition(data);
@@ -520,8 +517,10 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             counterParty = "";
         }
 
-        List<BankFlow> list = new ArrayList<>();
+
+        List<BankFlow> conditionExcelList = new ArrayList<>();
         List<BankFlow> collect = new ArrayList<>();
+        List<BankFlow> bankFlowList = null;
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
@@ -533,7 +532,8 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             Workbook workbook = initWorkbook(file);
             String[] titleArray = transformExcelTitle(file);
 
-            System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
+            //System.out.println("Arrays.asList(titleArray).toString() : " + Arrays.asList(titleArray).toString());
+            //System.out.println("titleMap: " + titleMap.toString());
 
             Sheet sheet = workbook.getSheetAt(0);
             int rowNum = sheet.getLastRowNum();
@@ -566,7 +566,10 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                         j++;
                     }
 
-                    //System.out.println("bankFlowMap : " + bankFlowMap);
+                    bankFlowMap.put("tick", "conditionExcel");
+
+
+                    //System.out.println("conditionExcelMap : " + conditionExcelMap);
                     //System.out.println("rowMap : " + rowMap);
 
 
@@ -574,22 +577,23 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     BankFlow bankFlow = JSON.parseObject(JSON.toJSONString(bankFlowMap), BankFlow.class);
                     //System.out.println("bankFlow : " + bankFlow);
 
-                    list.add(bankFlow);
+                    conditionExcelList.add(bankFlow);
+
 
 
                     /* 开始 查询分析 */
-                    TableData tableData = new TableData();
+                    ConditionData conditionData = new ConditionData();
                     Object transaction_amount = rowMap.get("transaction_amount");
                     float transactionMoney = Float.parseFloat(transaction_amount.toString());
-                    tableData.setStartMoney(transactionMoney * (1 - Float.parseFloat(percentage) / 100));
-                    tableData.setEndMoney(transactionMoney * (1 + Float.parseFloat(percentage) / 100));
+                    conditionData.setStartMoney(transactionMoney * (1 - Float.parseFloat(percentage) / 100));
+                    conditionData.setEndMoney(transactionMoney * (1 + Float.parseFloat(percentage) / 100));
 
                     Object recovery_mark = rowMap.get("recovery_mark");
                     if ("进".equals(recovery_mark.toString())) {
-                        tableData.setRecoveryMark("出");
+                        conditionData.setRecoveryMark("出");
                     }
                     if ("出".equals(recovery_mark.toString())) {
-                        tableData.setRecoveryMark("进");
+                        conditionData.setRecoveryMark("进");
                     }
 
 
@@ -608,24 +612,31 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     int i1 = (24 * 60 * 60 * 1000) * Integer.parseInt(dateScope);
                     long start = time - i1;
                     long end = time + i1;
-                    tableData.setStartTime(simpleDateFormat.format(new Date(start)));
-                    tableData.setEndTime(simpleDateFormat.format(new Date(end)));
+                    conditionData.setStartTime(simpleDateFormat.format(new Date(time)));
+                    conditionData.setEndTime(simpleDateFormat.format(new Date(end)));
 
 
-                    tableData.setCounterParty(counterParty);
-                    //tableData.setCardEntity(rowMap.get("card_entity").toString());
+                    conditionData.setCounterParty(counterParty);
+                    //conditionData.setCardEntity(rowMap.get("card_entity").toString());
 
-                    //System.out.println("tableData : " + tableData);
+                    //System.out.println("conditionData : " + conditionData);
 
-                    List<BankFlow> bankFlowList = bankFlowService.examimeBankFlowByCondition(tableData);
+                    bankFlowList = bankFlowService.examimeBankFlowByCondition(conditionData);
+
+                    Iterator<BankFlow> bankFlowIterator = bankFlowList.iterator();
+                    while (bankFlowIterator.hasNext()) {
+                        BankFlow next = bankFlowIterator.next();
+                        next.setTick("resultExcel");
+                    }
+
+                    //System.out.println("bankFlowList.toString(): "+bankFlowList.toString());
+
+
                     //System.out.println("bankFlowList.size() : " + bankFlowList.size());
 
-                    list.addAll(bankFlowList);
+                    conditionExcelList.addAll(bankFlowList);
 
-                    collect = Stream.of(bankFlowList, list)
-                      .flatMap(Collection::stream)
-                      .distinct()
-                      .collect(Collectors.toList());
+                    collect = conditionExcelList.stream().distinct().collect(Collectors.toList());
 
 
                 } catch (ParseException e) {
@@ -635,8 +646,9 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 }
 
             }
-
+            System.out.println("collect.toString(): "+collect.toString());
             System.out.println("collect.size() : " + collect.size());
+            //System.out.println("Arrays.toString(titles): " + Arrays.toString(titles));
         }
         responseData.setBankFlowList(collect);
 
@@ -649,6 +661,8 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      */
     public String[] transformExcelTitle(MultipartFile file) {
         oneToMany();
+
+        titleMap = new HashMap();
 
         //System.out.println("hashMap: "+hashMap);
 
@@ -683,6 +697,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                         if (next.contains(titles[i])) {
                             String fieldCode = wordbookInterface.examineWordbookFieldCodeByType(j);
                             titles[i] = fieldCode;
+                            titleMap.put(titles[i], titleNames[i]);
                         }
                     }
                 }
@@ -725,6 +740,86 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
 
         return message;
+    }
+
+
+    /**
+     * @author: wg
+     * @time: 2020/4/13 9:30
+     */
+    @RequestMapping(value = "/exportTest")
+    public void export(String filePath, HttpServletResponse response) {
+        List<BankFlow> list = responseData.getBankFlowList();
+        String[] strings = responseData.getTitles();
+        Workbook workbook;
+        workbook = new SXSSFWorkbook(1000);
+
+        Sheet sheet = workbook.createSheet("");
+
+        Row row = sheet.createRow(0);  // 表头
+        for (int i = 0; i < strings.length; i++) {
+            row.createCell(i).setCellValue(strings[i]);
+
+        }
+
+        Iterator<BankFlow> iterator = list.iterator();
+        int k = 1;
+        while (iterator.hasNext()) {
+            BankFlow bankFlow = iterator.next();
+            for (int i = 0; i < strings.length; i++) {
+                Row row1 = sheet.createRow(k);
+                row1.createCell(i).setCellValue(bankFlow.getAbstractContent());
+                row1.createCell(i++).setCellValue(bankFlow.getAccountCounterparty());
+
+                k++;
+            }
+        }
+
+        for (int j = 1; j < 100; j++) {
+            Row row1 = sheet.createRow(j);  // 正文
+            for (int i = 0; i < strings.length; i++) {
+
+                row1.createCell(i).setCellValue("i: " + i);
+            }
+        }
+
+        ByteArrayOutputStream byteArrayOutputStream = null;
+        byte[] bytes = null;
+        try {
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            workbook.write(byteArrayOutputStream);
+
+            bytes = byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                byteArrayOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        OutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            //response.reset();
+            outputStream.write(bytes);
+            outputStream.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
     }
 
 

@@ -8,6 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -82,6 +83,10 @@ public class WriteToExcel {
             }
 
             System.out.println("主表数据写入完成>>>>>>>>");
+
+            ByteArrayOutputStream byteArrayOutputStream =null;
+
+
             FileOutputStream fos = new FileOutputStream(filePath);
             workbook.write(fos);
             fos.close();

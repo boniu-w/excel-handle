@@ -2,7 +2,7 @@ package org.jeecg.modules.app.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jeecg.modules.app.entity.BankFlow;
-import org.jeecg.modules.app.entity.TableData;
+import org.jeecg.modules.app.entity.ConditionData;
 import org.jeecg.modules.app.mapper.BankFlowMapper;
 import org.jeecg.modules.app.service.BankFlowService;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,8 @@ public class BankFlowServiceImpl extends ServiceImpl<BankFlowMapper,BankFlow> im
     BankFlowMapper bankFlowMapper;
 
     @Override
-    public List<BankFlow> examimeBankFlowByCondition(TableData tableData) {
-        List<BankFlow> bankFlows = bankFlowMapper.examimeBankFlowByCondition(tableData);
+    public List<BankFlow> examimeBankFlowByCondition(ConditionData conditionData) {
+        List<BankFlow> bankFlows = bankFlowMapper.examimeBankFlowByCondition(conditionData);
         return bankFlows;
     }
 

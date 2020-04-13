@@ -78,7 +78,7 @@
             </a-col>
             <a-col :span="7">
               <a-form-item
-                label="交易日期范围"
+                label="交易日期范围(之后多少天)"
                 :labelCol="{ span: 10 }"
                 :wrapperCol="{ span: 14 }"
                 :style="{ marginLeft: '20px' }"
