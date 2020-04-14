@@ -126,11 +126,12 @@
   </div>
 </template>
 <script>
-import { postAction, getAction } from '@/api/manage.js'
+import { postAction, getAction, downFile } from '@/api/manage.js'
 import Vue from 'vue'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import moment from 'moment'
 import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+import axios from 'axios'
 let id = 1
 export default {
   mixins: [JeecgListMixin],
@@ -146,6 +147,7 @@ export default {
       fileListName: [],
       conditionsFileList: [],
       resData: [],
+      titleArr: null,
       columns: [
         {
           title: '#',
@@ -165,7 +167,8 @@ export default {
       params: {},
       url: {
         getFileInfoUploaded: '/app/appController/getFileInfoUploaded',
-        exportXlsUrl: '/app/appController/exportXls'
+        // exportXlsUrl: '/app/appController/exportXls',
+        exportXlsUrl: '/app/appController/exportTest'
       }
     }
   },
@@ -218,9 +221,9 @@ export default {
               updateTime: item.updateTime
             }
           })
-          let titleMap = this.resData[0].fileTitle
+          let titleArr = this.resData[0].fileTitle
           // 获取数据表头
-          this.getTableTitle(titleMap)
+          this.getTableTitle(titleArr)
           if (fileList.length > 12) {
             this.showButton = true
           }
@@ -240,6 +243,7 @@ export default {
           }
         }
       })
+      this.titleArr = titleArr
       this.columns = [this.columns[0], ...titleArr]
     },
     beforeUpload(file) {
@@ -323,8 +327,8 @@ export default {
       this.conditionsFileList = []
       this.params.fileName = e.target.value
       if (this.resData) {
-        let titleMap = this.resData.filter(item => item.fileName == this.params.fileName)[0].fileTitle
-        this.getTableTitle(titleMap)
+        let titleArr = this.resData.filter(item => item.fileName == this.params.fileName)[0].fileTitle
+        this.getTableTitle(titleArr)
       }
     },
     handleShow() {
@@ -352,7 +356,56 @@ export default {
       }
       return
     },
+    async handleExportXls(fileName) {
+      if (!fileName || typeof fileName != 'string') {
+        fileName = '导出文件'
+      }
+      console.log(this.myDataSource, this.columns, this.titleArr)
+      // let a = qs.stringify({ myDataSource: JSON.stringify(this.myDataSources) })
+      // console.log(a)
+      // let formData = new FormData()
+      // formData.append('titleArr', JSON.stringify(this.titleArr))
+      // formData.append('myDataSource', JSON.stringify(this.myDataSource))
+      // return
 
+      let myDataSource = this.myDataSource
+
+      await postAction(this.url.exportXlsUrl, myDataSource).then(res => {
+        console.log(res)
+      })
+
+      let param = { ...this.queryParam }
+      if (this.selectedRowKeys && this.selectedRowKeys.length > 0) {
+        param['selections'] = this.selectedRowKeys.join(',')
+      }
+      console.log('导出参数', param)
+      axios({
+        url: '/jeecg-boot' + this.url.exportXlsUrl,
+        data: param,
+        headers: { 'X-Access-Token': Vue.ls.get(ACCESS_TOKEN) },
+        method: 'post',
+        responseType: 'blob'
+      }).then(data => {
+        console.log(data, 'data export')
+        if (!data) {
+          this.$message.warning('文件下载失败')
+          return
+        }
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+          window.navigator.msSaveBlob(new Blob([data]), fileName + '.xls')
+        } else {
+          let url = window.URL.createObjectURL(new Blob([data]))
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', fileName + '.xls')
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link) //下载完成移除元素
+          window.URL.revokeObjectURL(url) //释放掉blob对象
+        }
+      })
+    },
     confirm(e) {
       getAction('/app/appController/clearDatabase').then(res => {
         if (res) {

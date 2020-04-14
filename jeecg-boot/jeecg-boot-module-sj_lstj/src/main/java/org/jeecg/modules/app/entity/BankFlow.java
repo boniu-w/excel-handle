@@ -3,11 +3,12 @@ package org.jeecg.modules.app.entity;
 import lombok.Data;
 import org.jeecgframework.poi.excel.annotation.Excel;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 
 @Data
-public class BankFlow {
+public class BankFlow implements Serializable {
 
     private String id;
 
