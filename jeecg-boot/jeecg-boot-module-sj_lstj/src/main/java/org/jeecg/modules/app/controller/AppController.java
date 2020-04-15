@@ -8,6 +8,7 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -40,6 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.apache.poi.hssf.util.HSSFColor.RED.index;
 
 
 /**
@@ -779,22 +782,12 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         String[][] content = new String[bankFlowList.size()][titles.length];
 
         for (int i = 0; i < bankFlowList.size(); i++) {
-            for (int j = 0; j < titles.length; j++) {
-
-            }
-        }
-
-
-        for (int i = 0; i < bankFlowList.size(); i++) {
             content[i] = new String[bankFlowList.size()];
             BankFlow bankFlow = bankFlowList.get(i);
             if (bankFlow.getTick() != null && bankFlow.getTick().equals("conditionExcel")) {
                 content[i][0] = bankFlow.getAbstractContent();
                 content[i][1] = bankFlow.getTick();
                 content[i][2] = String.valueOf(bankFlow.getTransactionDate());
-                //content[i][2]
-
-
             }
 
         }
@@ -819,23 +812,24 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * @author: wg
      * @time: 2020/4/15 10:26
      */
-    public HSSFWorkbook getHSSFWorkbook(String sheetName, String[] title, String[][] values, HSSFWorkbook wb) {
+    public HSSFWorkbook getHSSFWorkbook(String sheetName, String[] title, String[][] values, HSSFWorkbook hssfWorkbook) {
 
         // 第一步，创建一个HSSFWorkbook，对应一个Excel文件
-        if (wb == null) {
-            wb = new HSSFWorkbook();
+        if (hssfWorkbook == null) {
+            hssfWorkbook = new HSSFWorkbook();
         }
 
         // 第二步，在workbook中添加一个sheet,对应Excel文件中的sheet
-        HSSFSheet sheet = wb.createSheet(sheetName);
+        HSSFSheet sheet = hssfWorkbook.createSheet(sheetName);
 
         // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制
         HSSFRow row = sheet.createRow(0);
 
         // 第四步，创建单元格，并设置值表头 设置表头居中
-        HSSFCellStyle style = wb.createCellStyle();
+        HSSFCellStyle style = hssfWorkbook.createCellStyle();
         style.setFillForegroundColor(IndexedColors.AQUA.getIndex());
-        style.setFillBackgroundColor(IndexedColors.BLUE.getIndex());
+        style.setFillPattern((short) 1);
+
         //声明列对象
         HSSFCell cell = null;
 
@@ -851,10 +845,15 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             row = sheet.createRow(i + 1);
             for (int j = 0; j < values[i].length; j++) {
                 //将内容按顺序赋给对应的列对象
-                row.createCell(j).setCellValue(values[i][j]);
+                HSSFCell rowCell = row.createCell(j);
+                rowCell.setCellValue(values[i][j]);
+                if (values[i][j] != null && values[i][j] instanceof String && values[i][j].equals("conditionExcel")) {
+                    rowCell.setCellStyle(style);
+                    row.setRowStyle(style);
+                }
             }
         }
-        return wb;
+        return hssfWorkbook;
     }
 
 
@@ -867,7 +866,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             }
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName+".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
             response.addHeader("Pargam", "no-cache");
             response.addHeader("Cache-Control", "no-cache");
         } catch (Exception ex) {
