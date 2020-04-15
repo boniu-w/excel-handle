@@ -12,6 +12,7 @@ public class BankFlow implements Serializable {
 
     private String id;
 
+
     @Excel(name = "案件id")
     private String caseId;
 
@@ -133,6 +134,7 @@ public class BankFlow implements Serializable {
 
     private String excelName;
 
+    @Excel(name = "标记")
     private String tick;
 
 

@@ -106,7 +106,12 @@
     <a-card>
       <a-row type="flex" justify="end">
         <a-col>
-          <a-button @click="handleExportXls('导出文件')">导出</a-button>
+          <form :action="'jeecg-boot' + url.exportXlsUrl" method="post">
+            <input type="text" name="data" :value="JSON.stringify(myDataSource)" hidden="hidden" />
+            <input type="submit" value="导出" />
+          </form>
+
+          <!-- <a-button @click="handleExportXls('导出文件')">导出</a-button> -->
         </a-col>
       </a-row>
       <a-table
@@ -167,8 +172,8 @@ export default {
       params: {},
       url: {
         getFileInfoUploaded: '/app/appController/getFileInfoUploaded',
-        // exportXlsUrl: '/app/appController/exportXls',
-        exportXlsUrl: '/app/appController/exportTest'
+        // exportXlsUrl: '/app/appController/exportXls'
+        exportXlsUrl: '/app/appController/exportExcel'
       }
     }
   },
@@ -370,16 +375,23 @@ export default {
 
       let myDataSource = this.myDataSource
 
-      await postAction(this.url.exportXlsUrl, myDataSource).then(res => {
-        console.log(res)
-      })
+      // await axios({
+      //   url: '/jeecg-boot' + this.url.exportXlsUrl,
+      //   headers: { 'X-Access-Token': Vue.ls.get(ACCESS_TOKEN) },
+      //   method: 'post',
+      //   responseType: 'blob'
+      // }).then(res => {
+      //   console.log(res)
+      // })
 
+      postAction(this.url.exportXlsUrl, myDataSource)
+      return
       let param = { ...this.queryParam }
       if (this.selectedRowKeys && this.selectedRowKeys.length > 0) {
         param['selections'] = this.selectedRowKeys.join(',')
       }
       console.log('导出参数', param)
-      axios({
+      await axios({
         url: '/jeecg-boot' + this.url.exportXlsUrl,
         data: param,
         headers: { 'X-Access-Token': Vue.ls.get(ACCESS_TOKEN) },
@@ -396,8 +408,11 @@ export default {
         } else {
           let url = window.URL.createObjectURL(new Blob([data]))
           let link = document.createElement('a')
+          // link.innerText = '测试测试'
           link.style.display = 'none'
           link.href = url
+          console.log('八八八八八八八八八八八八八:' + JSON.stringify(link))
+          console.log('------------')
           link.setAttribute('download', fileName + '.xls')
           document.body.appendChild(link)
           link.click()
@@ -421,6 +436,17 @@ export default {
       this.fileListName = []
       this.fileList = []
       this.form.resetFields()
+    },
+    handleSubmit(e) {
+      // e.preventDefault()
+      console.log(1111)
+      let values = JSON.stringify(this.myDataSource)
+      console.log(values + '------------------------')
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          console.log('Received values of form: ', values)
+        }
+      })
     }
   }
 }

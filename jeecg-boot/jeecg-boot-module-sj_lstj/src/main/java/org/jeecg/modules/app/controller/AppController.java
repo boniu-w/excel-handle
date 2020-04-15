@@ -4,7 +4,7 @@ import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiOperation;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -23,10 +23,7 @@ import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
@@ -746,8 +743,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         bankFlowService.clearBankFlow();
         fileUploadService.clearFileUpload();
         String message = "删除成功";
-
-
         return message;
     }
 
@@ -756,228 +751,127 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
      * @author: wg
      * @time: 2020/4/13 9:30
      */
-    @PostMapping(value = "/exportTest1")
-    public void export1(@RequestBody List<BankFlow> bankFlowList, HttpServletResponse response, HttpServletRequest request) {
+    @PostMapping(value = "/exportExcel")
+    public void export1(String data, HttpServletResponse response, HttpServletRequest request) {
+
+        System.out.println(data);
+
+        List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
         System.out.println(bankFlowList.toString());
 
-        String[] titles = {"", ""};
+        String[] titles = {"123", "123123", "123123"};
         String fileName = "导出流水表";
         String sheetName = "导出流水sheet1";
 
         Workbook workbook = new SXSSFWorkbook(1000);
+        Sheet sheet = workbook.createSheet(sheetName);
 
         CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setFillForegroundColor(HSSFColor.WHITE.index);
-        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        cellStyle.setFillBackgroundColor(HSSFColor.BLUE.index);
 
-
-        Sheet sheet = workbook.createSheet(sheetName);
-        Row row = sheet.createRow(0);  // 表头
+        Row row = sheet.createRow(0); // 第一行,
         for (int i = 0; i < titles.length; i++) {
-            row.createCell(i).setCellValue(titles[i]);
-
+            Cell cell = row.createCell(i);
+            cell.setCellValue(titles[i]);
+            cell.setCellStyle(cellStyle);
         }
 
-        Iterator<BankFlow> iterator = bankFlowList.iterator();
-        int k = 1;
-        while (iterator.hasNext()) {
-            BankFlow bankFlow = iterator.next();
+        String[][] content = new String[bankFlowList.size()][titles.length];
 
-            Row contentRow = sheet.createRow(k);
-            for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < bankFlowList.size(); i++) {
+            for (int j = 0; j < titles.length; j++) {
 
-                if ("conditionExcel".equals(bankFlow.getTick())) {
-                    contentRow.createCell(i).setCellValue(bankFlow.getAccountCounterparty());
-                    contentRow.createCell(i + 1).setCellValue(bankFlow.getAbstractContent());
-                    contentRow.createCell(i + 2).setCellValue(bankFlow.getAccountSubject());
-                    contentRow.createCell(i + 3).setCellValue(bankFlow.getTick());
-                    contentRow.createCell(i + 3).setCellStyle(cellStyle);
-                }
+            }
+        }
+
+
+        for (int i = 0; i < bankFlowList.size(); i++) {
+            content[i] = new String[bankFlowList.size()];
+            BankFlow bankFlow = bankFlowList.get(i);
+            if (bankFlow.getTick() != null && bankFlow.getTick().equals("conditionExcel")) {
+                content[i][0] = bankFlow.getAbstractContent();
+                content[i][1] = bankFlow.getTick();
+                content[i][2] = String.valueOf(bankFlow.getTransactionDate());
+                //content[i][2]
+
+
             }
 
-            k++;
         }
 
+        HSSFWorkbook hssfWorkbook = this.getHSSFWorkbook(sheetName, titles, content, null);
 
-        ByteArrayOutputStream byteArrayOutputStream = null;
-        byte[] bytes = null;
         try {
-            byteArrayOutputStream = new ByteArrayOutputStream();
-            workbook.write(byteArrayOutputStream);
 
-            bytes = byteArrayOutputStream.toByteArray();
+            this.setResponseHeader(response, fileName);
+            ServletOutputStream outputStream = response.getOutputStream();
+            hssfWorkbook.write(outputStream);
+            outputStream.flush();
+            outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                byteArrayOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
-        OutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            response.reset();
-            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
-            response.setContentType("application/vnd.ms-excel");
-            response.setCharacterEncoding("utf-8");
-            outputStream.write(bytes);
-            outputStream.flush();
-            System.out.println("----------");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (outputStream != null) {
-                try {
-                    System.out.println("***********");
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
 
     }
 
     /**
      * @author: wg
-     * @time: 2020/4/13 9:30
+     * @time: 2020/4/15 10:26
      */
-    @PostMapping(value = "/exportTest2")
-    public void export2(@RequestBody BankFlow[] bankFlow, HttpServletResponse response, HttpServletRequest request) {
-        System.out.println(Arrays.toString(bankFlow));
+    public HSSFWorkbook getHSSFWorkbook(String sheetName, String[] title, String[][] values, HSSFWorkbook wb) {
 
-        String[] titles = {"", ""};
-        String fileName = "导出流水表";
-        String sheetName = "导出流水sheet1";
-
-        SXSSFWorkbook workbook = new SXSSFWorkbook(1000);
-
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setFillForegroundColor(HSSFColor.WHITE.index);
-        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-
-
-        Sheet sheet = workbook.createSheet(sheetName);
-        Row row = sheet.createRow(0);  // 表头
-        for (int i = 0; i < titles.length; i++) {
-            row.createCell(i).setCellValue(titles[i]);
-
+        // 第一步，创建一个HSSFWorkbook，对应一个Excel文件
+        if (wb == null) {
+            wb = new HSSFWorkbook();
         }
 
-        int k = 0;
-        Row contentRow;
-        for (int i = 0; i < bankFlow.length; i++) {
-            contentRow = sheet.createRow(i + 1);
+        // 第二步，在workbook中添加一个sheet,对应Excel文件中的sheet
+        HSSFSheet sheet = wb.createSheet(sheetName);
 
-            if ("conditionExcel".equals(bankFlow[i].getTick())) {
-                contentRow.createCell(i).setCellValue(bankFlow[i].getAccountCounterparty());
-                contentRow.createCell(i + 1).setCellValue(bankFlow[i].getAbstractContent());
-                contentRow.createCell(i + 2).setCellValue(bankFlow[i].getAccountSubject());
-                contentRow.createCell(i + 3).setCellValue(bankFlow[i].getTick());
-                contentRow.createCell(i + 3).setCellStyle(cellStyle);
-                k++;
+        // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制
+        HSSFRow row = sheet.createRow(0);
+
+        // 第四步，创建单元格，并设置值表头 设置表头居中
+        HSSFCellStyle style = wb.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.AQUA.getIndex());
+        style.setFillBackgroundColor(IndexedColors.BLUE.getIndex());
+        //声明列对象
+        HSSFCell cell = null;
+
+        //创建标题
+        for (int i = 0; i < title.length; i++) {
+            cell = row.createCell(i);
+            cell.setCellValue(title[i]);
+            cell.setCellStyle(style);
+        }
+
+        //创建内容
+        for (int i = 0; i < values.length; i++) {
+            row = sheet.createRow(i + 1);
+            for (int j = 0; j < values[i].length; j++) {
+                //将内容按顺序赋给对应的列对象
+                row.createCell(j).setCellValue(values[i][j]);
             }
         }
-
-        System.out.println("条件表里数据数量: " + k);
-
-
-        //ByteArrayOutputStream byteArrayOutputStream = null;
-        //byte[] bytes = null;
-        //try {
-        //    byteArrayOutputStream = new ByteArrayOutputStream();
-        //    workbook.write(byteArrayOutputStream);
-        //
-        //    bytes = byteArrayOutputStream.toByteArray();
-        //} catch (Exception e) {
-        //    e.printStackTrace();
-        //} finally {
-        //    try {
-        //        byteArrayOutputStream.close();
-        //    } catch (IOException e) {
-        //        e.printStackTrace();
-        //    }
-        //}
-
-        OutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            response.reset();
-            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
-            response.setContentType("application/vnd.ms-excel");
-            response.setCharacterEncoding("utf-8");
-            workbook.write(outputStream);
-            outputStream.flush();
-            //outputStream.write(bytes);
-            //outputStream.flush();
-            System.out.println("----------");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (outputStream != null) {
-                try {
-                    System.out.println("***********");
-                    outputStream.close();
-                    workbook.dispose();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
+        return wb;
     }
 
-    /**
-     * @author: wg
-     * @time: 2020/4/14 17:50
-     */
-    @PostMapping(value = "/exportTest")
-    public void export(HttpServletResponse response, HttpServletRequest request) {
 
-        SXSSFWorkbook sxssfWorkbook = new SXSSFWorkbook(1000);
-        String fileName = "导出的流水表";
-
-        Sheet sheet = sxssfWorkbook.createSheet("导出表");
-        for (int i = 0; i < 100; i++) {
-            Row row = sheet.createRow(i);
-            for (int j = 0; j < 10; j++) {
-                Cell cell = row.createCell(j);
-                cell.setCellValue(j + " ---");
-            }
-        }
-
-        OutputStream out = null;
-
+    public void setResponseHeader(HttpServletResponse response, String fileName) {
         try {
-            out = response.getOutputStream();
-            response.reset();
-            response.setHeader("content-disposition", "attachment;filename=" + fileName);
-            response.setCharacterEncoding("utf-8");
-            response.setContentType("application/vnd.ms-excel");
-
-            sxssfWorkbook.write(out);
-            out.flush();
-
-
-            System.out.println("-------");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
             try {
-                if (out != null) {
-                    out.close();
-                }
-                sxssfWorkbook.dispose();
-            } catch (IOException e) {
+                fileName = new String(fileName.getBytes(), "ISO8859-1");
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName+".xls");
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-
-
     }
-
-
 }
