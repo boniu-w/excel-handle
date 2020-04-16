@@ -19,6 +19,7 @@ import org.jeecg.modules.app.service.TypeToFieldNameService;
 import org.jeecg.modules.app.service.WordbookInterface;
 import org.jeecg.modules.app.util.DatawashReadExcel;
 import org.jeecg.modules.app.util.ExcelUtil;
+import org.jeecgframework.poi.excel.annotation.Excel;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
@@ -34,6 +35,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -899,12 +901,67 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     }
 
 
-
     @RequestMapping(value = "excelUtilTest")
-    public void excelUtilTest(String data, HttpServletResponse response){
+    public void excelUtilTest(String data, HttpServletResponse response) {
 
         List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
-        ExcelUtil util=new ExcelUtil(BankFlow.class);
-        util.exportExcel(bankFlowList,"导出工具测试",response);
+        ExcelUtil util = new ExcelUtil(BankFlow.class);
+        util.exportExcel(bankFlowList, "导出工具测试", response);
     }
+
+    public void export2(String data, HttpServletResponse response) {
+        List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
+
+        String fileName = "导出流水表.xls";
+        String sheetName = "导出流水sheet1";
+
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet(sheetName);
+        HSSFRow row = null;
+        HSSFCell cell = null;
+
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setFillBackgroundColor(HSSFColor.BLUE.index);
+
+        // 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头
+        BankFlow bankFlow = new BankFlow();
+        Field[] fields = bankFlow.getClass().getDeclaredFields();
+        ArrayList<Field> fieldArrayList = new ArrayList<>();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Excel.class)) {
+                fieldArrayList.add(field);
+            }
+        }
+        row = sheet.createRow(0);
+        for (int i = 0; i < fieldArrayList.size(); i++) {
+            cell = row.createCell(i);
+            Field field = fieldArrayList.get(i);
+            Excel annotation = field.getAnnotation(Excel.class);
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            cell.setCellValue(annotation.name());
+        }
+
+        // 正文 field.get(bankFlow)
+        try {
+            for (int i = 0; i < bankFlowList.size(); i++) {
+                row = sheet.createRow(i + 1);
+                BankFlow flow = bankFlowList.get(i);
+                for (int j = 0; j < fieldArrayList.size(); j++) {
+                    cell = row.createCell(j);
+                    Field field = fieldArrayList.get(j);
+                    field.setAccessible(true);
+                    if (field.get(flow) instanceof String) {
+                        cell.setCellValue((String) field.get(flow));
+                    }
+
+
+                }
+
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
