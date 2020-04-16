@@ -32,40 +32,49 @@ public class BankStatement {
 	@TableId(type = IdType.ID_WORKER_STR)
     @ApiModelProperty(value = "id")
 	private java.lang.String id;
+
 	/**案件id*/
     @ApiModelProperty(value = "案件id")
 	private java.lang.String caseId;
+
 	/**交易日期*/
 	@Excel(name = "交易日期", width = 15, format = "yyyy/MM/dd")
 	@JsonFormat(timezone = "GMT+8",pattern = "yyyy/MM/dd")
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @ApiModelProperty(value = "交易日期")
 	private java.util.Date transactionDate;
+
 	/**交易时间*/
 	@Excel(name = "交易时间", width = 15, format = "hhmmss")
 	@JsonFormat(timezone = "GMT+8",pattern = "hhmmss")
     @ApiModelProperty(value = "交易时间")
 	private java.util.Date transactionTime;
+
 	/**查询卡号*/
 	@Excel(name = "查询卡号", width = 15)
     @ApiModelProperty(value = "查询卡号")
 	private java.lang.String queryCardNumber;
+
 	/**姓名*/
 	@Excel(name = "姓名", width = 15)
     @ApiModelProperty(value = "姓名")
 	private java.lang.String fullName;
+
 	/**账号余额*/
 	@Excel(name = "账号余额", width = 15)
     @ApiModelProperty(value = "账号余额")
 	private java.lang.Double accountBalance;
+
 	/**交易金额*/
 	@Excel(name = "交易金额", width = 15)
     @ApiModelProperty(value = "交易金额")
 	private java.lang.Double transactionAmount;
+
 	/**借贷标识*/
 	@Excel(name = "借贷标识", width = 15)
     @ApiModelProperty(value = "借贷标识")
 	private java.lang.String loanIdentification;
+
 	/**对手账号*/
 	@Excel(name = "对手账号", width = 15)
     @ApiModelProperty(value = "对手账号")

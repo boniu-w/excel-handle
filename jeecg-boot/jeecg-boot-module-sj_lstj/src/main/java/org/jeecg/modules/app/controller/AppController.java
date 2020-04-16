@@ -2,23 +2,23 @@ package org.jeecg.modules.app.controller;
 
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.app.entity.*;
+import org.jeecg.modules.app.enumeration.Title;
 import org.jeecg.modules.app.service.BankFlowService;
 import org.jeecg.modules.app.service.FileUploadService;
 import org.jeecg.modules.app.service.TypeToFieldNameService;
 import org.jeecg.modules.app.service.WordbookInterface;
 import org.jeecg.modules.app.util.DatawashReadExcel;
+import org.jeecg.modules.app.util.ExcelUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
 import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -40,9 +39,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.apache.poi.hssf.util.HSSFColor.RED.index;
 
 
 /**
@@ -762,8 +758,34 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
         System.out.println(bankFlowList.toString());
 
-        String[] titles = {"123", "123123", "123123"};
-        String fileName = "导出流水表";
+        //String[] titles = {
+        //  Title.TRANSACTION_SUBJECT.getFileName(),  // 交易主体
+        //  Title.ACCOUNT_SUBJECT.getFileName(),  // 交易主体账号
+        //  Title.CARD_ENTITY.getFileName(),  // 交易主体
+        //  Title.RECOVERY_MARK.getFileName(),  // 收付标志
+        //  Title.TRANSACTION_AMOUNT.getFileName(),  // 交易金额
+        //  Title.TRANSACTION_DATE.getFileName(),  // 交易日期
+        //  Title.COUNTER_PARTY.getFileName(),  // 交易对手
+        //  Title.BALANCE_TRANSACTION.getFileName(),  // 交易后余额
+        //  Title.TRANSACTION_BANK.getFileName(),  // 交易主体归属行
+        //  Title.COUNTERPARTY_BANK.getFileName(),  // 交易对手归属行
+        //  Title.PLACE_TRANSACTION.getFileName(),
+        //  Title.TRADING_PLACE.getFileName(),
+        //  Title.TRANSACTION_NUMBER.getFileName(),
+        //  Title.CURRENCY.getFileName()
+        //};
+
+
+        Title[] titleArray = Title.values();
+        String[] titles = new String[titleArray.length];
+        for (int i = 0; i < titleArray.length; i++) {
+            Title title = titleArray[i];
+            String fileName = title.getFileName();
+            titles[i] = fileName;
+        }
+
+
+        String fileName = "导出流水表.xls";
         String sheetName = "导出流水sheet1";
 
         Workbook workbook = new SXSSFWorkbook(1000);
@@ -784,13 +806,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         for (int i = 0; i < bankFlowList.size(); i++) {
             content[i] = new String[bankFlowList.size()];
             BankFlow bankFlow = bankFlowList.get(i);
-            if (bankFlow.getTick() != null && bankFlow.getTick().equals("conditionExcel")) {
-                content[i][0] = bankFlow.getAbstractContent();
-                content[i][1] = bankFlow.getTick();
-                content[i][2] = String.valueOf(bankFlow.getTransactionDate());
-            }
+            content[i][0] = bankFlow.getAbstractContent();
+            content[i][1] = bankFlow.getTick();
+            content[i][2] = String.valueOf(bankFlow.getTransactionDate());
+
 
         }
+
 
         HSSFWorkbook hssfWorkbook = this.getHSSFWorkbook(sheetName, titles, content, null);
 
@@ -845,11 +867,13 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             row = sheet.createRow(i + 1);
             for (int j = 0; j < values[i].length; j++) {
                 //将内容按顺序赋给对应的列对象
-                HSSFCell rowCell = row.createCell(j);
-                rowCell.setCellValue(values[i][j]);
                 if (values[i][j] != null && values[i][j] instanceof String && values[i][j].equals("conditionExcel")) {
+                    HSSFCell rowCell = row.createCell(j);
+                    rowCell.setCellValue(values[i][j]);
                     rowCell.setCellStyle(style);
-                    row.setRowStyle(style);
+                } else {
+                    HSSFCell rowCell = row.createCell(j);
+                    rowCell.setCellValue(values[i][j]);
                 }
             }
         }
@@ -866,11 +890,21 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             }
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xls");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
             response.addHeader("Pargam", "no-cache");
             response.addHeader("Cache-Control", "no-cache");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+
+
+    @RequestMapping(value = "excelUtilTest")
+    public void excelUtilTest(String data, HttpServletResponse response){
+
+        List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
+        ExcelUtil util=new ExcelUtil(BankFlow.class);
+        util.exportExcel(bankFlowList,"导出工具测试",response);
     }
 }
