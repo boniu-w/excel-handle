@@ -953,13 +953,11 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                     if (field.get(flow) instanceof String) {
                         cell.setCellValue((String) field.get(flow));
                     }
-
-
                 }
 
             }
         } catch (IllegalAccessException e) {
-			// 测试 git拉取
+			// 测试 git拉取 >>>>>
             e.printStackTrace();
         }
     }
