@@ -18,7 +18,6 @@ import org.jeecg.modules.app.service.FileUploadService;
 import org.jeecg.modules.app.service.TypeToFieldNameService;
 import org.jeecg.modules.app.service.WordbookInterface;
 import org.jeecg.modules.app.util.DatawashReadExcel;
-import org.jeecg.modules.app.util.ExcelUtil;
 import org.jeecgframework.poi.excel.annotation.Excel;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -750,90 +749,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
     /**
      * @author: wg
-     * @time: 2020/4/13 9:30
-     */
-    @PostMapping(value = "/exportExcel")
-    public void export1(String data, HttpServletResponse response, HttpServletRequest request) {
-
-        System.out.println(data);
-
-        List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
-        System.out.println(bankFlowList.toString());
-
-        //String[] titles = {
-        //  Title.TRANSACTION_SUBJECT.getFileName(),  // 交易主体
-        //  Title.ACCOUNT_SUBJECT.getFileName(),  // 交易主体账号
-        //  Title.CARD_ENTITY.getFileName(),  // 交易主体
-        //  Title.RECOVERY_MARK.getFileName(),  // 收付标志
-        //  Title.TRANSACTION_AMOUNT.getFileName(),  // 交易金额
-        //  Title.TRANSACTION_DATE.getFileName(),  // 交易日期
-        //  Title.COUNTER_PARTY.getFileName(),  // 交易对手
-        //  Title.BALANCE_TRANSACTION.getFileName(),  // 交易后余额
-        //  Title.TRANSACTION_BANK.getFileName(),  // 交易主体归属行
-        //  Title.COUNTERPARTY_BANK.getFileName(),  // 交易对手归属行
-        //  Title.PLACE_TRANSACTION.getFileName(),
-        //  Title.TRADING_PLACE.getFileName(),
-        //  Title.TRANSACTION_NUMBER.getFileName(),
-        //  Title.CURRENCY.getFileName()
-        //};
-
-
-        Title[] titleArray = Title.values();
-        String[] titles = new String[titleArray.length];
-        for (int i = 0; i < titleArray.length; i++) {
-            Title title = titleArray[i];
-            String fileName = title.getFileName();
-            titles[i] = fileName;
-        }
-
-
-        String fileName = "导出流水表.xls";
-        String sheetName = "导出流水sheet1";
-
-        Workbook workbook = new SXSSFWorkbook(1000);
-        Sheet sheet = workbook.createSheet(sheetName);
-
-        CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setFillBackgroundColor(HSSFColor.BLUE.index);
-
-        Row row = sheet.createRow(0); // 第一行,
-        for (int i = 0; i < titles.length; i++) {
-            Cell cell = row.createCell(i);
-            cell.setCellValue(titles[i]);
-            cell.setCellStyle(cellStyle);
-        }
-
-        String[][] content = new String[bankFlowList.size()][titles.length];
-
-        for (int i = 0; i < bankFlowList.size(); i++) {
-            content[i] = new String[bankFlowList.size()];
-            BankFlow bankFlow = bankFlowList.get(i);
-            content[i][0] = bankFlow.getAbstractContent();
-            content[i][1] = bankFlow.getTick();
-            content[i][2] = String.valueOf(bankFlow.getTransactionDate());
-
-
-        }
-
-
-        HSSFWorkbook hssfWorkbook = this.getHSSFWorkbook(sheetName, titles, content, null);
-
-        try {
-
-            this.setResponseHeader(response, fileName);
-            ServletOutputStream outputStream = response.getOutputStream();
-            hssfWorkbook.write(outputStream);
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    /**
-     * @author: wg
      * @time: 2020/4/15 10:26
      */
     public HSSFWorkbook getHSSFWorkbook(String sheetName, String[] title, String[][] values, HSSFWorkbook hssfWorkbook) {
@@ -900,16 +815,19 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         }
     }
 
-
-    @RequestMapping(value = "excelUtilTest")
-    public void excelUtilTest(String data, HttpServletResponse response) {
-
-        List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
-        ExcelUtil util = new ExcelUtil(BankFlow.class);
-        util.exportExcel(bankFlowList, "导出工具测试", response);
-    }
-
+    /***************************************************
+     *
+     * @author: wg
+     * @time: 2020/4/17 15:01
+     ***************************************************/
+    @RequestMapping(value = "/export2")
     public void export2(String data, HttpServletResponse response) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
+        Timestamp timestamp = null;
+        Date date = null;
+        Float aFloat = null;
+        String s = null;
+
         List<BankFlow> bankFlowList = JSON.parseArray(data, BankFlow.class);
 
         String fileName = "导出流水表.xls";
@@ -921,9 +839,10 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         HSSFCell cell = null;
 
         CellStyle cellStyle = workbook.createCellStyle();
-        cellStyle.setFillBackgroundColor(HSSFColor.BLUE.index);
+        cellStyle.setFillForegroundColor(HSSFColor.GOLD.index);
+        cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
-        // 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头
+        /************ 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头,并创建单元格写入表头标题 开始 ************/
         BankFlow bankFlow = new BankFlow();
         Field[] fields = bankFlow.getClass().getDeclaredFields();
         ArrayList<Field> fieldArrayList = new ArrayList<>();
@@ -940,8 +859,9 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             cell.setCellType(Cell.CELL_TYPE_STRING);
             cell.setCellValue(annotation.name());
         }
+        /************ 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头,并创建单元格写入表头标题 结束 ************/
 
-        // 正文 field.get(bankFlow)
+        /************ 导出表的正文 开始 field.get(bankFlow) ************/
         try {
             for (int i = 0; i < bankFlowList.size(); i++) {
                 row = sheet.createRow(i + 1);
@@ -949,18 +869,62 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 for (int j = 0; j < fieldArrayList.size(); j++) {
                     cell = row.createCell(j);
                     Field field = fieldArrayList.get(j);
+
+                    System.out.println("field.toString(): " + field.toString());
+
                     field.setAccessible(true);
+
                     if (field.get(flow) instanceof String) {
+                        s = (String) field.get(flow);
                         cell.setCellValue((String) field.get(flow));
+                        System.out.println(s);
+
+                        if (s.equals("conditionExcel")) {
+                            cell.setCellStyle(cellStyle);
+                        }
                     }
+
+                    if (field.get(flow) instanceof Timestamp) {
+                        timestamp = (Timestamp) field.get(flow);
+                        date = new Date(timestamp.getTime());
+
+                        String format = dateFormat.format(date);
+                        cell.setCellValue(format);
+                        System.out.println(format);
+                    }
+
+                    if (field.get(flow) instanceof Float) {
+                        aFloat = (Float) field.get(flow);
+                        cell.setCellValue(aFloat.toString());
+                        System.out.println(aFloat.toString());
+                    }
+
                 }
 
             }
+            /************ 导出表的正文 结束 ************/
+
+            /************ 设置响应header 开始 ************/
+            fileName = new String(fileName.getBytes(), "ISO8859-1");
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+            response.addHeader("Pargam", "no-cache");
+            response.addHeader("Cache-Control", "no-cache");
+            /************ 设置响应header 结束 ************/
+
+
+            /************ 流 开始 ************/
+            OutputStream outputStream = response.getOutputStream();
+            workbook.write(outputStream);
+            outputStream.flush();
+            outputStream.close();
+            /************ 流 结束 ************/
         } catch (IllegalAccessException e) {
-			// 测试 git拉取 >>>>>
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
 }

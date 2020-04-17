@@ -172,8 +172,8 @@ export default {
       params: {},
       url: {
         getFileInfoUploaded: '/app/appController/getFileInfoUploaded',
-        // exportXlsUrl: '/app/appController/excelUtilTest'
-        exportXlsUrl: '/app/appController/exportExcel'
+        exportXlsUrl: '/app/appController/export2'
+        // exportXlsUrl: '/app/appController/exportExcel'
       }
     }
   },
