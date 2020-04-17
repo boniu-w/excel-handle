@@ -959,6 +959,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
 
             }
         } catch (IllegalAccessException e) {
+			// 测试 git拉取
             e.printStackTrace();
         }
     }
