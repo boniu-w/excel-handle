@@ -17,10 +17,10 @@ public class BankFlow implements Serializable {
     @Excel(name = "案件id")
     private String caseId;
 
-    @Excel(name = "导入人id", width = 15)
+    @Excel(name = "导入人id", width = 30)
     private String introductionId;
 
-    @Excel(name = "交易主体", width = 15)
+    @Excel(name = "交易主体", width = 30)
     private String transactionSubject;
 
     @Excel(name = "交易主体账号")
@@ -135,7 +135,6 @@ public class BankFlow implements Serializable {
 
     private String excelName;
 
-    @Excel(name = "标记")
     private String tick;
 
 

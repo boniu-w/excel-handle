@@ -6,13 +6,11 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.app.entity.*;
-import org.jeecg.modules.app.enumeration.Title;
 import org.jeecg.modules.app.service.BankFlowService;
 import org.jeecg.modules.app.service.FileUploadService;
 import org.jeecg.modules.app.service.TypeToFieldNameService;
@@ -30,7 +28,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -816,7 +813,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
     }
 
     /***************************************************
-     *
+     * 导出excel
      * @author: wg
      * @time: 2020/4/17 15:01
      ***************************************************/
@@ -842,7 +839,7 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
         cellStyle.setFillForegroundColor(HSSFColor.GOLD.index);
         cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
-        /************ 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头,并创建单元格写入表头标题 开始 ************/
+        /************ 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头,并创建单元格写入表头标题 -> 开始 ************/
         BankFlow bankFlow = new BankFlow();
         Field[] fields = bankFlow.getClass().getDeclaredFields();
         ArrayList<Field> fieldArrayList = new ArrayList<>();
@@ -859,18 +856,23 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
             cell.setCellType(Cell.CELL_TYPE_STRING);
             cell.setCellValue(annotation.name());
         }
-        /************ 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头,并创建单元格写入表头标题 结束 ************/
+        /************ 把所有 带有@Excel 注解的字段拿出来 形成arrayList 以形成表头,并创建单元格写入表头标题 -> 结束 ************/
 
-        /************ 导出表的正文 开始 field.get(bankFlow) ************/
+        /************ 导出表的正文 field.get(bankFlow) -> 开始 ************/
         try {
             for (int i = 0; i < bankFlowList.size(); i++) {
                 row = sheet.createRow(i + 1);
                 BankFlow flow = bankFlowList.get(i);
                 for (int j = 0; j < fieldArrayList.size(); j++) {
                     cell = row.createCell(j);
+
+                    if (!StringUtils.isEmpty(flow.getTick()) && flow.getTick().equals("conditionExcel")) {
+                        cell.setCellStyle(cellStyle);
+                    }
+
                     Field field = fieldArrayList.get(j);
 
-                    System.out.println("field.toString(): " + field.toString());
+                    //System.out.println("field.toString(): " + field.toString());
 
                     field.setAccessible(true);
 
@@ -879,9 +881,6 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                         cell.setCellValue((String) field.get(flow));
                         System.out.println(s);
 
-                        if (s.equals("conditionExcel")) {
-                            cell.setCellStyle(cellStyle);
-                        }
                     }
 
                     if (field.get(flow) instanceof Timestamp) {
@@ -902,24 +901,25 @@ public class AppController extends JeecgController<BankFlow, BankFlowService> {
                 }
 
             }
-            /************ 导出表的正文 结束 ************/
+            /************ 导出表的正文 -> 结束 ************/
 
-            /************ 设置响应header 开始 ************/
+
+            /************ 设置响应header -> 开始  ************/
             fileName = new String(fileName.getBytes(), "ISO8859-1");
             response.setContentType("application/vnd.ms-excel");
             response.setCharacterEncoding("utf-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
             response.addHeader("Pargam", "no-cache");
             response.addHeader("Cache-Control", "no-cache");
-            /************ 设置响应header 结束 ************/
+            /************ 设置响应header -> 结束  ************/
 
 
-            /************ 流 开始 ************/
+            /************ 流 -> 开始 ************/
             OutputStream outputStream = response.getOutputStream();
             workbook.write(outputStream);
             outputStream.flush();
             outputStream.close();
-            /************ 流 结束 ************/
+            /************ 流 -> 结束 ************/
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (IOException e) {
